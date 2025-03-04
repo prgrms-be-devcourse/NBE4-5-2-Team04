@@ -36,6 +36,10 @@ out/
 ### VS Code ###
 .vscode/
 
+
+### custom ###
+../.idea/
+
 # Ignore H2 database files
 *.mv.db
 *.trace.db
