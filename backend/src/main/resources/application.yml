@@ -3,6 +3,10 @@ server:
 
 spring:
   application.name: project2
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
   output:
     ansi:
       enabled: always
