@@ -56,8 +56,14 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<PostResponseDTO> getPosts(Pageable pageable) {
-		return postRepository.findAll(pageable).map(PostResponseDTO::new);
+	public Page<PostResponseDTO> getPosts(String sortBy, Pageable pageable) {
+		if ("like".equals(sortBy)) {
+			return postRepository.findAllSortedByLike(pageable).map(PostResponseDTO::new);
+		} else if ("scrap".equals(sortBy)) {
+			return postRepository.findAllSortedByScrap(pageable).map(PostResponseDTO::new);
+		} else {
+			return postRepository.findAllByOrderByCreatedDateDesc(pageable).map(PostResponseDTO::new);
+		}
 	}
 
 	@Transactional(readOnly = true)

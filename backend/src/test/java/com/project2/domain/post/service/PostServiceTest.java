@@ -106,7 +106,7 @@ class PostServiceTest {
 		when(postRepository.findAll(pageable)).thenReturn(postPage);
 
 		// When
-		Page<PostResponseDTO> response = postService.getPosts(pageable);
+		Page<PostResponseDTO> response = postService.getPosts("likes", pageable);
 
 		// Then
 		assertThat(response).isNotEmpty();

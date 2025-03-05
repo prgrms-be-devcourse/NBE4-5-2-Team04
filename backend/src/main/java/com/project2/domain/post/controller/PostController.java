@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project2.domain.post.dto.PostRequestDTO;
@@ -36,8 +37,9 @@ public class PostController {
 	}
 
 	@GetMapping
-	public RsData<Page<PostResponseDTO>> getPosts(Pageable pageable) {
-		Page<PostResponseDTO> posts = postService.getPosts(pageable);
+	public RsData<Page<PostResponseDTO>> getPosts(@RequestParam(defaultValue = "created_at") String sortBy,
+		Pageable pageable) {
+		Page<PostResponseDTO> posts = postService.getPosts(sortBy, pageable);
 		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 목록 조회 성공", posts);
 	}
 
