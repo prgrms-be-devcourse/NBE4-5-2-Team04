@@ -2,8 +2,10 @@ package com.project2.domain.member.controller;
 
 import com.project2.domain.member.dto.FollowRequestDto;
 import com.project2.domain.member.dto.FollowResponseDto;
+import com.project2.domain.member.dto.FollowerResponseDto;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.FollowService;
+import com.project2.domain.member.service.FollowerService;
 import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
 import com.project2.global.security.Rq;
@@ -14,12 +16,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class FollowController {
 
     private final FollowService followService;
+    private final FollowerService followerService;
     private final Rq rq;
 
 
@@ -73,4 +78,14 @@ public class FollowController {
                     );
         }
     }
+
+    @GetMapping("/{userId}/followers")
+    public ResponseEntity<List<FollowerResponseDto>> getFollowers(@PathVariable Long userId) {
+        List<FollowerResponseDto> followers = followerService.getFollowers(userId);
+        return ResponseEntity.ok(followers);
     }
+
+
+
+
+}
