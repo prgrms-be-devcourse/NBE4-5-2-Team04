@@ -77,7 +77,7 @@ public class PostService {
 			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
 		if (!post.getMember().equals(actor)) {
-			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN), "댓글 수정 권한이 없습니다.");
+			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN.value()), "게시글 수정 권한이 없습니다.");
 		}
 
 		post.update(requestDTO.getTitle(), requestDTO.getContent());
@@ -95,7 +95,7 @@ public class PostService {
 			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
 		if (!post.getMember().equals(actor)) {
-			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN), "댓글 수정 권한이 없습니다.");
+			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN.value()), "게시글 삭제 권한이 없습니다.");
 		}
 		postRepository.deleteById(postId);
 	}
