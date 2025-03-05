@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.entity.PostImage;
 import com.project2.domain.post.repository.PostImageRepository;
-import com.project2.global.ut.Ut;
+import com.project2.global.util.Ut;
 
 @Service
 public class PostImageService {
