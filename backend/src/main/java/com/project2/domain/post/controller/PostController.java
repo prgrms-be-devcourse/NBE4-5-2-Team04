@@ -1,15 +1,18 @@
 package com.project2.domain.post.controller;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,11 +31,11 @@ import lombok.RequiredArgsConstructor;
 public class PostController {
 	private final PostService postService;
 
-	@PostMapping
-	public RsData<PostResponseDTO> createPost(@Valid @RequestBody PostRequestDTO postRequestDTO,
-		@AuthenticationPrincipal Member member) {
-		PostResponseDTO responseDto = postService.createPost(postRequestDTO, member);
-		return new RsData<>(String.valueOf(HttpStatus.CREATED.value()), "게시글이 성공적으로 생성되었습니다.", responseDto);
+	@PostMapping(consumes = "multipart/form-data")
+	public RsData<PostResponseDTO> createPost(@Valid @ModelAttribute PostRequestDTO postRequestDTO,
+		@AuthenticationPrincipal Member member) throws IOException {
+		PostResponseDTO post = postService.createPost(postRequestDTO, member);
+		return new RsData<>(String.valueOf(HttpStatus.CREATED.value()), "게시글이 성공적으로 생성되었습니다.", post);
 	}
 
 	@GetMapping
@@ -50,10 +53,10 @@ public class PostController {
 	@PutMapping("/{postId}")
 	public RsData<PostResponseDTO> updatePost(
 		@PathVariable Long postId,
-		@Valid @RequestBody PostRequestDTO postRequestDTO
-	) {
-		PostResponseDTO updatedPost = postService.updatePost(postId, postRequestDTO);
-		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글이 성공적으로 수정되었습니다.", updatedPost);
+		@Valid @ModelAttribute PostRequestDTO postRequestDTO
+	) throws IOException, NoSuchAlgorithmException {
+		PostResponseDTO post = postService.updatePost(postId, postRequestDTO);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글이 성공적으로 수정되었습니다.", post);
 	}
 
 	@DeleteMapping("/{postId}")
