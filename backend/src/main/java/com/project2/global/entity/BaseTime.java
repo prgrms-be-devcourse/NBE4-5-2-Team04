@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
 public class BaseTime {
+
 	@CreatedDate
 	@Setter(AccessLevel.PRIVATE)
 	@JsonProperty("createdAt")
