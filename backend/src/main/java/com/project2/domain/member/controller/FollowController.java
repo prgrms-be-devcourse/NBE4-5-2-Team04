@@ -80,12 +80,38 @@ public class FollowController {
     }
 
     @GetMapping("/{userId}/followers")
-    public ResponseEntity<List<FollowerResponseDto>> getFollowers(@PathVariable Long userId) {
-        List<FollowerResponseDto> followers = followerService.getFollowers(userId);
-        return ResponseEntity.ok(followers);
+    public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowers(@PathVariable Long userId) {
+        try {
+            List<FollowerResponseDto> followers = followerService.getFollowers(userId);
+
+            // Check if the list of followers is empty
+            if (followers.isEmpty()) {
+                return ResponseEntity.ok(
+                        new RsData<>(
+                                "204",
+                                "팔로워가 없습니다.",
+                                null
+                        )
+                );
+            }
+
+            return ResponseEntity.ok(
+                    new RsData<>(
+                            "200",
+                            "팔로워 목록이 성공적으로 조회되었습니다.",
+                            followers
+                    )
+            );
+        } catch (ServiceException e) {
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .body(
+                            new RsData<>(
+                                    e.getCode(),
+                                    e.getMsg(),
+                                    null
+                            )
+                    );
+        }
     }
-
-
-
-
 }
