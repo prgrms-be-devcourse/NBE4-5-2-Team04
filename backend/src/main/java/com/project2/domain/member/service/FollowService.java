@@ -7,6 +7,7 @@ import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.repository.FollowsRepository;
 import com.project2.domain.member.repository.MemberRepository;
 import com.project2.global.exception.ServiceException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,20 +16,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class FollowService {
 
     private final FollowsRepository followsRepository;
     private final MemberRepository memberRepository;
 
-    @Autowired
-    public FollowService(FollowsRepository followsRepository, MemberRepository memberRepository) {
-        this.followsRepository = followsRepository;
-        this.memberRepository = memberRepository;
-    }
 
     @Transactional
-    public FollowResponseDto toggleFollow(Member follower, FollowRequestDto requestDto) { // follower 매개변수 추가
+    public FollowResponseDto toggleFollow(Long userid, FollowRequestDto requestDto) {
 
+        Member follower = memberRepository.findById(userid)
+                .orElseThrow(() -> new ServiceException(
+                        String.valueOf(HttpStatus.NOT_FOUND.value()),
+                        "팔로워를 찾을 수 없습니다."
+                ));
 
         Member following = memberRepository.findById(requestDto.getFollowingId())
                 .orElseThrow(() -> new ServiceException(
@@ -47,7 +49,7 @@ public class FollowService {
             newFollow.setFollowing(following);
             Follows savedFollow = followsRepository.save(newFollow);
 
-            FollowResponseDto responseDto = new FollowResponseDto();
+            FollowResponseDto responseDto = new FollowResponseDto(savedFollow);
             responseDto.setId(savedFollow.getId());
             responseDto.setFollowerId(savedFollow.getFollower().getId());
             responseDto.setFollowingId(savedFollow.getFollowing().getId());

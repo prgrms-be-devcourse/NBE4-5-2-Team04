@@ -1,4 +1,4 @@
-package com.project2.member;
+package com.project2.domain.member.service;
 
 import com.project2.domain.member.dto.FollowRequestDto;
 import com.project2.domain.member.dto.FollowResponseDto;
@@ -6,7 +6,6 @@ import com.project2.domain.member.entity.Follows;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.repository.FollowsRepository;
 import com.project2.domain.member.repository.MemberRepository;
-import com.project2.domain.member.service.FollowService;
 import com.project2.global.exception.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,25 +42,30 @@ public class FollowServiceTest {
         follower = new Member();
         follower.setId(1L);
 
+
         following = new Member();
         following.setId(2L);
 
-        requestDto = new FollowRequestDto();
-        requestDto.setFollowingId(2L);
+        Follows follows = new Follows();
+        follows.setFollower(follower);
+        follows.setFollowing(following);
+
+        requestDto = new FollowRequestDto(follows);
     }
 
     @Test
     public void testToggleFollow_Success_Follow() {
-        // given
+// given
         when(memberRepository.findById(1L)).thenReturn(Optional.of(follower));
         when(memberRepository.findById(2L)).thenReturn(Optional.of(following));
         when(followsRepository.findByFollowerAndFollowing(follower, following)).thenReturn(Optional.empty());
         when(followsRepository.save(any(Follows.class))).thenReturn(new Follows(1L, follower, following));
 
-        // when
-        FollowResponseDto responseDto = followService.toggleFollow(follower, requestDto);
 
-        // then
+// when
+        FollowResponseDto responseDto = followService.toggleFollow(1L, requestDto); // userid로 변경
+
+// then
         assertNotNull(responseDto);
         assertEquals(1L, responseDto.getId());
         assertEquals(1L, responseDto.getFollowerId());
@@ -70,37 +74,40 @@ public class FollowServiceTest {
 
     @Test
     public void testToggleFollow_Success_Unfollow() {
-        // given
+// given
         when(memberRepository.findById(1L)).thenReturn(Optional.of(follower));
         when(memberRepository.findById(2L)).thenReturn(Optional.of(following));
         when(followsRepository.findByFollowerAndFollowing(follower, following)).thenReturn(Optional.of(new Follows(1L, follower, following)));
 
-        // when
-        FollowResponseDto responseDto = followService.toggleFollow(follower, requestDto);
 
-        // then
+// when
+        FollowResponseDto responseDto = followService.toggleFollow(1L, requestDto); // userid로 변경
+
+// then
         assertNull(responseDto);
     }
 
     @Test
     public void testToggleFollow_ServiceException_FollowerNotFound() {
-        // given
+// given
         when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // when & then
-        ServiceException exception = assertThrows(ServiceException.class, () -> followService.toggleFollow(follower, requestDto));
+
+// when & then
+        ServiceException exception = assertThrows(ServiceException.class, () -> followService.toggleFollow(1L, requestDto)); // userid로 변경
         assertEquals(String.valueOf(HttpStatus.NOT_FOUND.value()), exception.getCode());
         assertEquals("팔로워를 찾을 수 없습니다.", exception.getMsg());
     }
 
     @Test
     public void testToggleFollow_ServiceException_FollowingNotFound() {
-        // given
+// given
         when(memberRepository.findById(1L)).thenReturn(Optional.of(follower));
         when(memberRepository.findById(2L)).thenReturn(Optional.empty());
 
-        // when & then
-        ServiceException exception = assertThrows(ServiceException.class, () -> followService.toggleFollow(follower, requestDto));
+
+// when & then
+        ServiceException exception = assertThrows(ServiceException.class, () -> followService.toggleFollow(1L, requestDto)); // userid로 변경
         assertEquals(String.valueOf(HttpStatus.NOT_FOUND.value()), exception.getCode());
         assertEquals("팔로잉을 찾을 수 없습니다.", exception.getMsg());
     }
