@@ -3,6 +3,11 @@ server:
 
 spring:
   application.name: project2
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+      enabled: true
   output:
     ansi:
       enabled: always
@@ -36,6 +41,8 @@ logging:
     org.springframework.transaction.interceptor: TRACE
 
 custom:
+  file:
+    upload-dir: uploads/
   jwt:
     secret-key: abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890
     access-token-expire-seconds: 3600
