@@ -22,7 +22,6 @@ import lombok.Setter;
 public class Follows extends BaseTime {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "follows_id")
 	private Long id;
 
 	@ManyToOne

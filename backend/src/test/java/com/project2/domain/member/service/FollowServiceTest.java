@@ -4,7 +4,7 @@ import com.project2.domain.member.dto.FollowRequestDto;
 import com.project2.domain.member.dto.FollowResponseDto;
 import com.project2.domain.member.entity.Follows;
 import com.project2.domain.member.entity.Member;
-import com.project2.domain.member.repository.FollowsRepository;
+import com.project2.domain.member.repository.FollowRepository;
 import com.project2.domain.member.repository.MemberRepository;
 import com.project2.global.exception.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 public class FollowServiceTest {
 
     @Mock
-    private FollowsRepository followsRepository;
+    private FollowRepository followRepository;
 
     @Mock
     private MemberRepository memberRepository;
@@ -58,8 +58,8 @@ public class FollowServiceTest {
 // given
         when(memberRepository.findById(1L)).thenReturn(Optional.of(follower));
         when(memberRepository.findById(2L)).thenReturn(Optional.of(following));
-        when(followsRepository.findByFollowerAndFollowing(follower, following)).thenReturn(Optional.empty());
-        when(followsRepository.save(any(Follows.class))).thenReturn(new Follows(1L, follower, following));
+        when(followRepository.findByFollowerAndFollowing(follower, following)).thenReturn(Optional.empty());
+        when(followRepository.save(any(Follows.class))).thenReturn(new Follows(1L, follower, following));
 
 
 // when
@@ -77,7 +77,7 @@ public class FollowServiceTest {
 // given
         when(memberRepository.findById(1L)).thenReturn(Optional.of(follower));
         when(memberRepository.findById(2L)).thenReturn(Optional.of(following));
-        when(followsRepository.findByFollowerAndFollowing(follower, following)).thenReturn(Optional.of(new Follows(1L, follower, following)));
+        when(followRepository.findByFollowerAndFollowing(follower, following)).thenReturn(Optional.of(new Follows(1L, follower, following)));
 
 
 // when

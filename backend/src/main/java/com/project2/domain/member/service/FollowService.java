@@ -4,11 +4,11 @@ import com.project2.domain.member.dto.FollowRequestDto;
 import com.project2.domain.member.dto.FollowResponseDto;
 import com.project2.domain.member.entity.Follows;
 import com.project2.domain.member.entity.Member;
-import com.project2.domain.member.repository.FollowsRepository;
+import com.project2.domain.member.repository.FollowRepository;
+
 import com.project2.domain.member.repository.MemberRepository;
 import com.project2.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FollowService {
 
-    private final FollowsRepository followsRepository;
+    private final FollowRepository followRepository;
     private final MemberRepository memberRepository;
 
 
@@ -38,16 +38,16 @@ public class FollowService {
                         "팔로잉을 찾을 수 없습니다."
                 ));
 
-        Optional<Follows> existingFollow = followsRepository.findByFollowerAndFollowing(follower, following);
+        Optional<Follows> existingFollow = followRepository.findByFollowerAndFollowing(follower, following);
 
         if (existingFollow.isPresent()) {
-            followsRepository.delete(existingFollow.get());
+            followRepository.delete(existingFollow.get());
             return null; // 언팔로우 시에는 응답 데이터가 없을 수 있음
         } else {
             Follows newFollow = new Follows();
             newFollow.setFollower(follower);
             newFollow.setFollowing(following);
-            Follows savedFollow = followsRepository.save(newFollow);
+            Follows savedFollow = followRepository.save(newFollow);
 
             FollowResponseDto responseDto = new FollowResponseDto(savedFollow);
             responseDto.setId(savedFollow.getId());

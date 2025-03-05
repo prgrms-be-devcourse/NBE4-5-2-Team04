@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface FollowsRepository extends JpaRepository<Follows, Long> {
+public interface FollowRepository extends JpaRepository<Follows, Long> {
     Optional<Follows> findByFollowerAndFollowing(Member follower, Member following);
 }
