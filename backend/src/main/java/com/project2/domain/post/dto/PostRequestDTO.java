@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.project2.domain.post.validation.ImageFile;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -17,18 +19,24 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PostRequestDTO {
 
-	@NotBlank
+	@NotBlank(message = "제목을 입력해주세요.")
 	private String title;
-	@NotBlank
+
+	@NotBlank(message = "내용을 입력해주세요.")
 	private String content;
-	@NotNull
+
+	@NotNull(message = "위도를 입력해주세요.")
 	private Double latitude;
-	@NotNull
+
+	@NotNull(message = "경도를 입력해주세요.")
 	private Double longitude;
-	@NotNull
+
+	@NotNull(message = "장소 ID는 필수입니다.")
 	private Long placeId;
-	@NotNull
+
+	@NotNull(message = "회원 ID는 필수입니다.")
 	private Long memberId;
+	@ImageFile
 	private List<MultipartFile> images;
 
 }
