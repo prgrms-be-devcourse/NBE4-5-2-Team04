@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Ignore H2 database files
+*.mv.db
+*.trace.db
+
+# 환경 변수 파일 제외
+.env
