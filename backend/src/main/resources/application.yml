@@ -39,3 +39,4 @@ custom:
   jwt:
     secret-key: abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890
     access-token-expire-seconds: 3600
+    refresh-token-expire-seconds: 86400

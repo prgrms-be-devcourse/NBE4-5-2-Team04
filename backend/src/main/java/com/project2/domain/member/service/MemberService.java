@@ -68,7 +68,23 @@ public class MemberService {
         );
     }
 
+    public Optional<Member> getMemberByRefreshToken(String refreshToken) {
+        Map<String, Object> payload = authTokenService.getPayload(refreshToken);
+
+        if (payload == null) {
+            return Optional.empty();
+        }
+
+        long id = (long) payload.get("id");
+
+        return memberRepository.findById(id);
+    }
+
     public String genAccessToken(Member member) {
         return authTokenService.genAccessToken(member);
+    }
+
+    public String genRefreshToken(Member member) {
+        return authTokenService.genRefreshToken(member.getId());
     }
 }

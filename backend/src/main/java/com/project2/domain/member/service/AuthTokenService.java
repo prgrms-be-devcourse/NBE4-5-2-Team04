@@ -18,12 +18,23 @@ public class AuthTokenService {
     @Value("${custom.jwt.access-token-expire-seconds}")
     private int accessTokenExpireSeconds;
 
+    @Value("${custom.jwt.refresh-token-expire-seconds}")
+    private int refreshTokenExpireSeconds;
+
     String genAccessToken(Member member) {
 
         return Ut.Jwt.createToken(
                 keyString,
                 accessTokenExpireSeconds,
                 Map.of("id", member.getId(), "email", member.getEmail())
+        );
+    }
+
+    public String genRefreshToken(Long id) {
+        return Ut.Jwt.createToken(
+                keyString,
+                refreshTokenExpireSeconds,
+                Map.of("id", id)
         );
     }
 

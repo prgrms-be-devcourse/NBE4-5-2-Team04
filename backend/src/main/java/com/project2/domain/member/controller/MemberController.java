@@ -30,6 +30,9 @@ public class MemberController {
         String accessToken = memberService.genAccessToken(member);
         rq.addCookie("accessToken", accessToken);
 
+        String refreshToken = memberService.genRefreshToken(member);
+        rq.addCookie("refreshToken", refreshToken);
+
         return new RsData<>(
                 "201",
                 "인증이 완료되었습니다.",
