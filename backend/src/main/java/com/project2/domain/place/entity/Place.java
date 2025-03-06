@@ -1,18 +1,18 @@
 package com.project2.domain.place.entity;
 
+import com.project2.domain.place.enums.Category;
+import com.project2.domain.place.enums.Region;
+import com.project2.domain.post.entity.Post;
 import com.project2.global.entity.BaseTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
 @Getter
 @Setter
 @SuperBuilder
@@ -25,14 +25,22 @@ public class Place extends BaseTime {
 	private Long id;
 
 	@Column(nullable = false)
-	private String name;
+	private String name;		// 장소명
 
 	@Column(nullable = false)
-	private String region;
+	private Double latitude;	// 위도
 
-	private Double latitude;
-	private Double longitude;
+	@Column(nullable = false)
+	private Double longitude;	// 경도
 
-	@Column(nullable = false, length = 100)
-	private String category;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Region region;		// 시/도
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Category category;	// 카테고리
+
+	@OneToMany(mappedBy = "place")
+	private List<Post> posts;
 }
