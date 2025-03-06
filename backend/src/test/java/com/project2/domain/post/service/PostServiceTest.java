@@ -175,7 +175,13 @@ class PostServiceTest {
 	@DisplayName("게시글 상세 조회 성공")
 	void getPostById_Success() {
 		// Given
-		when(postRepository.findById(anyLong())).thenReturn(Optional.of(post));
+		PostResponseDTO postResponseDTO = new PostResponseDTO(
+			1L, "Test Title", "Test Content", 37.5665, 126.9780,
+			10L, 5L, "img1.jpg,img2.jpg", // 좋아요 10개, 스크랩 5개, 이미지 여러 개
+			LocalDateTime.now(), LocalDateTime.now()
+		);
+
+		when(postRepository.findPostDetailByIdSorted(anyLong())).thenReturn(Optional.of(postResponseDTO));
 
 		// When
 		PostResponseDTO response = postService.getPostById(1L);
@@ -183,18 +189,25 @@ class PostServiceTest {
 		// Then
 		assertThat(response).isNotNull();
 		assertThat(response.getTitle()).isEqualTo("Test Title");
+		assertThat(response.getLikeCount()).isEqualTo(10);
+		assertThat(response.getScrapCount()).isEqualTo(5);
+		assertThat(response.getImageUrls()).isEqualTo(List.of("img1.jpg", "img2.jpg"));
+
+		verify(postRepository, times(1)).findPostDetailByIdSorted(1L);
 	}
 
 	@Test
 	@DisplayName("게시글 조회 실패 - 존재하지 않는 게시글")
 	void getPostById_ShouldThrowException_WhenPostDoesNotExist() {
 		// Given
-		when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
+		when(postRepository.findPostDetailByIdSorted(anyLong())).thenReturn(Optional.empty());
 
 		// When & Then
 		assertThatThrownBy(() -> postService.getPostById(1L))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("해당 게시글이 존재하지 않습니다.");
+
+		verify(postRepository, times(1)).findPostDetailByIdSorted(1L);
 	}
 
 	@Test
