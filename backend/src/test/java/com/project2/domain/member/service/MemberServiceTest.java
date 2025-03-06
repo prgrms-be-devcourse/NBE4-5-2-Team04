@@ -36,6 +36,7 @@ class MemberServiceTest {
     @BeforeEach
     void setUp() {
         mockMember = Member.builder()
+                .id(1L)
                 .email(email)
                 .nickname(nickname)
                 .provider(provider)
@@ -64,6 +65,8 @@ class MemberServiceTest {
     @Test
     @DisplayName("회원 가입을 수행한다.")
     void memberNotExists_CreatesNewMember() {
+        // Given
+        when(imageService.downloadProfileImage(anyString(), anyLong())).thenReturn("mocked/path/profile.png");
         when(memberRepository.save(any(Member.class))).thenReturn(mockMember);
 
         // When
@@ -73,8 +76,9 @@ class MemberServiceTest {
         assertThat(result).isNotNull();
         assertThat(email).isEqualTo(result.getEmail());
         assertThat(provider).isEqualTo(result.getProvider());
-        assertThat(profileImageUrl).isEqualTo(result.getProfileImageUrl());
+        assertThat(result.getProfileImageUrl()).isEqualTo("mocked/path/profile.png");
 
         verify(memberRepository, times(1)).save(any(Member.class));
+        verify(imageService, times(1)).downloadProfileImage(anyString(), anyLong());
     }
 }
