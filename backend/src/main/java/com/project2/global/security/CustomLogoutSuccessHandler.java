@@ -1,5 +1,7 @@
 package com.project2.global.security;
 
+import com.project2.global.dto.RsData;
+import com.project2.global.util.Ut;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +38,8 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
         // 로그아웃 성공 응답 반환
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write("{\"code\": \"200\", \"msg\": \"로그아웃 되었습니다.\"}");
+        response.getWriter().write(Ut.Json.toString(
+        new RsData("200", "로그아웃이 완료되었습니다.")));
         response.getWriter().flush();
         response.getWriter().close();
     }
