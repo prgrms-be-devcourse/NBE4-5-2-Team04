@@ -8,7 +8,7 @@ import {
   useLoginMember,
 } from "@/app/stores/auth/loginMemberStore";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { components } from "@/lib/backend/schema";
 
 export default function ClinetLayout({
@@ -46,17 +46,20 @@ export default function ClinetLayout({
   // 로그인이 필요 없는 경로들
   const isLoginPage = pathname === "/member/login";
 
-  // 로그인 정보 가져오기
+  const isFetching = useRef(false);
+
   useEffect(() => {
     const checkLoginStatus = async () => {
+      if (isFetching.current) return;
+      isFetching.current = true;
+
       try {
         const response = await client.GET("/api/members/me", {
           credentials: "include",
         });
 
         if (response.data?.data) {
-          const member: Member = response.data.data;
-          setLoginMember(member);
+          setLoginMember(response.data.data);
         } else {
           setNoLoginMember();
         }
@@ -64,11 +67,12 @@ export default function ClinetLayout({
         setNoLoginMember();
       } finally {
         setAuthChecked(true);
+        isFetching.current = false;
       }
     };
 
     checkLoginStatus();
-  }, [setLoginMember, setNoLoginMember]);
+  }, []);
 
   // 인증 후 리다이렉트 처리
   useEffect(() => {

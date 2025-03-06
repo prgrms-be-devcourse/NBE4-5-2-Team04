@@ -85,20 +85,11 @@ async function refreshAccessToken(request: NextRequest) {
     const nextResponse = NextResponse.next();
 
     // 리프레시 토큰을 사용하여 새 액세스 토큰 요청
-    const response = await client
-      .GET("/api/members/refresh", {
-        headers: {
-          cookie: (await cookies()).toString(),
-        },
-      })
-      .catch(async (error) => {
-        // API가 없는 경우 기존 엔드포인트로 폴백
-        return await client.GET("/api/members/me", {
-          headers: {
-            cookie: (await cookies()).toString(),
-          },
-        });
-      });
+    const response = await client.GET("/api/members/refresh", {
+      headers: {
+        cookie: (await cookies()).toString(),
+      },
+    });
 
     if (!response.response.ok) {
       return redirectToLogin(request);
