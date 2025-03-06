@@ -9,7 +9,7 @@ spring:
   datasource:
     url: jdbc:h2:./db_dev;MODE=MySQL
     username: sa
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    password:
     driver-class-name: org.h2.Driver
 
   jpa:
