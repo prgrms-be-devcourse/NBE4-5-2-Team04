@@ -12,7 +12,8 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: test
-      USE_MYSQL: false  # 기본적으로 H2 사용, MySQL 사용하려면 true로 변경
+      USE_MYSQL: false # 기본적으로 H2 사용, MySQL 사용하려면 true로 변경
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }} # GitHub Secrets에서 환경 변수 주입
 
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +32,7 @@ jobs:
 
       # MySQL 설정 (기본적으로 비활성화)
       - name: Set up MySQL
-        if: env.USE_MYSQL == 'true'  # USE_MYSQL이 true이면 MySQL 실행
+        if: env.USE_MYSQL == 'true' # USE_MYSQL이 true이면 MySQL 실행
         uses: mirromutth/mysql-action@v1.1
         with:
           host-port: 3306
@@ -43,7 +44,7 @@ jobs:
           mysql-root-password: 1234
 
       - name: Wait for MySQL
-        if: env.USE_MYSQL == 'true'  # USE_MYSQL이 true이면 실행
+        if: env.USE_MYSQL == 'true' # USE_MYSQL이 true이면 실행
         run: |
           echo "Waiting for MySQL to be ready..."
           until mysql -h127.0.0.1 -uroot -p1234 -e "SELECT 1"; do
