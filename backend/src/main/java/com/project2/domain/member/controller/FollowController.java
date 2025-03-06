@@ -6,6 +6,7 @@ import com.project2.domain.member.dto.FollowerResponseDto;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.FollowService;
 import com.project2.domain.member.service.FollowerService;
+import com.project2.domain.member.service.FollowingService;
 import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
 import com.project2.global.security.Rq;
@@ -25,6 +26,7 @@ public class FollowController {
 
     private final FollowService followService;
     private final FollowerService followerService;
+    private final FollowingService followingService;
     private final Rq rq;
 
 
@@ -100,6 +102,41 @@ public class FollowController {
                             "200",
                             "팔로워 목록이 성공적으로 조회되었습니다.",
                             followers
+                    )
+            );
+        } catch (ServiceException e) {
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .body(
+                            new RsData<>(
+                                    e.getCode(),
+                                    e.getMsg(),
+                                    null
+                            )
+                    );
+        }
+    }
+    @GetMapping("/{userId}/followings")
+    public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowings(@PathVariable Long userId) {
+        try {
+            List<FollowerResponseDto> followings = followingService.getFollowings(userId);
+
+            // Check if the list of followings is empty
+            if (followings.isEmpty()) {
+                return ResponseEntity.ok(
+                        new RsData<>(
+                                "204",
+                                "팔로잉이 없습니다.",
+                                null
+                        )
+                );
+            }
+
+            return ResponseEntity.ok(
+                    new RsData<>(
+                            "200",
+                            "팔로잉 목록이 성공적으로 조회되었습니다.",
+                            followings
                     )
             );
         } catch (ServiceException e) {
