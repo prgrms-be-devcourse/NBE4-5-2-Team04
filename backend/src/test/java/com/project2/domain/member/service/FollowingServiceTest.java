@@ -5,6 +5,7 @@ import com.project2.domain.member.entity.Follows;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.repository.FollowRepository;
 import com.project2.domain.member.repository.MemberRepository;
+import com.project2.global.security.Rq;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,8 @@ public class FollowingServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock private Rq rq;
 
     @InjectMocks
     private FollowingService followingService;
@@ -55,16 +58,16 @@ public class FollowingServiceTest {
     @Test
     public void testGetFollowings_Success() {
         // Given
+        when(rq.getActor()).thenReturn(user);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        // Create Follows entities
         Follows follow1 = new Follows();
-        follow1.setFollower(user); // Set the user as the follower
-        follow1.setFollowing(following1); // Set following1 as the following
+        follow1.setFollower(user);
+        follow1.setFollowing(following1);
 
         Follows follow2 = new Follows();
-        follow2.setFollower(user); // Set the user as the follower
-        follow2.setFollowing(following2); // Set following2 as the following
+        follow2.setFollower(user);
+        follow2.setFollowing(following2);
 
         when(followRepository.findByFollower(user)).thenReturn(Arrays.asList(follow1, follow2));
 
@@ -75,11 +78,11 @@ public class FollowingServiceTest {
         assertNotNull(followings);
         assertEquals(2, followings.size());
 
-        // Verify the followings match the mocked data
+
         assertTrue(followings.stream().anyMatch(f -> f.getUserId().equals(following1.getId())));
         assertTrue(followings.stream().anyMatch(f -> f.getUserId().equals(following2.getId())));
 
-        // Verify interactions
+
         verify(memberRepository).findById(1L);
         verify(followRepository).findByFollower(user);
     }
@@ -87,6 +90,7 @@ public class FollowingServiceTest {
     @Test
     public void testGetFollowings_NoFollowings() {
         // Given
+        when(rq.getActor()).thenReturn(user);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(user));
         when(followRepository.findByFollower(user)).thenReturn(Arrays.asList());
 
@@ -101,6 +105,7 @@ public class FollowingServiceTest {
     @Test
     public void testGetFollowings_UserNotFound() {
         // Given
+        when(rq.getActor()).thenReturn(user);
         when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
         // When & Then

@@ -5,6 +5,7 @@ import com.project2.domain.member.entity.Follows;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.repository.FollowRepository;
 import com.project2.domain.member.repository.MemberRepository;
+import com.project2.global.security.Rq;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ public class FollowerServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private Rq rq;
 
     @InjectMocks
     private FollowerService followerService;
@@ -55,6 +59,7 @@ public class FollowerServiceTest {
     @Test
     public void testGetFollowers_Success() {
         // Given
+        when(rq.getActor()).thenReturn(user);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(user));
 
         // Create Follows entities
@@ -80,6 +85,7 @@ public class FollowerServiceTest {
         assertTrue(followers.stream().anyMatch(f -> f.getUserId().equals(follower2.getId())));
 
         // Verify interactions
+        verify(rq).getActor(); // 실제로 getActor()가 호출되었는지 검증
         verify(memberRepository).findById(1L);
         verify(followRepository).findByFollowing(user);
     }
@@ -87,6 +93,7 @@ public class FollowerServiceTest {
     @Test
     public void testGetFollowers_NoFollowers() {
         // Given
+        when(rq.getActor()).thenReturn(user);  // 현재 로그인된 사용자
         when(memberRepository.findById(1L)).thenReturn(Optional.of(user));
         when(followRepository.findByFollowing(user)).thenReturn(Arrays.asList());
 
@@ -96,16 +103,26 @@ public class FollowerServiceTest {
         // Then
         assertNotNull(followers);
         assertTrue(followers.isEmpty());
+
+        // Verify interactions
+        verify(rq).getActor();
+        verify(memberRepository).findById(1L);
+        verify(followRepository).findByFollowing(user);
     }
 
     @Test
     public void testGetFollowers_UserNotFound() {
         // Given
-        when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+        when(rq.getActor()).thenReturn(user);  // 현재 로그인된 사용자
+        when(memberRepository.findById(1L)).thenReturn(Optional.empty()); // 사용자 찾을 수 없음
 
         // When & Then
         assertThrows(EntityNotFoundException.class, () -> {
             followerService.getFollowers(1L);
         });
+
+        // Verify interactions
+        verify(rq).getActor();
+        verify(memberRepository).findById(1L);
     }
 }
