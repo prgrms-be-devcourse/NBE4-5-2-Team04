@@ -54,8 +54,8 @@ public class PostController {
 		@PathVariable Long postId,
 		@Valid @ModelAttribute PostRequestDTO postRequestDTO
 	) throws IOException, NoSuchAlgorithmException {
-		PostResponseDTO post = postService.updatePost(postId, postRequestDTO);
-		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글이 성공적으로 수정되었습니다.", post);
+		postService.updatePost(postId, postRequestDTO);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글이 성공적으로 수정되었습니다.");
 	}
 
 	@DeleteMapping("/{postId}")

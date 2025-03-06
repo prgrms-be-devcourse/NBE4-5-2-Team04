@@ -57,24 +57,17 @@ public class PostService {
 
 	@Transactional(readOnly = true)
 	public Page<PostResponseDTO> getPosts(String sortBy, Pageable pageable) {
-		if ("like".equals(sortBy)) {
-			return postRepository.findAllSortedByLike(pageable).map(PostResponseDTO::new);
-		} else if ("scrap".equals(sortBy)) {
-			return postRepository.findAllSortedByScrap(pageable).map(PostResponseDTO::new);
-		} else {
-			return postRepository.findAllByOrderByCreatedDateDesc(pageable).map(PostResponseDTO::new);
-		}
+		return postRepository.findAllOrderBySorted(sortBy, pageable);
 	}
 
 	@Transactional(readOnly = true)
 	public PostResponseDTO getPostById(Long postId) {
-		Post post = postRepository.findById(postId)
+		return postRepository.findPostDetailByIdSorted(postId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
-		return new PostResponseDTO(post);
 	}
 
 	@Transactional
-	public PostResponseDTO updatePost(Long postId, PostRequestDTO requestDTO) throws
+	public void updatePost(Long postId, PostRequestDTO requestDTO) throws
 		IOException,
 		NoSuchAlgorithmException {
 		Member actor = rq.getActor();
@@ -88,9 +81,7 @@ public class PostService {
 
 		post.update(requestDTO.getTitle(), requestDTO.getContent());
 
-		List<String> newImages = postImageService.updateImages(post, requestDTO.getImages());
-
-		return new PostResponseDTO(post, newImages);
+		postImageService.updateImages(post, requestDTO.getImages());
 	}
 
 	@Transactional
