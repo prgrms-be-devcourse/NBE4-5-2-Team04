@@ -8,19 +8,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.UUID;
 
 @Service
 public class ImageService {
 
-    public String downloadProfileImage(String imageUrl) {
+    public String downloadProfileImage(String imageUrl, Long memberId) {
 
         if (imageUrl == null || imageUrl.isEmpty()) {
             return "";
         }
 
-        String relativePath = "src/main/resources/static/img/";
-        String savePath = relativePath + UUID.randomUUID() + ".png";
+        String relativePath = "./upload" + "/profiles/" + memberId + "/";
+        String savePath = relativePath + "profile.png"; //
 
         try {
             URL url = new URL(imageUrl);
@@ -36,8 +35,7 @@ public class ImageService {
                 file.getParentFile().mkdirs(); // 폴더가 없으면 생성
                 Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
-
-            return savePath;
+            return savePath.substring(1);
         } catch (Exception e) {
             throw new RuntimeException("이미지 다운로드 실패: " + e.getMessage(), e);
         }

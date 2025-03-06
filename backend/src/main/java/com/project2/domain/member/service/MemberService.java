@@ -19,16 +19,21 @@ public class MemberService {
 
     @Transactional
     public Member signUp(String email, String nickname, String profileImage, Provider provider) {
-        String profileImagePath = imageService.downloadProfileImage(profileImage);
 
-        Member member = Member.builder()
+        Member member = memberRepository.save(Member.builder()
                 .email(email)
                 .nickname(nickname)
                 .provider(provider)
-                .profileImageUrl(profileImagePath)
-                .build();
+                .profileImageUrl("")
+                .build());
 
-        return memberRepository.save(member);
+        Long memberId = member.getId();
+
+        String profileImagePath = imageService.downloadProfileImage(profileImage, memberId);
+
+        member.setProfileImageUrl(profileImagePath);
+
+        return member;
     }
 
     @Transactional
