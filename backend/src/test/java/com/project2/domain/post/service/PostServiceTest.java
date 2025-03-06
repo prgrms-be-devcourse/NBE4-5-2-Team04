@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,11 +57,13 @@ class PostServiceTest {
 	private Place place;
 	private Post post;
 	private PostRequestDTO postRequestDTO;
+	private Pageable pageable;
 
 	@BeforeEach
 	void setUp() {
 		member = new Member();
 		place = new Place();
+		pageable = PageRequest.of(0, 10, Sort.by("createdDate").descending());
 
 		post = Post.builder()
 			.title("Test Title")
@@ -98,19 +103,72 @@ class PostServiceTest {
 	}
 
 	@Test
-	@DisplayName("게시글 목록 조회 성공")
-	void getPosts_Success() {
+	@DisplayName("좋아요 순 정렬 테스트")
+	void getPostsSortedByLikes() {
 		// Given
-		PageRequest pageable = PageRequest.of(0, 10);
-		Page<Post> postPage = new PageImpl<>(List.of(post));
-		when(postRepository.findAll(pageable)).thenReturn(postPage);
+		List<PostResponseDTO> postList = List.of(
+			new PostResponseDTO(1L, "Title 1", "Content 1", 37.5665, 126.9780, 10L, 2L, "img1.jpg",
+				LocalDateTime.now(), LocalDateTime.now()),
+			new PostResponseDTO(2L, "Title 2", "Content 2", 37.5665, 126.9780, 8L, 5L, "img1.jpg",
+				LocalDateTime.now(), LocalDateTime.now())
+		);
+		Page<PostResponseDTO> postPage = new PageImpl<>(postList, pageable, postList.size());
+
+		when(postRepository.findAllOrderBySorted(eq("likes"), any(Pageable.class))).thenReturn(postPage);
 
 		// When
-		Page<PostResponseDTO> response = postService.getPosts("likes", pageable);
+		Page<PostResponseDTO> result = postService.getPosts("likes", pageable);
 
 		// Then
-		assertThat(response).isNotEmpty();
-		assertThat(response.getContent().get(0).getTitle()).isEqualTo("Test Title");
+		assertThat(result).isNotNull();
+		assertThat(result.getTotalElements()).isEqualTo(2);
+		assertThat(result.getContent().get(0).getLikeCount()).isGreaterThan(result.getContent().get(1).getLikeCount());
+
+		verify(postRepository, times(1)).findAllOrderBySorted(eq("likes"), any(Pageable.class));
+	}
+
+	@Test
+	@DisplayName("스크랩 순 정렬 테스트")
+	void getPostsSortedByScrap() {
+		// Given
+		List<PostResponseDTO> postList = List.of(
+			new PostResponseDTO(3L, "Title 3", "Content 3", 37.5665, 126.9780, 5L, 10L, "img3.jpg",
+				LocalDateTime.now(), LocalDateTime.now()),
+			new PostResponseDTO(4L, "Title 4", "Content 4", 37.5665, 126.9780, 3L, 8L, "img3.jpg",
+				LocalDateTime.now(), LocalDateTime.now())
+		);
+		Page<PostResponseDTO> postPage = new PageImpl<>(postList, pageable, postList.size());
+
+		when(postRepository.findAllOrderBySorted(eq("scrap"), any(Pageable.class))).thenReturn(postPage);
+
+		// When
+		Page<PostResponseDTO> result = postService.getPosts("scrap", pageable);
+
+		// Then
+		assertThat(result).isNotNull();
+		assertThat(result.getTotalElements()).isEqualTo(2);
+		assertThat(result.getContent().get(0).getScrapCount()).isGreaterThan(
+			result.getContent().get(1).getScrapCount());
+
+		verify(postRepository, times(1)).findAllOrderBySorted(eq("scrap"), any(Pageable.class));
+	}
+
+	@Test
+	@DisplayName("게시글이 없을 경우 빈 페이지 반환")
+	void getPostsReturnsEmptyPage() {
+		// Given
+		Page<PostResponseDTO> emptyPage = Page.empty(pageable);
+		when(postRepository.findAllOrderBySorted(anyString(), any(Pageable.class))).thenReturn(emptyPage);
+
+		// When
+		Page<PostResponseDTO> result = postService.getPosts("likes", pageable);
+
+		// Then
+		assertThat(result).isNotNull();
+		assertThat(result.getTotalElements()).isEqualTo(0);
+		assertThat(result.getContent()).isEmpty();
+
+		verify(postRepository, times(1)).findAllOrderBySorted(anyString(), any(Pageable.class));
 	}
 
 	@Test
@@ -148,11 +206,13 @@ class PostServiceTest {
 		when(postImageService.updateImages(any(Post.class), anyList())).thenReturn(Collections.emptyList());
 
 		// When
-		PostResponseDTO response = postService.updatePost(1L, postRequestDTO);
+		postService.updatePost(1L, postRequestDTO);
 
 		// Then
-		assertThat(response).isNotNull();
-		assertThat(response.getTitle()).isEqualTo("Updated Title");
+		verify(postRepository, times(1)).findById(1L);  // 게시글 조회 확인
+		verify(postImageService, times(1)).updateImages(post, postRequestDTO.getImages()); // 이미지 업데이트 확인
+		assertThat(post.getTitle()).isEqualTo("Updated Title"); // 객체가 올바르게 변경되었는지 확인
+		assertThat(post.getContent()).isEqualTo("Updated Content");
 	}
 
 	@Test
