@@ -63,7 +63,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         String url = request.getRequestURI();
 
-        if(List.of("/api/members/oauth-authenticate", "/api/*/members/logout").contains(url)) {
+        if(List.of("/api/members/logout").contains(url)) {
             filterChain.doFilter(request, response);
             return;
         }

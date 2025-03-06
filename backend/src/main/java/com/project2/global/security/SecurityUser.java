@@ -1,12 +1,15 @@
 package com.project2.global.security;
 
+import com.project2.domain.member.entity.Member;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
+import java.util.Map;
 
-public class SecurityUser extends User {
+public class SecurityUser extends User implements OAuth2User {
 
     @Getter
     private long id;
@@ -17,5 +20,24 @@ public class SecurityUser extends User {
         super(email, "", authorities);
         this.id = id;
         this.nickname = nickname;
+    }
+
+    public SecurityUser(Member member) {
+        this(member.getId(), member.getEmail(), member.getNickname(), member.getAuthorities());
+    }
+
+    @Override
+    public <A> A getAttribute(String name) {
+        return OAuth2User.super.getAttribute(name);
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Map.of();
+    }
+
+    @Override
+    public String getName() {
+        return this.getUsername();
     }
 }
