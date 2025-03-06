@@ -3,8 +3,7 @@ package com.project2.domain.member.service;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.enums.Provider;
 import com.project2.domain.member.repository.MemberRepository;
-import com.project2.global.dto.OAuthUserInfo;
-import com.project2.global.security.OAuth.OAuthService;
+import com.project2.global.exception.ServiceException;
 import com.project2.global.util.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,27 +17,18 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final OAuthService oAuthService;
     private final ImageService imageService;
     private final AuthTokenService authTokenService;
 
     @Transactional
-    public Member loginOrSignUp(String email, String nickname, String authCode, Provider provider) {
-        Optional<Member> opMember = memberRepository.findByEmail(email);
-        return opMember.orElseGet(() -> signUp(email, nickname, authCode, provider));
-    }
-
-    private Member signUp(String email, String nickname, String authCode, Provider provider) {
-
-        OAuthUserInfo userInfo = oAuthService.getOAuthUserInfo(provider, authCode);
-
-        imageService.downloadProfileImage(provider, userInfo.getProfileImageUrl());
+    public Member signUp(String email, String nickname, String profileImage, Provider provider) {
+        String profileImagePath = imageService.downloadProfileImage(profileImage);
 
         Member member = Member.builder()
                 .email(email)
                 .nickname(nickname)
                 .provider(provider)
-                .profileImageUrl(userInfo.getProfileImageUrl())
+                .profileImageUrl(profileImagePath)
                 .build();
 
         return memberRepository.save(member);
@@ -54,7 +44,7 @@ public class MemberService {
         Map<String, Object> payload = authTokenService.getPayload(accessToken);
 
         if (payload == null) {
-            return Optional.empty();
+                return Optional.empty();
         }
 
         long id = (long) payload.get("id");
@@ -80,11 +70,20 @@ public class MemberService {
         return memberRepository.findById(id);
     }
 
+    public Member getMemberByRefreshTokenOrThrow(String refreshToken) {
+        return getMemberByRefreshToken(refreshToken)
+                .orElseThrow(() -> new ServiceException("401", "유효하지 않은 리프레시 토큰이거나 회원을 찾을 수 없습니다."));
+    }
+
     public String genAccessToken(Member member) {
         return authTokenService.genAccessToken(member);
     }
 
     public String genRefreshToken(Member member) {
         return authTokenService.genRefreshToken(member.getId());
+    }
+
+    public Optional<Member> findByEmail(String email) {
+        return memberRepository.findByEmail(email);
     }
 }
