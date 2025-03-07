@@ -1,42 +1,69 @@
 package com.project2.domain.member.controller;
 
-import com.project2.domain.member.dto.OAuthAuthenticationResponseDto;
-import com.project2.domain.member.dto.OAuthAuthenticationRequestDto;
+import com.project2.domain.member.dto.MemberDTO;
 import com.project2.domain.member.entity.Member;
-import com.project2.domain.member.service.MemberService;
+import com.project2.domain.member.service.AuthService;
+import com.project2.global.dto.Empty;
 import com.project2.global.dto.RsData;
 import com.project2.global.security.Rq;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "MemberController", description = "회원 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
 public class MemberController {
 
-    private final MemberService memberService;
+    private final AuthService authService;
     private final Rq rq;
 
-    @PostMapping("/oauth-authenticate")
-    public RsData<OAuthAuthenticationResponseDto> oauthAuthenticate(@RequestBody OAuthAuthenticationRequestDto oAuthAuthenticationRequestDto) {
-        Member member = memberService.loginOrSignUp(oAuthAuthenticationRequestDto.getEmail()
-                , oAuthAuthenticationRequestDto.getNickname()
-                , oAuthAuthenticationRequestDto.getAuthCode()
-                , oAuthAuthenticationRequestDto.getProvider());
+    @Operation(summary = "내 정보 조회")
+    @GetMapping("/me")
+    public RsData<MemberDTO> me() {
 
-        String accessToken = memberService.genAccessToken(member);
-        rq.addCookie("accessToken", accessToken);
-
-        String refreshToken = memberService.genRefreshToken(member);
-        rq.addCookie("refreshToken", refreshToken);
+        Member actor = rq.getActor();
+        Member realActor = rq.getRealActor(actor);
 
         return new RsData<>(
-                "201",
-                "인증이 완료되었습니다.",
-                new OAuthAuthenticationResponseDto(member)
+                "200",
+                "내 정보 조회가 완료되었습니다.",
+                new MemberDTO(realActor)
+        );
+    }
+
+    /**
+     * 로그아웃 API 엔드포인트
+     * 실제 로그아웃 처리는 Spring Security의 LogoutFilter에서 담당합니다.
+     * 이 메서드는 SpringDoc을 통해 프론트엔드에 API 명세를 제공하기 위한 용도입니다.
+     *
+     * @return 로그아웃 성공 응답
+     */
+    @Operation(summary = "로그아웃", description = "사용자 로그아웃 처리")
+    @DeleteMapping("/logout")
+    public RsData<Empty> logout() {
+        return new RsData<>("200", "로그아웃이 완료되었습니다.", new Empty());
+    }
+
+    @Operation(summary = "리프레시 토큰을 이용한 액세스 토큰 갱신")
+    @GetMapping("/refresh")
+    public RsData<MemberDTO> refreshAccessToken() {
+        String refreshToken = rq.getValueFromCookie("refreshToken");
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return new RsData<>("401", "리프레시 토큰이 제공되지 않았습니다.", null);
+        }
+
+        Member actor = authService.getMemberByRefreshTokenOrThrow(refreshToken);
+        Member realActor = rq.getRealActor(actor);
+        String newAccessToken = authService.genAccessToken(realActor);
+        rq.addCookie("accessToken", newAccessToken);
+
+        return new RsData<>(
+                "200",
+                "액세스 토큰이 갱신되었습니다.",
+                new MemberDTO(realActor)
         );
     }
 }

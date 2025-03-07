@@ -1,79 +1,133 @@
 package com.project2.global.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-
-import javax.crypto.SecretKey;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Map;
 
+import javax.crypto.SecretKey;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 public class Ut {
-    public static class Json {
+	public static class Json {
 
-        private static final ObjectMapper objectMapper = new ObjectMapper();
+		private static final ObjectMapper objectMapper = new ObjectMapper();
 
-        public static String toString(Object obj) {
-            try {
-                return objectMapper.writeValueAsString(obj);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+		public static String toString(Object obj) {
+			try {
+				return objectMapper.writeValueAsString(obj);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
 
-    public static class Jwt {
-        public static String createToken(String keyString, int expireSeconds, Map<String, Object> claims) {
+	/**
+	 * 파일의 SHA-256 해시값을 계산
+	 */
+	public static String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		try (FileInputStream fis = new FileInputStream(file)) {
+			byte[] byteArray = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = fis.read(byteArray)) != -1) {
+				digest.update(byteArray, 0, bytesRead);
+			}
+		}
+		return bytesToHex(digest.digest());
+	}
 
-            SecretKey secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
+	/**
+	 * MultipartFile 의 SHA-256 해시값을 계산
+	 */
+	public static String getFileChecksum(MultipartFile file) throws IOException, NoSuchAlgorithmException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		try (var inputStream = file.getInputStream()) {
+			byte[] byteArray = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = inputStream.read(byteArray)) != -1) {
+				digest.update(byteArray, 0, bytesRead);
+			}
+		}
+		return bytesToHex(digest.digest());
+	}
 
-            Date issuedAt = new Date();
-            Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
+	/**
+	 * 바이트 배열을 16진수 문자열로 변환
+	 */
+	public static String bytesToHex(byte[] bytes) {
+		StringBuilder sb = new StringBuilder();
+		for (byte b : bytes) {
+			sb.append(String.format("%02x", b));
+		}
+		return sb.toString();
+	}
 
-            String jwt = Jwts.builder()
-                    .claims(claims)
-                    .issuedAt(issuedAt)
-                    .expiration(expiration)
-                    .signWith(secretKey)
-                    .compact();
+	public static String getFileNameWithoutExtension(File file) {
+		String fileName = file.getName();
+		int dotIndex = fileName.lastIndexOf(".");
+		return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
+	}
 
-            return jwt;
-        }
+	public static class Jwt {
+		public static String createToken(String keyString, int expireSeconds, Map<String, Object> claims) {
 
-        public static boolean isValidToken(String keyString, String token) {
-            try {
+			SecretKey secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
 
-                SecretKey secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
+			Date issuedAt = new Date();
+			Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
 
-                Jwts
-                        .parser()
-                        .verifyWith(secretKey)
-                        .build()
-                        .parse(token);
+			String jwt = Jwts.builder()
+				.claims(claims)
+				.issuedAt(issuedAt)
+				.expiration(expiration)
+				.signWith(secretKey)
+				.compact();
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
+			return jwt;
+		}
 
-            return true;
+		public static boolean isValidToken(String keyString, String token) {
+			try {
 
-        }
+				SecretKey secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
 
+				Jwts
+					.parser()
+					.verifyWith(secretKey)
+					.build()
+					.parse(token);
 
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
 
-        public static Map<String, Object> getPayload(String keyString, String jwtStr) {
+			return true;
 
-            SecretKey secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
+		}
 
-            return (Map<String, Object>) Jwts
-                    .parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parse(jwtStr)
-                    .getPayload();
+		public static Map<String, Object> getPayload(String keyString, String jwtStr) {
 
-        }
-    }
+			SecretKey secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
+
+			return (Map<String, Object>)Jwts
+				.parser()
+				.verifyWith(secretKey)
+				.build()
+				.parse(jwtStr)
+				.getPayload();
+
+		}
+	}
 }

@@ -22,7 +22,6 @@ import lombok.Setter;
 public class PostImage extends BaseTime {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "post_image_id")
 	private Long id;
 
 	@Column(nullable = false, length = 500)

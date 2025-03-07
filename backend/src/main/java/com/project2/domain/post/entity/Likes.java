@@ -3,7 +3,6 @@ package com.project2.domain.post.entity;
 import com.project2.domain.member.entity.Member;
 import com.project2.global.entity.BaseTime;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,7 +22,6 @@ import lombok.Setter;
 public class Likes extends BaseTime {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "likes_id")
 	private Long id;
 
 	@ManyToOne
