@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package com.project2.domain.post.repository;
 
 import java.util.Optional;
@@ -157,4 +158,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 		""",
 		nativeQuery = true)
 	Optional<Object[]> findPostDetailById(@Param("postId") Long postId, @Param("memberId") Long memberId);
+
+	@Query("SELECT p FROM Post p WHERE p.place.id = :placeId ORDER BY p.createdDate DESC")
+	Page<Post> findByPlaceId(Long placeId, Pageable pageable);
 }
+
