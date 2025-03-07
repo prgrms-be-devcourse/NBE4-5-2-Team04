@@ -1,6 +1,6 @@
 "use client";
 
-import client from "@/lib/backend/client";
+import { client } from "@/lib/backend/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
