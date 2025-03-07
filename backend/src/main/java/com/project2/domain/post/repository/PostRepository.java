@@ -2,6 +2,7 @@ package com.project2.domain.post.repository;
 
 import java.util.Optional;
 
+import com.project2.domain.member.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -158,16 +159,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 		""",
 		nativeQuery = true)
 	Optional<Object[]> findPostDetailById(@Param("postId") Long postId, @Param("memberId") Long memberId);
-
-    //팔로워 게시글 쿼리 원래쓰던거 일단넣겠습니다
-    @Query("""
-    SELECT p FROM Post p
-    WHERE p.member IN (
-        SELECT f.following FROM Follows f WHERE f.follower = :user
-    )
-    ORDER BY p.createdDate DESC
-""")
-    Page<Post> findPostsByFollowing(@Param("user") Member user, Pageable pageable);
 
 
 }

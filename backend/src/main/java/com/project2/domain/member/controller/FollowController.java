@@ -7,10 +7,14 @@ import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.FollowService;
 import com.project2.domain.member.service.FollowerService;
 import com.project2.domain.member.service.FollowingService;
+import com.project2.domain.post.dto.PostResponseDTO;
+import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +29,7 @@ public class FollowController {
     private final FollowService followService;
     private final FollowerService followerService;
     private final FollowingService followingService;
-
+    private final PostService postService;
 
     @PostMapping("/{userid}/follows")
     public RsData<FollowResponseDto> toggleFollow(
@@ -107,6 +111,13 @@ public class FollowController {
                             )
                     );
         }
+    }
+
+    @GetMapping("/{userId}/following-posts")
+    public Page<PostResponseDTO> getFollowerPosts(
+            Pageable pageable
+    ) {
+        return postService.getFollowerPosts(pageable);
     }
 }
 
