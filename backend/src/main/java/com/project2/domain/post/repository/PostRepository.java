@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package com.project2.domain.post.repository;
 
 import java.util.Optional;
