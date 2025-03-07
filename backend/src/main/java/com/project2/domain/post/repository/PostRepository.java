@@ -159,6 +159,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 		""",
 		nativeQuery = true)
 	Optional<Object[]> findPostDetailById(@Param("postId") Long postId, @Param("memberId") Long memberId);
-
 }
 
