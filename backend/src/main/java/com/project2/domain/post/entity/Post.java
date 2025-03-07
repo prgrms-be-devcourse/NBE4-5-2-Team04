@@ -35,6 +35,7 @@ public class Post extends BaseTime {
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String content;
 	private String title;
+
 	@ManyToOne
 	@JoinColumn(nullable = false)
 	private Member member;
@@ -43,6 +44,7 @@ public class Post extends BaseTime {
 	private List<PostImage> images;
 
 	@ManyToOne
+	@JoinColumn(name = "place_id")
 	private Place place;
 
 	public void update(String title, String content) {
@@ -50,3 +52,4 @@ public class Post extends BaseTime {
 		this.content = content;
 	}
 }
+
