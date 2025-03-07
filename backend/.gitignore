@@ -46,3 +46,7 @@ out/
 
 # 환경 변수 파일 제외
 .env
+
+# 프론트 연동을 위한 apiV1 문서 제거
+apiV1.json
+/upload/*

@@ -58,6 +58,9 @@ public class Member extends BaseTime {
 		return new ArrayList<>();
 	}
 
+	public String getProfileImageUrlOrDefaultUrl() {
+		return (profileImageUrl == null || profileImageUrl.isBlank()) ? "https://placehold.co/640x640?text=O_O" : this.profileImageUrl;
+	}
 }
 
 

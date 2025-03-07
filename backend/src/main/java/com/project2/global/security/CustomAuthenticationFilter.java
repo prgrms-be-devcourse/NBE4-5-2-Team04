@@ -1,7 +1,7 @@
 package com.project2.global.security;
 
 import com.project2.domain.member.entity.Member;
-import com.project2.domain.member.service.MemberService;
+import com.project2.domain.member.service.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +19,7 @@ import java.util.Optional;
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     private final Rq rq;
-    private final MemberService memberService;
+    private final AuthService authService;
 
     record AuthToken(String accessToken, String refreshToken) {
     }
@@ -39,19 +39,19 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     private Member getMemberByAccessToken(String accessToken, String refreshToken) {
 
-        Optional<Member> opAccMember = memberService.getMemberByAccessToken(accessToken);
+        Optional<Member> opAccMember = authService.getMemberByAccessToken(accessToken);
 
         if (opAccMember.isPresent()) {
             return opAccMember.get();
         }
 
-        Optional<Member> opRefMember = memberService.getMemberByRefreshToken(refreshToken);
+        Optional<Member> opRefMember = authService.getMemberByRefreshToken(refreshToken);
 
         if(opRefMember.isEmpty()) {
             return null;
         }
 
-        String newAccessToken = memberService.genAccessToken(opRefMember.get());
+        String newAccessToken = authService.genAccessToken(opRefMember.get());
 
         rq.addCookie("accessToken", newAccessToken);
 
@@ -63,7 +63,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         String url = request.getRequestURI();
 
-        if(List.of("/api/members/oauth-authenticate", "/api/*/members/logout").contains(url)) {
+        if(List.of("/api/members/logout").contains(url)) {
             filterChain.doFilter(request, response);
             return;
         }
