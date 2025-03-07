@@ -2,6 +2,7 @@ package com.project2.domain.post.repository;
 
 import java.util.Optional;
 
+import com.project2.domain.member.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.project2.domain.post.entity.Post;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
+
 
 	// 전체 게시글 조회
 	@Query(value = """
@@ -158,7 +160,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 		nativeQuery = true)
 	Optional<Object[]> findPostDetailById(@Param("postId") Long postId, @Param("memberId") Long memberId);
 
-	@Query("SELECT p FROM Post p WHERE p.place.id = :placeId ORDER BY p.createdDate DESC")
-	Page<Post> findByPlaceId(Long placeId, Pageable pageable);
 }
 

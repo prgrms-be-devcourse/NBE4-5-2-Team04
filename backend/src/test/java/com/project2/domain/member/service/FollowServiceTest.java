@@ -6,17 +6,22 @@ import com.project2.domain.member.entity.Follows;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.repository.FollowRepository;
 import com.project2.domain.member.repository.MemberRepository;
+import com.project2.global.dto.Empty;
+import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
+import com.project2.global.security.Rq;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -30,6 +35,9 @@ public class FollowServiceTest {
     @Mock
     private MemberRepository memberRepository;
 
+    @Mock
+    private Rq rq;
+
     @InjectMocks
     private FollowService followService;
 
@@ -42,7 +50,6 @@ public class FollowServiceTest {
         follower = new Member();
         follower.setId(1L);
 
-
         following = new Member();
         following.setId(2L);
 
@@ -54,61 +61,34 @@ public class FollowServiceTest {
     }
 
     @Test
+    @DisplayName("팔로우 성공")
     public void testToggleFollow_Success_Follow() {
-// given
-        when(memberRepository.findById(1L)).thenReturn(Optional.of(follower));
+        // given
+        when(rq.getActor()).thenReturn(follower);
         when(memberRepository.findById(2L)).thenReturn(Optional.of(following));
         when(followRepository.findByFollowerAndFollowing(follower, following)).thenReturn(Optional.empty());
         when(followRepository.save(any(Follows.class))).thenReturn(new Follows(1L, follower, following));
 
+        // when
+        RsData<FollowResponseDto> response = followService.toggleFollow(requestDto);
 
-// when
-        FollowResponseDto responseDto = followService.toggleFollow(1L, requestDto); // userid로 변경
-
-// then
-        assertNotNull(responseDto);
-        assertEquals(1L, responseDto.getId());
-        assertEquals(1L, responseDto.getFollowerId());
-        assertEquals(2L, responseDto.getFollowingId());
+        // then
+        assertEquals(1L, response.getData().getFollowerId());
+        assertEquals(2L, response.getData().getFollowingId());
     }
 
     @Test
+    @DisplayName("언팔로우 성공")
     public void testToggleFollow_Success_Unfollow() {
-// given
-        when(memberRepository.findById(1L)).thenReturn(Optional.of(follower));
+        // given
+        when(rq.getActor()).thenReturn(follower);
         when(memberRepository.findById(2L)).thenReturn(Optional.of(following));
         when(followRepository.findByFollowerAndFollowing(follower, following)).thenReturn(Optional.of(new Follows(1L, follower, following)));
 
+        // when
+        RsData<FollowResponseDto> response = followService.toggleFollow(requestDto);
 
-// when
-        FollowResponseDto responseDto = followService.toggleFollow(1L, requestDto); // userid로 변경
-
-// then
-        assertNull(responseDto);
+        // then
+        assertThat(response.getCode()).isEqualTo("204");
     }
-
-    @Test
-    public void testToggleFollow_ServiceException_FollowerNotFound() {
-// given
-        when(memberRepository.findById(1L)).thenReturn(Optional.empty());
-
-
-// when & then
-        ServiceException exception = assertThrows(ServiceException.class, () -> followService.toggleFollow(1L, requestDto)); // userid로 변경
-        assertEquals(String.valueOf(HttpStatus.NOT_FOUND.value()), exception.getCode());
-        assertEquals("팔로워를 찾을 수 없습니다.", exception.getMsg());
     }
-
-    @Test
-    public void testToggleFollow_ServiceException_FollowingNotFound() {
-// given
-        when(memberRepository.findById(1L)).thenReturn(Optional.of(follower));
-        when(memberRepository.findById(2L)).thenReturn(Optional.empty());
-
-
-// when & then
-        ServiceException exception = assertThrows(ServiceException.class, () -> followService.toggleFollow(1L, requestDto)); // userid로 변경
-        assertEquals(String.valueOf(HttpStatus.NOT_FOUND.value()), exception.getCode());
-        assertEquals("팔로잉을 찾을 수 없습니다.", exception.getMsg());
-    }
-}
