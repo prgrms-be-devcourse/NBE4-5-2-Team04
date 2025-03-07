@@ -20,25 +20,25 @@ public class FollowerService {
     private final MemberRepository memberRepository;
     private final Rq rq;
 
-    public List<FollowerResponseDto> getFollowers(Long userId) {
+    public List<FollowerResponseDto> getFollowers(Long memberId) {
         Member actor = rq.getActor(); //
-        if (!actor.getId().equals(userId)) {
+        if (!actor.getId().equals(memberId)) {
             throw new ServiceException("403","자신의 팔로워 목록만 볼 수 있습니다.");
         }
 
-        Member user = memberRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("member not found"));
 
-        List<Follows> follows = followRepository.findByFollowing(user);
+        List<Follows> follows = followRepository.findByFollowing(member);
         return follows.stream()
                 .map(follow -> FollowerResponseDto.fromEntity(follow.getFollower()))
                 .collect(Collectors.toList());
     }
 
 
-    private Member findMemberById(Long userId) {
-        // userId로 Member 엔티티를 가져오는 로직 구현
-        return memberRepository.findById(userId)
+    private Member findMemberById(Long memberId) {
+        // memberId로 Member 엔티티를 가져오는 로직 구현
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
     }
 }

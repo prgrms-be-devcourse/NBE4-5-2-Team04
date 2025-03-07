@@ -22,23 +22,23 @@ public class FollowingService {
     private final MemberRepository memberRepository;
     private final Rq rq;
 
-    public List<FollowerResponseDto> getFollowings(Long userId) {
+    public List<FollowerResponseDto> getFollowings(Long memberId) {
 
         Member actor = rq.getActor();
-        if (!actor.getId().equals(userId)) {
+        if (!actor.getId().equals(memberId)) {
             throw new ServiceException("403","자신의 팔로잉 목록만 볼 수 있습니다.");
         }
-        Member user = findMemberById(userId);
-        List<Follows> followsList = followRepository.findByFollower(user);
+        Member member = findMemberById(memberId);
+        List<Follows> followsList = followRepository.findByFollower(member);
 
         return followsList.stream()
                 .map(follow -> FollowerResponseDto.fromEntity(follow.getFollowing()))
                 .collect(Collectors.toList());
     }
 
-    private Member findMemberById(Long userId) {
+    private Member findMemberById(Long memberId) {
 
-        return memberRepository.findById(userId)
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
     }
 }

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/members")
 @RequiredArgsConstructor
 public class FollowController {
 
@@ -31,20 +31,20 @@ public class FollowController {
     private final FollowingService followingService;
     private final PostService postService;
 
-    @PostMapping("/{userid}/follows")
+    @PostMapping("/{memberid}/follows")
     public RsData<FollowResponseDto> toggleFollow(
-            @PathVariable Long userid,
+            @PathVariable Long memberid,
             @RequestBody FollowRequestDto requestDto
     ) {
-            requestDto.setFollowerId(userid);
+            requestDto.setFollowerId(memberid);
             return followService.toggleFollow(requestDto);
         }
 
 
-    @GetMapping("/{userId}/followers")
-    public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowers(@PathVariable Long userId) {
+    @GetMapping("/{memberId}/followers")
+    public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowers(@PathVariable Long memberId) {
         try {
-            List<FollowerResponseDto> followers = followerService.getFollowers(userId);
+            List<FollowerResponseDto> followers = followerService.getFollowers(memberId);
 
 
             if (followers.isEmpty()) {
@@ -77,10 +77,10 @@ public class FollowController {
         }
     }
 
-    @GetMapping("/{userId}/followings")
-    public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowings(@PathVariable Long userId) {
+    @GetMapping("/{memberId}/followings")
+    public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowings(@PathVariable Long memberId) {
         try {
-            List<FollowerResponseDto> followings = followingService.getFollowings(userId);
+            List<FollowerResponseDto> followings = followingService.getFollowings(memberId);
 
             // Check if the list of followings is empty
             if (followings.isEmpty()) {
@@ -113,7 +113,7 @@ public class FollowController {
         }
     }
 
-    @GetMapping("/{userId}/following-posts")
+    @GetMapping("/{memberId}/following-posts")
     public Page<PostResponseDTO> getFollowerPosts(
             Pageable pageable
     ) {
