@@ -14,15 +14,5 @@ import org.springframework.web.bind.annotation.*;
 public class PlaceController {
     private final PlaceService placeService;
 
-    // 특정 장소를 태그한 게시물 목록
-    @GetMapping("/places/{placeId}/posts")
-    public RsData<PlacePostResponseDTO> getPostsByPlace(
-            @PathVariable Long placeId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        Pageable pageable = PageRequest.of(page,size);
-        return placeService.getPostByPlace(placeId,pageable);
-    }
 }
 
