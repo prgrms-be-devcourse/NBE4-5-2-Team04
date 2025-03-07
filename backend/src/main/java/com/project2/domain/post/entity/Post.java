@@ -35,8 +35,6 @@ public class Post extends BaseTime {
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String content;
 	private String title;
-	private Double latitude;
-	private Double longitude;
 	@ManyToOne
 	@JoinColumn(nullable = false)
 	private Member member;

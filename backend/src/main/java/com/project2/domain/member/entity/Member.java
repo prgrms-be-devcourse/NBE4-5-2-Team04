@@ -1,8 +1,15 @@
 package com.project2.domain.member.entity;
 
-import com.project2.domain.member.enums.Provider;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import com.project2.domain.member.enums.Provider;
 import com.project2.global.entity.BaseTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,12 +22,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 @Getter
 @Setter
@@ -31,7 +32,6 @@ import java.util.List;
 public class Member extends BaseTime {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
 	@Column(nullable = false, unique = true)
@@ -46,19 +46,16 @@ public class Member extends BaseTime {
 	@Column(columnDefinition = "VARCHAR(20)")
 	private Provider provider;
 
-
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return getMemberAuthoritesAsString()
-				.stream()
-				.map(SimpleGrantedAuthority::new)
-				.toList();
+		return getMemberAuthoritiesAsString()
+			.stream()
+			.map(SimpleGrantedAuthority::new)
+			.toList();
 	}
 
-	public List<String> getMemberAuthoritesAsString() {
+	public List<String> getMemberAuthoritiesAsString() {
 
-		List<String> authorities = new ArrayList<>();
-
-		return authorities;
+		return new ArrayList<>();
 	}
 
 }

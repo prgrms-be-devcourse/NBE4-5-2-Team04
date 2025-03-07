@@ -25,12 +25,6 @@ public class PostRequestDTO {
 	@NotBlank(message = "내용을 입력해주세요.")
 	private String content;
 
-	@NotNull(message = "위도를 입력해주세요.")
-	private Double latitude;
-
-	@NotNull(message = "경도를 입력해주세요.")
-	private Double longitude;
-
 	@NotNull(message = "장소 ID는 필수입니다.")
 	private Long placeId;
 
