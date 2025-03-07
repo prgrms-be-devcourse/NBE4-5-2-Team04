@@ -88,8 +88,14 @@ public class PostService {
 
 	// 5. 특정 사용자의 게시글 조회
 	@Transactional(readOnly = true)
-	public Page<PostResponseDTO> getPostsByMember(Long targetMemberId, Pageable pageable) {
+	public Page<PostResponseDTO> getPostsByMemberId(Long targetMemberId, Pageable pageable) {
 		Page<Object[]> results = postRepository.findPostsByMember(targetMemberId, pageable);
+		return results.map(this::mapToPostResponseDTO);
+	}
+
+	@Transactional(readOnly = true)
+	public Page<PostResponseDTO> getPostsByPlaceId(Long placeId, Pageable pageable) {
+		Page<Object[]> results = postRepository.findPostsByPlace(placeId, pageable);
 		return results.map(this::mapToPostResponseDTO);
 	}
 

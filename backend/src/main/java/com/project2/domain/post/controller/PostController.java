@@ -78,7 +78,16 @@ public class PostController {
 		@PathVariable("memberId") Long memberId,
 		Pageable pageable
 	) {
-		return postService.getPostsByMember(memberId, pageable);
+		return postService.getPostsByMemberId(memberId, pageable);
+	}
+
+	// 6. 특정 사용자의 게시글 조회
+	@GetMapping("/member/{memberId}")
+	public Page<PostResponseDTO> getPostsByPlace(
+		@PathVariable("memberId") Long placeId,
+		Pageable pageable
+	) {
+		return postService.getPostsByPlaceId(placeId, pageable);
 	}
 
 	@GetMapping("/{postId}")

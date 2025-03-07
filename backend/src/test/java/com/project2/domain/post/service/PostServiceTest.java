@@ -150,7 +150,7 @@ class PostServiceTest {
 		given(postRepository.findPostsByMember(anyLong(), any(Pageable.class))).willReturn(mockPage);
 
 		// When
-		Page<PostResponseDTO> result = postService.getPostsByMember(1L, Pageable.unpaged());
+		Page<PostResponseDTO> result = postService.getPostsByMemberId(1L, Pageable.unpaged());
 
 		// Then
 		assertThat(result.getTotalElements()).isEqualTo(1);
