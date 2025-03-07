@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.project2.domain.place.service.PlaceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -31,22 +32,37 @@ public class PostService {
 	private final PostRepository postRepository;
 	private final PlaceRepository placeRepository;
 	private final PostImageService postImageService;
+	private final PlaceService placeService;
 	private final Rq rq;
 
 	@Transactional(rollbackFor = Exception.class)
 	public Long createPost(PostRequestDTO requestDTO) throws IOException {
 		Member actor = rq.getActor();
 
-		Place place = placeRepository.findById(requestDTO.getPlaceId())
-			.orElseThrow(() -> new IllegalArgumentException("해당 장소가 존재하지 않음"));
+		// placeId가 존재하는지 먼저 확인한 후, 게시물이 성공적으로 저장되면 장소도 저장
+		// 즉 게시물 저장이 먼저 그 이후 장소 업데이트
+		Place place = placeRepository.findById(requestDTO.getPlaceId()).orElse(null);
 
 		Post post = Post.builder()
 			.title(requestDTO.getTitle())
 			.content(requestDTO.getContent())
-			.place(place)
+			.place(null)
 			.member(actor)
 			.build();
 		Post createdPost = postRepository.save(post);
+
+		if (place == null) {
+			if (place == null) {
+				place = placeService.savePlace(
+						requestDTO.getPlaceId(),
+						requestDTO.getPlaceName(),
+						requestDTO.getLatitude(),
+						requestDTO.getLongitude(),
+						requestDTO.getRegion(),
+						requestDTO.getCategory()
+				);
+			}
+		}
 
 		if (requestDTO.getImages() != null && !requestDTO.getImages().isEmpty()) {
 			postImageService.saveImages(post, requestDTO.getImages(), Collections.emptyList());

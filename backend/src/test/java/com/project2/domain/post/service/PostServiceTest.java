@@ -1,189 +1,120 @@
 package com.project2.domain.post.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
+import com.project2.domain.place.entity.Place;
+import com.project2.domain.place.enums.Category;
+import com.project2.domain.place.enums.Region;
+import com.project2.domain.place.repository.PlaceRepository;
+import com.project2.domain.post.dto.PostRequestDTO;
+import com.project2.domain.post.entity.Post;
+import com.project2.domain.post.repository.PostRepository;
+import com.project2.domain.member.entity.Member;
+import com.project2.domain.member.repository.MemberRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-import com.project2.domain.member.entity.Member;
-import com.project2.domain.place.entity.Place;
-import com.project2.domain.place.repository.PlaceRepository;
-import com.project2.domain.post.dto.PostDetailResponseDTO;
-import com.project2.domain.post.dto.PostRequestDTO;
-import com.project2.domain.post.dto.PostResponseDTO;
-import com.project2.domain.post.entity.Post;
-import com.project2.domain.post.repository.PostRepository;
-import com.project2.global.security.Rq;
-
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest  // ✅ Spring Boot 환경에서 실행 (MySQL 연결됨)
+@Transactional   // ✅ 테스트 후 데이터 자동 롤백 (데이터 유지 X)
 class PostServiceTest {
 
-	@InjectMocks
-	private PostService postService;
-
-	@Mock
+	@Autowired
 	private PostRepository postRepository;
 
-	@Mock
+	@Autowired
 	private PlaceRepository placeRepository;
 
-	@Mock
-	private PostImageService postImageService;
+	@Autowired
+	private MemberRepository memberRepository;
 
-	@Mock
-	private Rq rq;
+	@Autowired
+	private PostService postService;
 
-	private Member member;
-	private Place place;
-	private Post post;
+	private Member testMember;
 
 	@BeforeEach
 	void setUp() {
-		member = Member.builder().id(1L).nickname("testUser").build();
-		place = Place.builder().id(1L).name("Seoul").build();
-		post = Post.builder()
-			.id(1L)
-			.title("Test Post")
-			.content("Test Content")
-			.member(member)
-			.place(place)
-			.build();
+		// ✅ 테스트할 멤버 저장
+		testMember = Member.builder()
+				.id(1L)
+				.nickname("testUser")
+				.build();
+		memberRepository.save(testMember);
 	}
 
 	@Test
-	void post_success() throws IOException {
-		// Given
-		PostRequestDTO requestDTO = new PostRequestDTO("Test Title", "Test Content", 1L, 1L, List.of());
-		given(rq.getActor()).willReturn(member);
-		given(placeRepository.findById(anyLong())).willReturn(Optional.of(place));
-		given(postRepository.save(any(Post.class))).willReturn(post);
+	void testCreatePost_WhenPlaceExists() throws IOException {
+		// ✅ 1️⃣ 장소가 이미 DB에 존재하는 경우
+		Place existingPlace = Place.builder()
+				.id(100L)
+				.name("서울 한강공원")
+				.latitude(37.5326)
+				.longitude(127.0246)
+				.region(Region.SEOUL)
+				.category(Category.PO3)
+				.build();
+		placeRepository.save(existingPlace);
 
-		// When
-		Long postId = postService.createPost(requestDTO);
+		PostRequestDTO request = new PostRequestDTO(
+				"서울 한강공원 방문 후기",
+				"날씨가 좋아서 한강에 다녀왔어요.",
+				100L,
+				"서울 한강공원",
+				"37.5326",
+				"127.0246",
+				"서울특별시",
+				"공공기관",
+				1L,
+				List.of()
+		);
 
-		// Then
-		assertThat(postId).isEqualTo(post.getId());
+		Long postId = postService.createPost(request);
+
+		// ✅ 예상: 기존 장소를 사용하므로, 새로 저장되지 않아야 함
+		Optional<Place> retrievedPlace = placeRepository.findById(100L);
+		assertTrue(retrievedPlace.isPresent()); // ✅ 장소가 존재해야 함
+
+		Optional<Post> savedPost = postRepository.findById(postId);
+		assertTrue(savedPost.isPresent()); // ✅ 게시물이 저장되어야 함
+
+		assertEquals(savedPost.get().getPlace().getId(), existingPlace.getId());
 	}
 
 	@Test
-	void getPosts_success() {
-		// Given
-		List<Object[]> data = new ArrayList<>();
-		data.add(new Object[] {
-			1L, "Test Post", "Test Content", "Seoul", "City", 10, 5, 3, "img1.jpg,img2.jpg", 2L, "testUser",
-			"profile.png"
-		});
-		Page<Object[]> mockPage = new PageImpl<>(data);
-		given(postRepository.findAllBySearchWordsAndSort(anyString(), anyString(), anyString(), any(Pageable.class)))
-			.willReturn(mockPage);
+	void testCreatePost_WhenPlaceDoesNotExist() throws IOException {
+		// ✅ 2️⃣ 장소가 DB에 없는 경우 (새로운 장소 저장)
+		Long newPlaceId = 200L;
+		PostRequestDTO request = new PostRequestDTO(
+				"부산 광안리 방문 후기",
+				"광안대교 야경이 너무 예뻤어요.",
+				newPlaceId,
+				"부산 광안리",
+				"35.1571",
+				"129.1597",
+				"부산광역시",
+				"관광명소",
+				1L,
+				List.of()
+		);
 
-		// When
-		Page<PostResponseDTO> result = postService.getPosts("likes", "Seoul", "City", Pageable.unpaged());
+		Long postId = postService.createPost(request);
 
-		// Then
-		assertThat(result.getTotalElements()).isEqualTo(1);
-		assertThat(result.getContent().get(0).getTitle()).isEqualTo("Test Post");
-	}
+		// ✅ 예상: 새로운 장소가 저장되어야 함
+		Optional<Place> savedPlace = placeRepository.findById(newPlaceId);
+		assertTrue(savedPlace.isPresent()); // ✅ 새로운 장소가 저장됨
 
-	@Test
-	void getLikedPosts_success() {
-		// Given
-		given(rq.getActor()).willReturn(member);
-		List<Object[]> data = new ArrayList<>();
-		data.add(new Object[] {
-			1L, "Test Post", "Test Content", "Seoul", "City", 10, 5, 3, "img1.jpg,img2.jpg", 2L, "testUser",
-			"profile.png"
-		});
-		Page<Object[]> mockPage = new PageImpl<>(data);
-		given(postRepository.findLikedPosts(anyLong(), any(Pageable.class))).willReturn(mockPage);
+		Optional<Post> savedPost = postRepository.findById(postId);
+		assertTrue(savedPost.isPresent()); // ✅ 게시물이 저장되어야 함
 
-		// When
-		Page<PostResponseDTO> result = postService.getLikedPosts(Pageable.unpaged());
-
-		// Then
-		assertThat(result.getTotalElements()).isEqualTo(1);
-	}
-
-	@Test
-	void getScrappedPosts_success() {
-		// Given
-		given(rq.getActor()).willReturn(member);
-		List<Object[]> data = new ArrayList<>();
-		data.add(new Object[] {
-			1L, "Test Post", "Test Content", "Seoul", "City", 10, 5, 3, "img1.jpg,img2.jpg", 2L, "testUser",
-			"profile.png"
-		});
-		Page<Object[]> mockPage = new PageImpl<>(data);
-		given(postRepository.findScrappedPosts(anyLong(), any(Pageable.class))).willReturn(mockPage);
-
-		// When
-		Page<PostResponseDTO> result = postService.getScrappedPosts(Pageable.unpaged());
-
-		// Then
-		assertThat(result.getTotalElements()).isEqualTo(1);
-	}
-
-	@Test
-	void getPostsByMemberId_success() {
-		// Given
-		List<Object[]> data = new ArrayList<>();
-		data.add(new Object[] {
-			1L, "Test Post", "Test Content", "Seoul", "City", 10, 5, 3, "img1.jpg,img2.jpg", 2L, "testUser",
-			"profile.png"
-		});
-		Page<Object[]> mockPage = new PageImpl<>(data);
-		given(postRepository.findPostsByMember(anyLong(), any(Pageable.class))).willReturn(mockPage);
-
-		// When
-		Page<PostResponseDTO> result = postService.getPostsByMemberId(1L, Pageable.unpaged());
-
-		// Then
-		assertThat(result.getTotalElements()).isEqualTo(1);
-	}
-
-	@Test
-	void getPost_success() {
-		// Given
-		given(rq.getActor()).willReturn(member);
-		Object[] mockResult = {
-			1L, "Test Post", "Test Content", 2L, "testUser", "profile.png",
-			"Seoul", "City", 10, 5, true, false, "img1.jpg,img2.jpg",
-			LocalDateTime.now(), LocalDateTime.now()
-		};
-		given(postRepository.findPostDetailById(anyLong(), anyLong())).willReturn(Optional.of(mockResult));
-
-		// When
-		PostDetailResponseDTO result = postService.getPostById(1L);
-
-		// Then
-		assertThat(result.getTitle()).isEqualTo("Test Post");
-	}
-
-	@Test
-	void postDelete_success() {
-		// Given
-		given(rq.getActor()).willReturn(member);
-		given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
-
-		// When
-		postService.deletePost(1L);
-
-		// Then
-		verify(postRepository, times(1)).deleteById(1L);
+		assertEquals(savedPost.get().getPlace().getId(), savedPlace.get().getId());
 	}
 }

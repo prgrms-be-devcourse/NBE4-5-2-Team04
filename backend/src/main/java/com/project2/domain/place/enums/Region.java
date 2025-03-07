@@ -1,6 +1,10 @@
 package com.project2.domain.place.enums;
 
 import lombok.Getter;
+
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 public enum Region {
     SEOUL("서울특별시"),
@@ -26,5 +30,18 @@ public enum Region {
 
     Region(String krRegion) {
         this.krRegion = krRegion;
+    }
+
+    // 지역 한글명을 받아 코드로 변환 해주주는 부분.
+    private static final Map<String, Region> REGION_MAP = new HashMap<>();
+
+    static {
+        for (Region region : values()) {
+            REGION_MAP.put(region.krRegion, region);
+        }
+    }
+
+    public static Region fromRegionName(String regionName) {
+        return REGION_MAP.getOrDefault(regionName, ETC); // 기본값: 기타(ETC)
     }
 }

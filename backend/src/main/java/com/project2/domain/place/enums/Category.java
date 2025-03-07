@@ -2,6 +2,9 @@ package com.project2.domain.place.enums;
 
 import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 public enum Category {
     // 추후 REST API 확장을 고려하여 카카오 API의 내부 카테고리 코드를 그대로 사용함.
@@ -29,5 +32,19 @@ public enum Category {
     private final String krCategory;
     Category(String krCategory) {
         this.krCategory = krCategory;
+    }
+
+    // 카테고리 한글명을 받아 코드로 변환 해주주는 부분.
+
+    private static final Map<String, Category> CATEGORY_MAP = new HashMap<>();
+
+    static {
+        for (Category category : values()) {
+            CATEGORY_MAP.put(category.krCategory, category);
+        }
+    }
+
+    public static Category fromCategoryName(String categoryName) {
+        return CATEGORY_MAP.getOrDefault(categoryName, ETC); // 기본값: 기타(ETC)
     }
 }
