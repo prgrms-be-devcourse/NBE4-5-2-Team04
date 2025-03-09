@@ -9,15 +9,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.RequestScope;
+
+import java.util.List;
 
 // Request, Response, Session, Cookie, Header
 @Component
 @RequiredArgsConstructor
-@RequestScope
 public class Rq {
 
     private final HttpServletRequest request;
@@ -27,7 +28,7 @@ public class Rq {
     public void setLogin(Member actor) {
 
         // 유저 정보 생성
-        UserDetails user = new SecurityUser(actor.getId(), actor.getEmail(), actor.getNickname(), actor.getAuthorities());
+        UserDetails user = new SecurityUser(actor.getId(), actor.getEmail(), actor.getNickname(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
         // 인증 정보 저장소
         SecurityContextHolder.getContext().setAuthentication(
@@ -80,12 +81,12 @@ public class Rq {
         response.setHeader(name, value);
     }
 
-    public void addCookie(String name, String value) {
+    public void addCookie(String name, String value, boolean isHttpOnly) {
         Cookie accsessTokenCookie = new Cookie(name, value);
 
         accsessTokenCookie.setDomain("localhost");
         accsessTokenCookie.setPath("/");
-        accsessTokenCookie.setHttpOnly(true);
+        accsessTokenCookie.setHttpOnly(isHttpOnly);
         accsessTokenCookie.setSecure(true);
         accsessTokenCookie.setAttribute("SameSite", "Strict");
 
