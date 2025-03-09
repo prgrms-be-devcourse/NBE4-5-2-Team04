@@ -21,10 +21,28 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private final Rq rq;
     private final AuthService authService;
 
+    private boolean isAuthorizationHeader() {
+        String authorizationHeader = rq.getHeader("Authorization");
+
+        if (authorizationHeader == null) {
+            return false;
+        }
+
+        return authorizationHeader.trim().startsWith("Bearer ");
+    }
+
     record AuthToken(String accessToken, String refreshToken) {
     }
 
     private AuthToken getAuthTokenFromRequest() {
+
+        if (isAuthorizationHeader()) {
+            String authorizationHeader = rq.getHeader("Authorization");
+            String accessToken = authorizationHeader.substring("Bearer ".length());
+
+            // Bearer 토큰이 사용되면 refreshToken은 빈 값("")으로 설정
+            return new AuthToken(accessToken, "");
+        }
 
         String accessToken = rq.getValueFromCookie("accessToken");
         String refreshToken = rq.getValueFromCookie("refreshToken");
@@ -40,9 +58,13 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private Member getMemberByAccessToken(String accessToken, String refreshToken) {
 
         Optional<Member> opAccMember = authService.getMemberByAccessToken(accessToken);
-
         if (opAccMember.isPresent()) {
             return opAccMember.get();
+        }
+
+        // refreshToken이 비어있으면 DB 조회하지 않음
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return null;
         }
 
         Optional<Member> opRefMember = authService.getMemberByRefreshToken(refreshToken);
@@ -52,8 +74,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String newAccessToken = authService.genAccessToken(opRefMember.get());
-
-        rq.addCookie("accessToken", newAccessToken);
+        rq.addCookie("accessToken", newAccessToken, false);
 
         return opRefMember.get();
     }
@@ -61,30 +82,35 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+
         String url = request.getRequestURI();
 
-        if(List.of("/api/members/logout").contains(url)) {
+        if(List.of("/api/members/logout", "/api/members/login").contains(url)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         AuthToken tokens = getAuthTokenFromRequest();
 
-        if (tokens == null) {
+        if (tokens == null || (tokens.accessToken.isEmpty() && tokens.refreshToken.isEmpty())) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String accessToken = tokens.accessToken;
+
         String refreshToken = tokens.refreshToken;
 
         Member actor = getMemberByAccessToken(accessToken, refreshToken);
 
         if (actor == null) {
-            filterChain.doFilter(request, response);
+            response.setContentType("application/json;charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"message\": \"토큰이 만료되었습니다.\"}");
+            response.getWriter().flush();
             return;
         }
-
         rq.setLogin(actor);
         filterChain.doFilter(request, response);
     }
