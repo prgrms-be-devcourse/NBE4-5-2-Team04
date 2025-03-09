@@ -18,7 +18,7 @@ public class ImageService {
             return "";
         }
 
-        String relativePath = "./upload" + "/profiles/" + memberId + "/";
+        String relativePath = "../frontend/public" + "/profiles/" + memberId + "/";
         String savePath = relativePath + "profile.png"; //
 
         try {
@@ -35,7 +35,7 @@ public class ImageService {
                 file.getParentFile().mkdirs(); // 폴더가 없으면 생성
                 Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
-            return savePath.substring(1);
+            return savePath.substring("../frontend/public".length());
         } catch (Exception e) {
             throw new RuntimeException("이미지 다운로드 실패: " + e.getMessage(), e);
         }
