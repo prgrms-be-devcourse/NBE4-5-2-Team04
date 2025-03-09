@@ -5,9 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -57,14 +55,10 @@ public class PostService {
 
 	// 1. 전체 게시글 조회 (정렬 기준 적용)
 	@Transactional(readOnly = true)
-	public Page<Post> getPosts(String sortBy, String placeName, String category, Pageable pageable) {
-		// 정렬 조건 추가
-		Sort sort = Sort.by(Sort.Order.desc(sortBy)); // 기본 정렬 내림차순
-		Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-
+	public Page<Post> getPosts(String placeName, String category, Pageable pageable) {
 		// 동적 검색 적용
 		Specification<Post> spec = PostSpecification.filterByPlaceAndCategory(placeName, category);
-		return postRepository.findAll(spec, sortedPageable);
+		return postRepository.findAll(spec, pageable);
 	}
 
 	// 2. 사용자가 좋아요 누른 게시글 조회

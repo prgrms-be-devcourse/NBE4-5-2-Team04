@@ -44,12 +44,11 @@ public class PostController {
 	// 1. 전체 게시글 조회 (정렬 기준 적용)
 	@GetMapping
 	public RsData<Page<PostResponseDTO>> getPosts(
-		@RequestParam(required = false, defaultValue = "createdDate") String sortBy,
 		@RequestParam(required = false) String placeName,
 		@RequestParam(required = false) String placeCategory,
 		Pageable pageable
 	) {
-		Page<Post> posts = postService.getPosts(sortBy, placeName, placeCategory, pageable);
+		Page<Post> posts = postService.getPosts(placeName, placeCategory, pageable);
 		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", posts.map(PostResponseDTO::new));
 	}
 
