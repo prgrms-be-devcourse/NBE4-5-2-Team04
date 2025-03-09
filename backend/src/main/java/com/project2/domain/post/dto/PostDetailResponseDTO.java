@@ -1,13 +1,13 @@
 package com.project2.domain.post.dto;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import com.project2.domain.member.dto.AuthorDTO;
+import com.project2.domain.member.entity.Member;
 import com.project2.domain.place.dto.PlaceDTO;
+import com.project2.domain.post.entity.Post;
+import com.project2.domain.post.entity.PostImage;
 
 import lombok.Getter;
 
@@ -26,29 +26,18 @@ public class PostDetailResponseDTO {
 	private final PlaceDTO placeDTO;
 	private final AuthorDTO authorDTO;
 
-	public PostDetailResponseDTO(
-		Long id, String title, String content,
-		Long memberId, String nickname, String profileImageUrl,
-		String placeName, String category,
-		int likeCount, int scrapCount,
-		Boolean isLiked, Boolean isScrapped,
-		String imageUrls,
-		LocalDateTime createdDate, LocalDateTime modifiedDate
-	) {
-		this.id = id;
-		this.title = title;
-		this.content = content;
-		this.likeCount = likeCount;
-		this.scrapCount = scrapCount;
-		this.imageUrls = Optional.ofNullable(imageUrls)
-			.filter(str -> !str.isEmpty())
-			.map(str -> Arrays.asList(str.split(",")))
-			.orElse(Collections.emptyList());
-		this.isLiked = isLiked != null ? isLiked : false;
-		this.isScrapped = isScrapped != null ? isScrapped : false;
-		this.createdDate = createdDate;
-		this.modifiedDate = modifiedDate;
-		this.authorDTO = new AuthorDTO(memberId, nickname, profileImageUrl);
-		this.placeDTO = new PlaceDTO(placeName, category);
+	public PostDetailResponseDTO(Post post, Member actor) {
+		this.id = post.getId();
+		this.title = post.getTitle();
+		this.content = post.getContent();
+		this.likeCount = post.getLikes().size();
+		this.scrapCount = post.getScraps().size();
+		this.imageUrls = post.getImages().stream().map(PostImage::getImageUrl).toList();
+		this.isLiked = post.getLikes().stream().anyMatch(like -> like.getMember().equals(actor));
+		this.isScrapped = post.getScraps().stream().anyMatch(scrap -> scrap.getMember().equals(actor));
+		this.createdDate = post.getCreatedDate();
+		this.modifiedDate = post.getModifiedDate();
+		this.authorDTO = new AuthorDTO(post.getMember().getId(), post.getMember().getNickname(), post.getMember().getProfileImageUrl());
+		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getCategory());
 	}
 }

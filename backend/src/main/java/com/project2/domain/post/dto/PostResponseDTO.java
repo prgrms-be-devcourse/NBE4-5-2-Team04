@@ -1,12 +1,11 @@
 package com.project2.domain.post.dto;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import com.project2.domain.member.dto.AuthorDTO;
 import com.project2.domain.place.dto.PlaceDTO;
+import com.project2.domain.post.entity.Post;
+import com.project2.domain.post.entity.PostImage;
 
 import lombok.Getter;
 
@@ -22,22 +21,15 @@ public class PostResponseDTO {
 	private final List<String> imageUrls;
 	private final AuthorDTO author;
 
-	public PostResponseDTO(Long id, String title, String content,
-		String placeName, String placeCategory,
-		int likeCount, int scrapCount, int commentCount,
-		String imageUrls,
-		Long memberId, String nickname, String profileImageUrl) {
-		this.id = id;
-		this.title = title;
-		this.content = content;
-		this.placeDTO = new PlaceDTO(placeName, placeCategory);
-		this.likeCount = likeCount;
-		this.scrapCount = scrapCount;
-		this.commentCount = commentCount;
-		this.imageUrls = Optional.ofNullable(imageUrls)
-			.filter(str -> !str.isEmpty())
-			.map(str -> Arrays.asList(str.split(",")))
-			.orElse(Collections.emptyList());
-		this.author = new AuthorDTO(memberId, nickname, profileImageUrl);
+	public PostResponseDTO(Post post) {
+		this.id = post.getId();
+		this.title = post.getTitle();
+		this.content = post.getContent();
+		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getCategory());
+		this.likeCount = post.getLikes().size();
+		this.scrapCount = post.getScraps().size();
+		this.commentCount = post.getComments().size();
+		this.imageUrls = post.getImages().stream().map(PostImage::getImageUrl).toList();
+		this.author = new AuthorDTO(post.getMember().getId(), post.getMember().getNickname(), post.getMember().getProfileImageUrl());
 	}
 }
