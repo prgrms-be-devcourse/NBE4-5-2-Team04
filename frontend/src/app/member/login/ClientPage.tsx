@@ -1,11 +1,24 @@
 "use client";
 
-import client from "@/lib/backend/client";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { getAccessToken } from "@/app/utils/auth";
 
 export default function ClientPage() {
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    const token = getAccessToken();
+    if (token) {
+      router.push("/");
+    } else {
+      setIsChecking(false); // 토큰이 없을 경우에만 화면 표시
+    }
+  }, [router]);
+
+  // 토큰 확인 중이면 아무것도 렌더링하지 않음
+  if (isChecking) return null;
 
   const handleNaverLogin = () => {
     const backendAuthUrl =
@@ -21,7 +34,6 @@ export default function ClientPage() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      {/* Increased the width from w-96 to w-full max-w-md */}
       <div className="w-full max-w-md p-8 bg-white border border-gray-200 rounded shadow-sm">
         <h2 className="text-center mb-6 text-xl font-medium">
           간편하게 로그인하세요
