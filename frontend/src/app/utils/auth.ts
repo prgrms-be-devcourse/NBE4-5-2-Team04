@@ -25,8 +25,7 @@ export function getAccessTokenFromCookie() {
 
 // Access Token에서 id 추출하기
 export function getUserIdFromToken() {
-  const token =
-    localStorage.getItem("accessToken") || getAccessTokenFromCookie();
+  const token = getAccessToken(); // getAccessToken()을 사용하여 안전하게 가져옴
   if (!token) return null;
 
   const payload = decodeJWT(token);
