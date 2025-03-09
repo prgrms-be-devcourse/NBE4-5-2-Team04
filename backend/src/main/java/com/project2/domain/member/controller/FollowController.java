@@ -8,10 +8,13 @@ import com.project2.domain.member.service.FollowService;
 import com.project2.domain.member.service.FollowerService;
 import com.project2.domain.member.service.FollowingService;
 import com.project2.domain.post.dto.PostResponseDTO;
+import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,98 +29,96 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FollowController {
 
-    private final FollowService followService;
-    private final FollowerService followerService;
-    private final FollowingService followingService;
-    private final PostService postService;
+	private final FollowService followService;
+	private final FollowerService followerService;
+	private final FollowingService followingService;
+	private final PostService postService;
 
-    @PostMapping("/{userid}/follows")
-    public RsData<FollowResponseDto> toggleFollow(
-            @PathVariable Long userid,
-            @RequestBody FollowRequestDto requestDto
-    ) {
-            requestDto.setFollowerId(userid);
-            return followService.toggleFollow(requestDto);
-        }
+	@PostMapping("/{userid}/follows")
+	public RsData<FollowResponseDto> toggleFollow(
+		@PathVariable Long userid,
+		@RequestBody FollowRequestDto requestDto
+	) {
+		requestDto.setFollowerId(userid);
+		return followService.toggleFollow(requestDto);
+	}
 
+	@GetMapping("/{userId}/followers")
+	public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowers(@PathVariable Long userId) {
+		try {
+			List<FollowerResponseDto> followers = followerService.getFollowers(userId);
 
-    @GetMapping("/{userId}/followers")
-    public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowers(@PathVariable Long userId) {
-        try {
-            List<FollowerResponseDto> followers = followerService.getFollowers(userId);
+			if (followers.isEmpty()) {
+				return ResponseEntity.ok(
+					new RsData<>(
+						"204",
+						"팔로워가 없습니다.",
+						null
+					)
+				);
+			}
 
+			return ResponseEntity.ok(
+				new RsData<>(
+					"200",
+					"팔로워 목록이 성공적으로 조회되었습니다.",
+					followers
+				)
+			);
+		} catch (ServiceException e) {
+			return ResponseEntity
+				.status(e.getStatusCode())
+				.body(
+					new RsData<>(
+						e.getCode(),
+						e.getMsg(),
+						null
+					)
+				);
+		}
+	}
 
-            if (followers.isEmpty()) {
-                return ResponseEntity.ok(
-                        new RsData<>(
-                                "204",
-                                "팔로워가 없습니다.",
-                                null
-                        )
-                );
-            }
+	@GetMapping("/{userId}/followings")
+	public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowings(@PathVariable Long userId) {
+		try {
+			List<FollowerResponseDto> followings = followingService.getFollowings(userId);
 
-            return ResponseEntity.ok(
-                    new RsData<>(
-                            "200",
-                            "팔로워 목록이 성공적으로 조회되었습니다.",
-                            followers
-                    )
-            );
-        } catch (ServiceException e) {
-            return ResponseEntity
-                    .status(e.getStatusCode())
-                    .body(
-                            new RsData<>(
-                                    e.getCode(),
-                                    e.getMsg(),
-                                    null
-                            )
-                    );
-        }
-    }
+			// Check if the list of followings is empty
+			if (followings.isEmpty()) {
+				return ResponseEntity.ok(
+					new RsData<>(
+						"204",
+						"팔로잉이 없습니다.",
+						null
+					)
+				);
+			}
 
-    @GetMapping("/{userId}/followings")
-    public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowings(@PathVariable Long userId) {
-        try {
-            List<FollowerResponseDto> followings = followingService.getFollowings(userId);
+			return ResponseEntity.ok(
+				new RsData<>(
+					"200",
+					"팔로잉 목록이 성공적으로 조회되었습니다.",
+					followings
+				)
+			);
+		} catch (ServiceException e) {
+			return ResponseEntity
+				.status(e.getStatusCode())
+				.body(
+					new RsData<>(
+						e.getCode(),
+						e.getMsg(),
+						null
+					)
+				);
+		}
+	}
 
-            // Check if the list of followings is empty
-            if (followings.isEmpty()) {
-                return ResponseEntity.ok(
-                        new RsData<>(
-                                "204",
-                                "팔로잉이 없습니다.",
-                                null
-                        )
-                );
-            }
-
-            return ResponseEntity.ok(
-                    new RsData<>(
-                            "200",
-                            "팔로잉 목록이 성공적으로 조회되었습니다.",
-                            followings
-                    )
-            );
-        } catch (ServiceException e) {
-            return ResponseEntity
-                    .status(e.getStatusCode())
-                    .body(
-                            new RsData<>(
-                                    e.getCode(),
-                                    e.getMsg(),
-                                    null
-                            )
-                    );
-        }
-    }
-
-    @GetMapping("/{userId}/following-posts")
-    public Page<PostResponseDTO> getFollowerPosts(
-            Pageable pageable
-    ) {
-        return postService.getFollowerPosts(pageable);
-    }
+	@GetMapping("/{userId}/following-posts")
+	public Page<Post> getFollowingPosts(
+		Pageable pageable
+	) {
+		return postService.getFollowingPosts(pageable);
+	}
 }
 
