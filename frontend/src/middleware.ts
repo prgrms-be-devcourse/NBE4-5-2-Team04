@@ -6,7 +6,7 @@ import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 // 인증이 필요하지 않은 공개 경로 정의 - 좀 더 확장
 const PUBLIC_ROUTES = [
   "/member/login",
-  "/api/member/logout",
+  "/member/logout",
   "/member/logout",
   "/static",
   "/_next",
@@ -92,8 +92,6 @@ async function refreshAccessToken(request: NextRequest) {
         cookie: (await cookies()).toString(),
       },
     });
-
-    console.log(response.response.ok);
 
     if (!response.response.ok) {
       return logout(request);
