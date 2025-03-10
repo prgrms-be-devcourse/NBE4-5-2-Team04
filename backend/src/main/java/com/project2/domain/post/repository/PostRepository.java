@@ -22,29 +22,31 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
 	// 사용자가 좋아요 누른 게시글 조회
 	@Query("""
-		    SELECT p FROM Post p
-		    JOIN p.likes l
-		    WHERE l.member.id = :memberId
-		""")
+    SELECT DISTINCT p FROM Post p
+    LEFT JOIN FETCH p.likes l
+    WHERE l.member.id = :memberId
+    """)
 	@EntityGraph(attributePaths = {"place", "member", "likes", "scraps", "comments", "images"})
 	Page<Post> findLikedPosts(@Param("memberId") Long memberId, Pageable pageable);
 
+
 	// 사용자가 스크랩한 게시글 조회
 	@Query("""
-		    SELECT p FROM Post p
-		    JOIN p.scraps s
-		    WHERE s.member.id = :memberId
-		""")
+    SELECT DISTINCT p FROM Post p
+    LEFT JOIN FETCH p.scraps s
+    WHERE s.member.id = :memberId
+    """)
 	@EntityGraph(attributePaths = {"place", "member", "likes", "scraps", "comments", "images"})
 	Page<Post> findScrappedPosts(@Param("memberId") Long memberId, Pageable pageable);
 
 	// 팔로우하는 사람들의 게시글 조회
 	@Query("""
-		    SELECT p FROM Post p
-		    WHERE p.member.id IN (
-		        SELECT f.following.id FROM Follows f WHERE f.follower.id = :memberId
-		    )
-		""")
+    SELECT p FROM Post p
+    JOIN p.member m
+    WHERE EXISTS (
+        SELECT 1 FROM Follows f WHERE f.follower.id = :memberId AND f.following.id = m.id
+    )
+""")
 	@EntityGraph(attributePaths = {"place", "member", "likes", "scraps", "comments", "images"})
 	Page<Post> findFollowingPosts(@Param("memberId") Long memberId, Pageable pageable);
 
