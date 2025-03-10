@@ -89,7 +89,7 @@ public class MemberController {
 	}
 
 	@Operation(summary = "전체 회원 조회")
-	@GetMapping
+	@GetMapping("/totalMember")
 	public RsData<List<MemberDTO>> getAllMembers() {
 		List<Member> members = memberService.findAllMembers(); // 모든 회원을 조회하는 메서드 호출
 		List<MemberDTO> memberDTOs = members.stream()
