@@ -42,3 +42,9 @@ next-env.d.ts
 
 # backend 참조 schema.d.ts
 schema.d.ts
+
+# git bash 충돌시 자동으로 생성되는 파일 제외
+*.stackdump
+
+# profile 이미지 저장경로 제외
+/public/profiles/*

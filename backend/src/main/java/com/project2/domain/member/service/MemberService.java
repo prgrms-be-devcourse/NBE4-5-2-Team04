@@ -3,6 +3,7 @@ package com.project2.domain.member.service;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.enums.Provider;
 import com.project2.domain.member.repository.MemberRepository;
+import com.project2.global.exception.ServiceException;
 import com.project2.global.util.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,12 @@ public class MemberService {
     @Transactional
     public Optional<Member> findById(Long id) {
         return memberRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Member findByIdOrThrow(Long id) {
+        return memberRepository.findById(id).orElseThrow(() ->
+                new ServiceException("404", "사용자를 찾을 수 없습니다."));
     }
 
     public Optional<Member> findByEmail(String email) {

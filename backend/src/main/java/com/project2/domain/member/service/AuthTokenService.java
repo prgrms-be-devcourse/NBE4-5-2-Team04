@@ -45,7 +45,7 @@ public class AuthTokenService {
         Map<String, Object> payload = Ut.Jwt.getPayload(keyString, token);
         Number idNo = (Number)payload.get("id");
         long id = idNo.longValue();
-        String email = (String)payload.get("email");
+        String email = (payload.containsKey("email")) ? (String) payload.get("email") : "";
 
         return Map.of("id", id, "email", email);
     }

@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project2.domain.member.entity.Member;
 import com.project2.domain.post.dto.PostDetailResponseDTO;
 import com.project2.domain.post.dto.PostRequestDTO;
 import com.project2.domain.post.dto.PostResponseDTO;
+import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.RsData;
+import com.project2.global.security.Rq;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/posts")
 public class PostController {
 	private final PostService postService;
+	private final Rq rq;
 
 	@PostMapping(consumes = "multipart/form-data")
 	public RsData<Long> createPost(@Valid @ModelAttribute PostRequestDTO postRequestDTO) throws IOException {
@@ -39,61 +43,67 @@ public class PostController {
 
 	// 1. 전체 게시글 조회 (정렬 기준 적용)
 	@GetMapping
-	public Page<PostResponseDTO> getPosts(
-		@RequestParam(required = false, defaultValue = "createdDate") String sortBy,
+	public RsData<Page<PostResponseDTO>> getPosts(
 		@RequestParam(required = false) String placeName,
 		@RequestParam(required = false) String placeCategory,
 		Pageable pageable
 	) {
-		return postService.getPosts(sortBy, placeName, placeCategory, pageable);
+		Page<Post> posts = postService.getPosts(placeName, placeCategory, pageable);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", posts.map(PostResponseDTO::new));
 	}
 
 	// 2. 사용자가 좋아요 누른 게시글 조회
 	@GetMapping("/liked")
-	public Page<PostResponseDTO> getLikedPosts(
+	public RsData<Page<PostResponseDTO>> getLikedPosts(
 		Pageable pageable
 	) {
-		return postService.getLikedPosts(pageable);
+		Page<Post> posts = postService.getLikedPosts(pageable);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", posts.map(PostResponseDTO::new));
 	}
 
 	// 3. 사용자가 스크랩한 게시글 조회
 	@GetMapping("/scrapped")
-	public Page<PostResponseDTO> getScrappedPosts(
+	public RsData<Page<PostResponseDTO>> getScrappedPosts(
 		Pageable pageable
 	) {
-		return postService.getScrappedPosts(pageable);
+		Page<Post> posts = postService.getScrappedPosts(pageable);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", posts.map(PostResponseDTO::new));
 	}
 
 	// 4. 사용자의 팔로워들의 게시글 조회
-	@GetMapping("/followers")
-	public Page<PostResponseDTO> getFollowerPosts(
+	@GetMapping("/following")
+	public RsData<Page<PostResponseDTO>> getFollowerPosts(
 		Pageable pageable
 	) {
-		return postService.getFollowerPosts(pageable);
+		Page<Post> posts = postService.getFollowingPosts(pageable);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", posts.map(PostResponseDTO::new));
 	}
 
 	// 5. 특정 사용자의 게시글 조회
 	@GetMapping("/member/{memberId}")
-	public Page<PostResponseDTO> getPostsByMember(
+	public RsData<Page<PostResponseDTO>> getPostsByMember(
 		@PathVariable("memberId") Long memberId,
 		Pageable pageable
 	) {
-		return postService.getPostsByMemberId(memberId, pageable);
+		Page<Post> posts = postService.getPostsByMemberId(memberId, pageable);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", posts.map(PostResponseDTO::new));
 	}
 
 	// 6. 특정 사용자의 게시글 조회
 	@GetMapping("/place/{placeId}")
-	public Page<PostResponseDTO> getPostsByPlace(
+	public RsData<Page<PostResponseDTO>> getPostsByPlace(
 		@PathVariable("placeId") Long placeId,
 		Pageable pageable
 	) {
-		return postService.getPostsByPlaceId(placeId, pageable);
+		Page<Post> posts = postService.getPostsByPlaceId(placeId, pageable);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", posts.map(PostResponseDTO::new));
 	}
 
 	@GetMapping("/{postId}")
 	public RsData<PostDetailResponseDTO> getPostById(@PathVariable Long postId) {
-		PostDetailResponseDTO post = postService.getPostById(postId);
-		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", post);
+		Member actor = rq.getActor();
+		Post post = postService.getPostById(postId);
+		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", new PostDetailResponseDTO(post, actor));
 	}
 
 	@PutMapping("/{postId}")

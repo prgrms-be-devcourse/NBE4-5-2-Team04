@@ -120,4 +120,3 @@ public class FollowController {
         return postService.getFollowerPosts(pageable);
     }
 }
-

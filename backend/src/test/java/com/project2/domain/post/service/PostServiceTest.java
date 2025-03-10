@@ -5,8 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,13 +18,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.place.entity.Place;
 import com.project2.domain.place.repository.PlaceRepository;
-import com.project2.domain.post.dto.PostDetailResponseDTO;
 import com.project2.domain.post.dto.PostRequestDTO;
-import com.project2.domain.post.dto.PostResponseDTO;
 import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.repository.PostRepository;
 import com.project2.global.security.Rq;
@@ -65,8 +63,9 @@ class PostServiceTest {
 			.build();
 	}
 
+	// 1. 게시글 생성 테스트
 	@Test
-	void post_success() throws IOException {
+	void createPost_shouldCreateNewPost() throws IOException {
 		// Given
 		PostRequestDTO requestDTO = new PostRequestDTO("Test Title", "Test Content", 1L, 1L, List.of());
 		given(rq.getActor()).willReturn(member);
@@ -78,107 +77,140 @@ class PostServiceTest {
 
 		// Then
 		assertThat(postId).isEqualTo(post.getId());
+		verify(postRepository, times(1)).save(any(Post.class));
 	}
 
+	// 2. 전체 게시글 조회 테스트
 	@Test
-	void getPosts_success() {
+	void getPosts_shouldReturnPagedPosts() {
 		// Given
-		List<Object[]> data = new ArrayList<>();
-		data.add(new Object[] {
-			1L, "Test Post", "Test Content", "Seoul", "City", 10, 5, 3, "img1.jpg,img2.jpg", 2L, "testUser",
-			"profile.png"
-		});
-		Page<Object[]> mockPage = new PageImpl<>(data);
-		given(postRepository.findAllBySearchWordsAndSort(anyString(), anyString(), anyString(), any(Pageable.class)))
-			.willReturn(mockPage);
+		Pageable pageable = Pageable.ofSize(10);
+		Page<Post> page = new PageImpl<>(List.of(post));
+
+		// Specification 은 null 을 허용하기 때문에 any()로 처리
+		given(postRepository.findAll(any(Specification.class), eq(pageable))).willReturn(page);
 
 		// When
-		Page<PostResponseDTO> result = postService.getPosts("likes", "Seoul", "City", Pageable.unpaged());
+		Page<Post> result = postService.getPosts(null, null, pageable);
 
 		// Then
-		assertThat(result.getTotalElements()).isEqualTo(1);
+		assertThat(result.getContent()).hasSize(1);
 		assertThat(result.getContent().get(0).getTitle()).isEqualTo("Test Post");
 	}
 
+	// 3. 사용자가 좋아요 누른 게시글 조회 테스트
 	@Test
-	void getLikedPosts_success() {
+	void getLikedPosts_shouldReturnLikedPosts() {
 		// Given
+		Pageable pageable = Pageable.ofSize(10);
+		Page<Post> page = new PageImpl<>(List.of(post));
 		given(rq.getActor()).willReturn(member);
-		List<Object[]> data = new ArrayList<>();
-		data.add(new Object[] {
-			1L, "Test Post", "Test Content", "Seoul", "City", 10, 5, 3, "img1.jpg,img2.jpg", 2L, "testUser",
-			"profile.png"
-		});
-		Page<Object[]> mockPage = new PageImpl<>(data);
-		given(postRepository.findLikedPosts(anyLong(), any(Pageable.class))).willReturn(mockPage);
+		given(postRepository.findLikedPosts(member.getId(), pageable)).willReturn(page);
 
 		// When
-		Page<PostResponseDTO> result = postService.getLikedPosts(Pageable.unpaged());
+		Page<Post> result = postService.getLikedPosts(pageable);
 
 		// Then
-		assertThat(result.getTotalElements()).isEqualTo(1);
+		assertThat(result.getContent()).hasSize(1);
 	}
 
+	// 4. 사용자가 스크랩한 게시글 조회 테스트
 	@Test
-	void getScrappedPosts_success() {
+	void getScrappedPosts_shouldReturnScrappedPosts() {
 		// Given
+		Pageable pageable = Pageable.ofSize(10);
+		Page<Post> page = new PageImpl<>(List.of(post));
 		given(rq.getActor()).willReturn(member);
-		List<Object[]> data = new ArrayList<>();
-		data.add(new Object[] {
-			1L, "Test Post", "Test Content", "Seoul", "City", 10, 5, 3, "img1.jpg,img2.jpg", 2L, "testUser",
-			"profile.png"
-		});
-		Page<Object[]> mockPage = new PageImpl<>(data);
-		given(postRepository.findScrappedPosts(anyLong(), any(Pageable.class))).willReturn(mockPage);
+		given(postRepository.findScrappedPosts(member.getId(), pageable)).willReturn(page);
 
 		// When
-		Page<PostResponseDTO> result = postService.getScrappedPosts(Pageable.unpaged());
+		Page<Post> result = postService.getScrappedPosts(pageable);
 
 		// Then
-		assertThat(result.getTotalElements()).isEqualTo(1);
+		assertThat(result.getContent()).hasSize(1);
 	}
 
+	// 5. 사용자가 팔로우하는 사람들의 게시글 조회 테스트
 	@Test
-	void getPostsByMemberId_success() {
+	void getFollowingPosts_shouldReturnFollowingUsersPosts() {
 		// Given
-		List<Object[]> data = new ArrayList<>();
-		data.add(new Object[] {
-			1L, "Test Post", "Test Content", "Seoul", "City", 10, 5, 3, "img1.jpg,img2.jpg", 2L, "testUser",
-			"profile.png"
-		});
-		Page<Object[]> mockPage = new PageImpl<>(data);
-		given(postRepository.findPostsByMember(anyLong(), any(Pageable.class))).willReturn(mockPage);
+		Pageable pageable = Pageable.ofSize(10);
+		Page<Post> page = new PageImpl<>(List.of(post));
+		given(rq.getActor()).willReturn(member);
+		given(postRepository.findFollowingPosts(member.getId(), pageable)).willReturn(page);
 
 		// When
-		Page<PostResponseDTO> result = postService.getPostsByMemberId(1L, Pageable.unpaged());
+		Page<Post> result = postService.getFollowingPosts(pageable);
 
 		// Then
-		assertThat(result.getTotalElements()).isEqualTo(1);
+		assertThat(result.getContent()).hasSize(1);
 	}
 
+	// 6. 특정 사용자의 게시글 조회 테스트
 	@Test
-	void getPost_success() {
+	void getPostsByMemberId_shouldReturnUserPosts() {
 		// Given
-		given(rq.getActor()).willReturn(member);
-		Object[] mockResult = {
-			1L, "Test Post", "Test Content", 2L, "testUser", "profile.png",
-			"Seoul", "City", 10, 5, true, false, "img1.jpg,img2.jpg",
-			LocalDateTime.now(), LocalDateTime.now()
-		};
-		given(postRepository.findPostDetailById(anyLong(), anyLong())).willReturn(Optional.of(mockResult));
+		Pageable pageable = Pageable.ofSize(10);
+		Page<Post> page = new PageImpl<>(List.of(post));
+		given(postRepository.findPostsByMember(1L, pageable)).willReturn(page);
 
 		// When
-		PostDetailResponseDTO result = postService.getPostById(1L);
+		Page<Post> result = postService.getPostsByMemberId(1L, pageable);
 
 		// Then
-		assertThat(result.getTitle()).isEqualTo("Test Post");
+		assertThat(result.getContent()).hasSize(1);
 	}
 
+	// 7. 특정 장소의 게시글 조회 테스트
 	@Test
-	void postDelete_success() {
+	void getPostsByPlaceId_shouldReturnPostsForPlace() {
+		// Given
+		Pageable pageable = Pageable.ofSize(10);
+		Page<Post> page = new PageImpl<>(List.of(post));
+		given(postRepository.findPostsByPlace(1L, pageable)).willReturn(page);
+
+		// When
+		Page<Post> result = postService.getPostsByPlaceId(1L, pageable);
+
+		// Then
+		assertThat(result.getContent()).hasSize(1);
+	}
+
+	// 8. 게시글 단건 조회 테스트
+	@Test
+	void getPostById_shouldReturnPost() {
+		// Given
+		given(postRepository.findPostById(1L)).willReturn(Optional.of(post));
+
+		// When
+		Post result = postService.getPostById(1L);
+
+		// Then
+		assertThat(result).isEqualTo(post);
+	}
+
+	// 9. 게시글 수정 테스트
+	@Test
+	void updatePost_shouldUpdatePost() throws IOException, NoSuchAlgorithmException {
+		// Given
+		PostRequestDTO requestDTO = new PostRequestDTO("Updated Title", "Updated Content", 1L, 1L, List.of());
+		given(rq.getActor()).willReturn(member);
+		given(postRepository.findById(1L)).willReturn(Optional.of(post));
+
+		// When
+		postService.updatePost(1L, requestDTO);
+
+		// Then
+		assertThat(post.getTitle()).isEqualTo("Updated Title");
+		assertThat(post.getContent()).isEqualTo("Updated Content");
+	}
+
+	// 10. 게시글 삭제 테스트
+	@Test
+	void deletePost_shouldDeletePost() {
 		// Given
 		given(rq.getActor()).willReturn(member);
-		given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+		given(postRepository.findById(1L)).willReturn(Optional.of(post));
 
 		// When
 		postService.deletePost(1L);

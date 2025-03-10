@@ -1,8 +1,13 @@
 package com.project2.domain.member.controller;
 
 import com.project2.domain.member.dto.MemberDTO;
+import com.project2.domain.member.dto.MemberProfileRequestDTO;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.AuthService;
+import com.project2.domain.member.service.FollowerService;
+import com.project2.domain.member.service.FollowingService;
+import com.project2.domain.member.service.MemberService;
+import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.Empty;
 import com.project2.global.dto.RsData;
 import com.project2.global.security.Rq;
@@ -18,6 +23,10 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final AuthService authService;
+    private final MemberService memberService;
+    private final PostService postService;
+    private final FollowerService followerService;
+    private final FollowingService followingService;
     private final Rq rq;
 
     @Operation(summary = "내 정보 조회")
@@ -52,13 +61,13 @@ public class MemberController {
     public RsData<MemberDTO> refreshAccessToken() {
         String refreshToken = rq.getValueFromCookie("refreshToken");
         if (refreshToken == null || refreshToken.isEmpty()) {
-            return new RsData<>("401", "리프레시 토큰이 제공되지 않았습니다.", null);
+            return new RsData<>("401", "리프레시 토큰이 제공되지 않았습니다.");
         }
 
         Member actor = authService.getMemberByRefreshTokenOrThrow(refreshToken);
         Member realActor = rq.getRealActor(actor);
         String newAccessToken = authService.genAccessToken(realActor);
-        rq.addCookie("accessToken", newAccessToken);
+        rq.addCookie("accessToken", newAccessToken, false);
 
         return new RsData<>(
                 "200",
@@ -66,4 +75,21 @@ public class MemberController {
                 new MemberDTO(realActor)
         );
     }
+
+    @Operation(summary = "사용자 정보 프로필을 조회합니다.")
+    @GetMapping("/{memberId}")
+    public RsData<MemberProfileRequestDTO> getUserIdData(
+            @PathVariable long memberId
+    ) {
+        Member member = this.memberService.findByIdOrThrow(memberId);
+        //long totalPostCount = this.postService.getPostById(memberId, pageable).getTotalElements();
+        long totalFlowerCount = this.followerService.getFollowers(memberId).size();
+        long totalFlowingCount = this.followingService.getFollowings(memberId).size();
+        return new RsData<>(
+                "200",
+                "사용자 프로필 조회가 완료되었습니다.",
+                new MemberProfileRequestDTO(member, 0, totalFlowerCount, totalFlowingCount)
+        );
+    }
+
 }

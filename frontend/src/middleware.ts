@@ -6,6 +6,8 @@ import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 // 인증이 필요하지 않은 공개 경로 정의 - 좀 더 확장
 const PUBLIC_ROUTES = [
   "/member/login",
+  "/member/logout",
+  "/member/logout",
   "/static",
   "/_next",
   "/favicon.ico",
@@ -20,22 +22,15 @@ const PUBLIC_ROUTES = [
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // 1. 로그인 페이지인 경우 - 절대 리다이렉션하지 않음
-  if (path === "/member/login") {
+  if (path.startsWith("/member/login") || path.startsWith("/member/logout")) {
     return NextResponse.next();
   }
 
-  // 2. 공개 경로는 인증 검사 없이 진행
-  if (isPublicRoute(path)) {
-    return NextResponse.next();
-  }
-
-  // 쿠키 확인
   const myCookies = await cookies();
   const accessToken = myCookies.get("accessToken");
   const refreshToken = myCookies.get("refreshToken");
 
-  // 두 토큰 모두 없으면 로그인 페이지로 리다이렉트
+  // 액세스 토큰, 리프레쉬 토큰이 없으면 로그인페이지로
   if (!accessToken && !refreshToken) {
     return redirectToLogin(request);
   }
@@ -54,8 +49,10 @@ export async function middleware(request: NextRequest) {
       try {
         return await refreshAccessToken(request);
       } catch (error) {
-        return redirectToLogin(request);
+        return logout(request);
       }
+    } else {
+      return redirectToLogin(request);
     }
   }
 
@@ -76,7 +73,12 @@ export async function middleware(request: NextRequest) {
 function redirectToLogin(request: NextRequest) {
   const url = request.nextUrl.clone();
   url.pathname = "/member/login";
-  url.searchParams.set("redirectTo", request.nextUrl.pathname);
+  return NextResponse.redirect(url);
+}
+
+function logout(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/member/logout";
   return NextResponse.redirect(url);
 }
 
@@ -92,7 +94,7 @@ async function refreshAccessToken(request: NextRequest) {
     });
 
     if (!response.response.ok) {
-      return redirectToLogin(request);
+      return logout(request);
     }
 
     const springCookie = response.response.headers.getSetCookie();

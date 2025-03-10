@@ -1,123 +1,113 @@
 "use client";
 
-import client from "@/lib/backend/client";
+import {client} from "@/lib/backend/client";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
+import {useEffect, useState} from "react";
 import {
-  LoginMemberContext,
-  useLoginMember,
-} from "@/app/stores/auth/loginMemberStore";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { components } from "@/lib/backend/schema";
+    saveAccessTokenFromCookie,
+    getAccessToken,
+    getUserIdFromToken,
+} from "@/app/utils/auth";
 
-export default function ClinetLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  type Member = components["schemas"]["MemberDTO"];
+export default function ClientLayout({
+                                         children,
+                                     }: Readonly<{ children: React.ReactNode }>) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const [isLogin, setIsLogin] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [authChecked, setAuthChecked] = useState(false);
+    const isLoginPage = pathname === "/member/login";
 
-  const {
-    setLoginMember,
-    isLogin,
-    loginMember,
-    removeLoginMember,
-    isLoginMemberPending,
-    isAdmin,
-    setNoLoginMember,
-  } = useLoginMember();
+    // 로그인 상태 확인
+    useEffect(() => {
+        if (typeof window === "undefined") return;
 
-  const loginMemberContextValue = {
-    loginMember,
-    setLoginMember,
-    removeLoginMember,
-    isLogin,
-    isLoginMemberPending,
-    isAdmin,
-    setNoLoginMember,
-  };
+        saveAccessTokenFromCookie();
+        const storedToken = getAccessToken();
 
-  // 로그인이 필요 없는 경로들
-  const isLoginPage = pathname === "/member/login";
-
-  const isFetching = useRef(false);
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      if (isFetching.current) return;
-      isFetching.current = true;
-
-      try {
-        const response = await client.GET("/api/members/me", {
-          credentials: "include",
-        });
-
-        if (response.data?.data) {
-          setLoginMember(response.data.data);
-        } else {
-          setNoLoginMember();
+        if (storedToken) {
+            setIsLogin(true);
+            setIsLoading(true);
+            return;
         }
-      } catch (_error) {
-        setNoLoginMember();
-      } finally {
-        setAuthChecked(true);
-        isFetching.current = false;
-      }
+
+        if (!isLogin && !storedToken) {
+            setIsLoading(true);
+            return;
+        }
+
+        // 로그인이 되지 않은 상태이고, 토큰이 없는경우 localStorage 에 accessToken 을 저장
+        const checkLoginStatus = async () => {
+            try {
+                const response = await client.GET("/api/members/me", {
+                    credentials: "include",
+                });
+
+                if (response.data?.data) {
+                    saveAccessTokenFromCookie();
+                    setIsLogin(true);
+                } else {
+                }
+            } catch (_error) {
+                console.error("로그인 확인 실패", _error);
+            } finally {
+                setIsLoading(true);
+            }
+        };
+
+        checkLoginStatus();
+    }, []);
+
+    // `마이페이지` 이동 함수 분리 (클릭 시 최신 userId를 가져와 이동)
+    const goToMyPage = (e: React.MouseEvent) => {
+        e.preventDefault();
+        const userId = getUserIdFromToken();
+        if (userId) {
+            router.push(`/member/${userId}`);
+        }
     };
 
-    checkLoginStatus();
-  }, []);
+    // 로딩이 끝났을때 체크
+    useEffect(() => {
+        if (!isLoading) return;
 
-  // 인증 후 리다이렉트 처리
-  useEffect(() => {
-    if (authChecked) {
-      if (isLogin && isLoginPage) {
-        router.replace("/");
-      }
-    }
-  }, [authChecked, isLogin, isLoginPage, router, searchParams]);
+        if (!isLogin && !isLoginPage) {
+            router.push("/member/login");
+        }
+    }, [isLoading, isLogin, isLoginPage, router]);
 
-  async function handleLogout(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    try {
-      await client
-        .DELETE("/api/members/logout", {
-          credentials: "include",
-        })
-        .catch((_err) => console.log("로그아웃 요청 중 에러:", _err));
-    } catch (_error) {
-      console.log("로그아웃 실패:");
+    if (!isLoading) {
+        return (
+            <div className="flex flex-col justify-center items-center h-screen">
+                <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                <p className="mt-4 text-gray-500 text-lg animate-pulse">
+                    잠시만 기다려 주세요...
+                </p>
+            </div>
+        );
     }
 
-    removeLoginMember();
-    router.replace("/member/login");
-  }
-
-  return (
-    <LoginMemberContext.Provider value={loginMemberContextValue}>
-      {/* 로그인 페이지가 아닐 때만 헤더 표시, 임시 뷰입니다.*/}
-      {!isLoginPage && (
-        <header className="flex justify-end gap-3 px-4">
-          <Link href="/">메인</Link>
-          <Link href="/about">소개</Link>
-          <Link href="/post/list">글 목록</Link>
-          {isLogin && <Link href="/post/write">글 작성</Link>}
-          {!isLogin && <Link href="/member/login">로그인</Link>}
-          {isLogin && (
-            <Link href="" onClick={handleLogout}>
-              로그아웃
-            </Link>
-          )}
-          {isLogin && <Link href="/member/me">내정보</Link>}
-        </header>
-      )}
-      {children}
-    </LoginMemberContext.Provider>
-  );
+    return (
+        <>
+            {!isLoginPage && (
+                <header className="flex justify-end gap-3 px-4">
+                    <Link href="/">메인</Link>
+                    {isLogin ? (
+                        <>
+                            {/* 토큰에서 가져온 ID를 사용하고, 최신 데이터가 있으면 업데이트 */}
+                            <Link href="#" onClick={goToMyPage}>
+                                마이페이지
+                            </Link>
+                            <Link href="/member/logout">로그아웃</Link>{" "}
+                        </>
+                    ) : (
+                        <Link href="/member/login">로그인</Link>
+                    )}
+                </header>
+            )}
+            {children}
+        </>
+    );
 }
