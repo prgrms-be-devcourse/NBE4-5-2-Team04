@@ -3,6 +3,7 @@ package com.project2.domain.post.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project2.domain.post.dto.comment.CommentRequestDTO;
 import com.project2.domain.post.dto.comment.CommentResponseDTO;
+import com.project2.domain.post.dto.comment.ListCommentResponseDTO;
 import com.project2.domain.post.service.CommentService;
 import com.project2.global.dto.RsData;
 import com.project2.global.util.Ut;
@@ -62,7 +63,7 @@ class CommentControllerTest {
     void createComment_Success() throws Exception {
         // Given
         CommentRequestDTO requestDTO = new CommentRequestDTO("Test Comment", null);
-        CommentResponseDTO responseDTO = new CommentResponseDTO(1L, "Test Comment", "TestUser");
+        CommentResponseDTO responseDTO = new CommentResponseDTO(1L, "Test Comment", "TestUser", null);
 
         when(commentService.createComment(any(), any()))
                 .thenReturn(new RsData<>("200", "댓글이 성공적으로 작성되었습니다.", responseDTO));
@@ -78,14 +79,18 @@ class CommentControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.data.content").value("Test Comment"));
+                .andExpect(jsonPath("$.data.content").value("Test Comment"))
+                .andExpect(jsonPath("$.data.parentId").doesNotExist()); // 부모 댓글이므로 parentId 없음
     }
 
     @Test
     @DisplayName("댓글 조회 성공")
     void getComments_Success() throws Exception {
         // Given
-        List<CommentResponseDTO> comments = List.of(new CommentResponseDTO(1L, "Test Comment", "TestUser"));
+        List<ListCommentResponseDTO> comments = List.of(
+                new ListCommentResponseDTO(1L, "부모 댓글", "TestUser", null),
+                new ListCommentResponseDTO(2L, "대댓글", "TestUser2", 1L)
+        );
 
         when(commentService.getComments(any()))
                 .thenReturn(new RsData<>("200", "댓글 목록 조회 성공", comments));
@@ -100,7 +105,10 @@ class CommentControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.data[0].content").value("Test Comment"));
+                .andExpect(jsonPath("$.data[0].content").value("부모 댓글"))
+                .andExpect(jsonPath("$.data[0].parentId").doesNotExist()) // 부모 댓글이므로 parentId 없음
+                .andExpect(jsonPath("$.data[1].content").value("대댓글"))
+                .andExpect(jsonPath("$.data[1].parentId").value(1L)); // 대댓글이므로 parentId 존재
     }
 
     @Test
@@ -108,7 +116,7 @@ class CommentControllerTest {
     void updateComment_Success() throws Exception {
         // Given
         CommentRequestDTO requestDTO = new CommentRequestDTO("Updated Comment", null);
-        CommentResponseDTO responseDTO = new CommentResponseDTO(1L, "Updated Comment", "TestUser");
+        CommentResponseDTO responseDTO = new CommentResponseDTO(1L, "Updated Comment", "TestUser", null);
 
         when(commentService.updateComment(any(), any()))
                 .thenReturn(new RsData<>("200", "댓글이 성공적으로 수정되었습니다.", responseDTO));
@@ -144,6 +152,6 @@ class CommentControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.msg").value("댓글이 성공적으로 삭제되었습니다."));
+                .andExpect(jsonPath("$.msg").value("댓글이 성공적으로 삭제되었습니다.")); // `msg` -> `message` 수정
     }
 }

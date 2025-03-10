@@ -36,14 +36,14 @@ public class PostService {
 		Member actor = rq.getActor();
 
 		Place place = placeRepository.findById(requestDTO.getPlaceId())
-			.orElseThrow(() -> new IllegalArgumentException("해당 장소가 존재하지 않음"));
+				.orElseThrow(() -> new IllegalArgumentException("해당 장소가 존재하지 않음"));
 
 		Post post = Post.builder()
-			.title(requestDTO.getTitle())
-			.content(requestDTO.getContent())
-			.place(place)
-			.member(actor)
-			.build();
+				.title(requestDTO.getTitle())
+				.content(requestDTO.getContent())
+				.place(place)
+				.member(actor)
+				.build();
 		Post createdPost = postRepository.save(post);
 
 		if (requestDTO.getImages() != null && !requestDTO.getImages().isEmpty()) {
@@ -96,17 +96,17 @@ public class PostService {
 	@Transactional(readOnly = true)
 	public Post getPostById(Long postId) {
 		return postRepository.findPostById(postId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+				.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 	}
 
 	@Transactional
 	public void updatePost(Long postId, PostRequestDTO requestDTO) throws
-		IOException,
-		NoSuchAlgorithmException {
+			IOException,
+			NoSuchAlgorithmException {
 		Member actor = rq.getActor();
 
 		Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+				.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
 		if (!post.getMember().equals(actor)) {
 			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN.value()), "게시글 수정 권한이 없습니다.");
@@ -122,13 +122,11 @@ public class PostService {
 		Member actor = rq.getActor();
 
 		Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+				.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
 		if (!post.getMember().equals(actor)) {
 			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN.value()), "게시글 삭제 권한이 없습니다.");
 		}
 		postRepository.deleteById(postId);
 	}
-
-
 }

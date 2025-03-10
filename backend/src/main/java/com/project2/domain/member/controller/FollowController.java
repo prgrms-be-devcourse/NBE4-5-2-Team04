@@ -8,6 +8,7 @@ import com.project2.domain.member.service.FollowService;
 import com.project2.domain.member.service.FollowerService;
 import com.project2.domain.member.service.FollowingService;
 import com.project2.domain.post.dto.PostResponseDTO;
+import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
@@ -113,10 +114,9 @@ public class FollowController {
         }
     }
 
-    @GetMapping("/{memberId}/following-posts")
-    public Page<PostResponseDTO> getFollowerPosts(
-            Pageable pageable
-    ) {
-        return postService.getFollowerPosts(pageable);
+    @GetMapping("/following-posts")
+    public RsData<Page<PostResponseDTO>> getFollowingPosts(Pageable pageable) {
+        Page<Post> posts = postService.getFollowingPosts(pageable);
+        return new RsData<>(String.valueOf(HttpStatus.OK.value()), "팔로우한 사용자의 게시글 조회 성공", posts.map(PostResponseDTO::new));
     }
 }

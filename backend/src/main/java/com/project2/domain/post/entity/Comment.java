@@ -4,18 +4,12 @@ import com.project2.domain.member.entity.Member;
 import com.project2.global.entity.BaseTime;
 
 import com.project2.global.exception.ServiceException;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -45,6 +39,10 @@ public class Comment extends BaseTime {
 	@ManyToOne
 	@JoinColumn(name = "parent_comment_id")
 	private Comment parent;
+
+	@OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@Builder.Default
+	private List<Comment> children = new ArrayList<>();
 
 	public void updateContent(String newContent) {
 		if (newContent == null || newContent.trim().isEmpty()) {
