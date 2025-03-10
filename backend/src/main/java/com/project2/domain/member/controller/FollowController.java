@@ -3,19 +3,17 @@ package com.project2.domain.member.controller;
 import com.project2.domain.member.dto.FollowRequestDto;
 import com.project2.domain.member.dto.FollowResponseDto;
 import com.project2.domain.member.dto.FollowerResponseDto;
-import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.FollowService;
 import com.project2.domain.member.service.FollowerService;
 import com.project2.domain.member.service.FollowingService;
-import com.project2.domain.post.dto.PostResponseDTO;
+import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
+import com.project2.global.security.Rq;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +28,7 @@ public class FollowController {
     private final FollowerService followerService;
     private final FollowingService followingService;
     private final PostService postService;
+
 
     @PostMapping("/{memberid}/follows")
     public RsData<FollowResponseDto> toggleFollow(
@@ -114,9 +113,12 @@ public class FollowController {
     }
 
     @GetMapping("/{memberId}/following-posts")
-    public Page<PostResponseDTO> getFollowerPosts(
+    public Page<Post> getFollowingPosts(
+            @PathVariable Long memberId,
             Pageable pageable
     ) {
-        return postService.getFollowerPosts(pageable);
+        // memberId를 사용하여 PostService의 메서드를 호출
+
+        return postService.getFollowingPosts(pageable);
     }
 }
