@@ -16,6 +16,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Tag(name = "MemberController", description = "회원 관련 API")
 @RestController
 @RequiredArgsConstructor
@@ -89,6 +92,21 @@ public class MemberController {
                 "200",
                 "사용자 프로필 조회가 완료되었습니다.",
                 new MemberProfileRequestDTO(member, 0, totalFlowerCount, totalFlowingCount)
+        );
+    }
+
+    @Operation(summary = "전체 회원 조회")
+    @GetMapping
+    public RsData<List<MemberDTO>> getAllMembers() {
+        List<Member> members = memberService.findAllMembers(); // 모든 회원을 조회하는 메서드 호출
+        List<MemberDTO> memberDTOs = members.stream()
+                .map(MemberDTO::new) // Member 객체를 MemberDTO로 변환
+                .collect(Collectors.toList());
+
+        return new RsData<>(
+                "200",
+                "전체 회원 조회가 완료되었습니다.",
+                memberDTOs
         );
     }
 
