@@ -5,10 +5,7 @@ import com.project2.global.entity.BaseTime;
 
 import com.project2.global.exception.ServiceException;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -44,6 +41,7 @@ public class Comment extends BaseTime {
 	private Comment parent;
 
 	@OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@Builder.Default
 	private List<Comment> children = new ArrayList<>();
 
 	public void updateContent(String newContent) {

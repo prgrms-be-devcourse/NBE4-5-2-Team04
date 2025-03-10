@@ -1,4 +1,4 @@
-package com.project2.domain.post.dto;
+package com.project2.domain.post.dto.toggle;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

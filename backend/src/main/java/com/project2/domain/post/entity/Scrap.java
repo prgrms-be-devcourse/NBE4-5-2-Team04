@@ -9,15 +9,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Entity
 public class Scrap extends BaseTime {
 	@Id
@@ -31,5 +30,4 @@ public class Scrap extends BaseTime {
 	@ManyToOne
 	@JoinColumn(nullable = false)
 	private Member member;
-
 }
