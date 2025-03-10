@@ -15,7 +15,7 @@ export default function LogoutPage() {
         console.error("로그아웃 실패:", error);
       }
       removeAccessToken();
-      localStorage.clear();
+      sessionStorage.clear();
       router.replace("/member/login");
     }
 

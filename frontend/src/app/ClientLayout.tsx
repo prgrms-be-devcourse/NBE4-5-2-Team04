@@ -4,7 +4,11 @@ import { client } from "@/lib/backend/client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getAccessTokenFromCookie, getUserIdFromToken } from "@/app/utils/auth";
+import {
+  saveAccessTokenFromCookie,
+  getAccessToken,
+  getUserIdFromToken,
+} from "@/app/utils/auth";
 
 export default function ClientLayout({
   children,
@@ -20,7 +24,8 @@ export default function ClientLayout({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const storedToken = getAccessTokenFromCookie();
+    saveAccessTokenFromCookie();
+    const storedToken = getAccessToken();
 
     if (storedToken) {
       setIsLogin(true);
@@ -33,7 +38,7 @@ export default function ClientLayout({
       return;
     }
 
-    // 로그인이 되지 않은 상태이고, 토큰이 없는경우 localStorage 에 accessToken 을 저장
+    // 로그인이 되지 않은 상태이고, 토큰이 없는경우 sessionStorage 에 accessToken 을 저장
     const checkLoginStatus = async () => {
       try {
         const response = await client.GET("/api/members/me", {
@@ -41,6 +46,7 @@ export default function ClientLayout({
         });
 
         if (response.data?.data) {
+          saveAccessTokenFromCookie();
           setIsLogin(true);
         } else {
         }

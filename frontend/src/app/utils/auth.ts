@@ -14,7 +14,7 @@ function decodeJWT(token: string) {
 }
 
 // 쿠키에서 Access Token 가져오기
-export function getAccessTokenFromCookie(): string | null {
+export function getAccessTokenFromCookie() {
   return (
     document.cookie
       .split("; ")
@@ -23,26 +23,31 @@ export function getAccessTokenFromCookie(): string | null {
   );
 }
 
-// Access Token에서 id 추출하기 (쿠키 기반)
-export function getUserIdFromToken(): string | null {
-  const token = getAccessTokenFromCookie(); // 쿠키에서 가져오기
+// Access Token에서 id 추출하기
+export function getUserIdFromToken() {
+  const token = getAccessToken(); // getAccessToken()을 사용하여 안전하게 가져옴
   if (!token) return null;
 
   const payload = decodeJWT(token);
-  return payload?.id || null; // JWT payload에 있는 id 반환
+  return payload?.id || null; // id가 JWT payload에 있는 경우 반환
 }
 
-// Access Token을 쿠키에 저장하기
-export function saveAccessTokenToCookie(
-  token: string,
-  expiresIn: number = 3600
-) {
-  const expires = new Date(Date.now() + expiresIn * 1000).toUTCString();
-  document.cookie = `accessToken=${token}; path=/; expires=${expires}; Secure; HttpOnly`;
+// Access Token을 sessionStorage에 저장
+export function saveAccessTokenFromCookie() {
+  const accessToken = getAccessTokenFromCookie();
+  if (accessToken) {
+    sessionStorage.setItem("accessToken", accessToken);
+  }
 }
 
-// Access Token 삭제 (쿠키에서 제거)
+// accessToken 불러오기
+export function getAccessToken(): string | null {
+  return typeof window !== "undefined"
+    ? sessionStorage.getItem("accessToken")
+    : null;
+}
+
+// Access Token 삭제 (sessionStorage에서 제거)
 export function removeAccessToken() {
-  document.cookie =
-    "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+  sessionStorage.removeItem("accessToken");
 }
