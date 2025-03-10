@@ -12,19 +12,23 @@ import org.springframework.stereotype.Repository;
 public interface ScrapRepository extends JpaRepository<Scrap, Long> {
 
     @Modifying
-    @Query("""
+    @Query(
+        """
         DELETE FROM Scrap s
         WHERE s.post.id = :postId AND s.member.id = :memberId
-    """)
+        """)
     int toggleScrapIfExists(@Param("postId") Long postId, @Param("memberId") Long memberId);
 
-    @Query("""
-        SELECT new com.project2.domain.post.dto.toggle.ScrapResponseDTO(
-            CASE WHEN COUNT(s) > 0 THEN true ELSE false END,
-            (SELECT COUNT(s2) FROM Scrap s2 WHERE s2.post.id = :postId)
-        )
-        FROM Scrap s
-        WHERE s.post.id = :postId AND s.member.id = :memberId
+    @Query(
+    """
+    SELECT new com.project2.domain.post.dto.toggle.ScrapResponseDTO(
+        CASE WHEN COUNT(s) > 0 THEN true ELSE false END,
+        CAST(COUNT(s2) AS integer)
+    )
+    FROM Scrap s
+    LEFT JOIN Scrap s2 ON s2.post.id = s.post.id
+    WHERE s.post.id = :postId AND s.member.id = :memberId
     """)
     ScrapResponseDTO getScrapStatus(@Param("postId") Long postId, @Param("memberId") Long memberId);
+
 }

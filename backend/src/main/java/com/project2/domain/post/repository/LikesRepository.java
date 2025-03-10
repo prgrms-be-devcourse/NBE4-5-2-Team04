@@ -20,13 +20,16 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     int toggleLikeIfExists(@Param("postId") Long postId, @Param("memberId") Long memberId);
 
     @Query(
-        """
-        SELECT new com.project2.domain.post.dto.toggle.LikeResponseDTO(
-            CASE WHEN COUNT(l) > 0 THEN true ELSE false END,
-            (SELECT COUNT(l2) FROM Likes l2 WHERE l2.post.id = :postId)
-        )
-        FROM Likes l
-        WHERE l.post.id = :postId AND l.member.id = :memberId
-        """)
+            """
+            SELECT new com.project2.domain.post.dto.toggle.LikeResponseDTO(
+                CASE WHEN COUNT(l) > 0 THEN true ELSE false END,
+                CAST(COUNT(l2) AS integer)
+            )
+            FROM Likes l
+            LEFT JOIN Likes l2 ON l2.post.id = l.post.id
+            WHERE l.post.id = :postId AND l.member.id = :memberId
+            """
+    )
     LikeResponseDTO getLikeStatus(@Param("postId") Long postId, @Param("memberId") Long memberId);
+
 }
