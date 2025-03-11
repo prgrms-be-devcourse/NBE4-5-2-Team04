@@ -37,7 +37,8 @@ public class PostDetailResponseDTO {
 		this.isScrapped = post.getScraps().stream().anyMatch(scrap -> scrap.getMember().equals(actor));
 		this.createdDate = post.getCreatedDate();
 		this.modifiedDate = post.getModifiedDate();
-		this.authorDTO = new AuthorDTO(post.getMember().getId(), post.getMember().getNickname(), post.getMember().getProfileImageUrl());
-		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getCategory());
+		this.authorDTO = new AuthorDTO(post.getMember().getId(), post.getMember().getNickname(),
+			post.getMember().getProfileImageUrl());
+		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getKrCategory());
 	}
 }

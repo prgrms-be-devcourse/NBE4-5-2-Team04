@@ -1,5 +1,8 @@
 package com.project2.domain.place.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.Getter;
 
 @Getter
@@ -13,6 +16,18 @@ public enum Category {
 
 	Category(String krCategory) {
 		this.krCategory = krCategory;
+	}
+
+	private static final Map<String, Category> CATEGORY_MAP = new HashMap<>();
+
+	static {
+		for (Category category : Category.values()) {
+			CATEGORY_MAP.put(category.krCategory, category);
+		}
+	}
+
+	public static Category fromKrCategory(String krCategory) {
+		return CATEGORY_MAP.getOrDefault(krCategory, ETC);
 	}
 
 }

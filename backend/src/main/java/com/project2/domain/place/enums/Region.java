@@ -19,4 +19,14 @@ public enum Region {
 	}
 
 	private static final Map<String, Region> REGION_MAP = new HashMap<>();
+
+	static {
+		for (Region region : Region.values()) {
+			REGION_MAP.put(region.krRegion, region);
+		}
+	}
+
+	public static Region fromKrRegion(String krRegion) {
+		return REGION_MAP.getOrDefault(krRegion, ETC);
+	}
 }
