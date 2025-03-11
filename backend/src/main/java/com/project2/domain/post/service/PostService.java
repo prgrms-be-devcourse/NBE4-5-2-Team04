@@ -45,7 +45,7 @@ public class PostService {
 		Post post = Post.builder()
 			.title(requestDTO.getTitle())
 			.content(requestDTO.getContent())
-			.place(null)
+			.place(place)
 			.member(actor)
 			.build();
 		Post createdPost = postRepository.save(post);
