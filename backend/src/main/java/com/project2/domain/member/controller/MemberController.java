@@ -3,14 +3,20 @@ package com.project2.domain.member.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.project2.domain.member.dto.MemberDTO;
 import com.project2.domain.member.dto.MemberProfileRequestDTO;
+import com.project2.domain.member.dto.UpdateNicknameDTO;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.AuthService;
 import com.project2.domain.member.service.FollowerService;
@@ -20,6 +26,7 @@ import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.Empty;
 import com.project2.global.dto.RsData;
 import com.project2.global.security.Rq;
+import com.project2.global.util.ImageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,6 +43,7 @@ public class MemberController {
 	private final PostService postService;
 	private final FollowerService followerService;
 	private final FollowingService followingService;
+	private final ImageService imageService;
 	private final Rq rq;
 
 	@Operation(summary = "내 정보 조회")
@@ -103,4 +111,26 @@ public class MemberController {
 		);
 	}
 
+	@Operation(summary = "사용자 정보 프로필 이미지를 수정합니다.")
+	@PutMapping(value = "/profile-image/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public RsData<MemberProfileRequestDTO> updateProfileImage(
+		@PathVariable long memberId,
+		@RequestParam("profileImage") MultipartFile profileImage) {  // ✅ @RequestParam을 사용하여 파일을 받음
+
+		// 파일 저장
+		String savedImagePath = imageService.storeProfileImage(memberId, profileImage);
+
+		// DB에 저장
+		Member updatedMember = memberService.updateProfileImageUrl(memberId, savedImagePath);
+
+		return getMemberProfile(updatedMember.getId());
+	}
+
+	@Operation(summary = "사용자 닉네임을 수정합니다.")
+	@PutMapping("/nickname/{memberId}")
+	public RsData<MemberProfileRequestDTO> updateNickname(@PathVariable long memberId,
+		@RequestBody UpdateNicknameDTO updateNicknameDTO) {
+		Member updatedMember = memberService.updateNickname(memberId, updateNicknameDTO.getNickname());
+		return getMemberProfile(updatedMember.getId());
+	}
 }
