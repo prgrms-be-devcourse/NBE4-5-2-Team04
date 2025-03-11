@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
+import com.project2.global.security.SecurityUser;
 
 import lombok.RequiredArgsConstructor;
 
@@ -117,12 +119,13 @@ public class FollowController {
 
 	@GetMapping("/{memberId}/following-posts")
 	public Page<Post> getFollowingPosts(
+		@AuthenticationPrincipal SecurityUser actor,
 		@PathVariable Long memberId,
 		Pageable pageable
 	) {
 		// memberId를 사용하여 PostService의 메서드를 호출
 
-		return postService.getFollowingPosts(pageable);
+		return postService.getFollowingPosts(actor, pageable);
 
 	}
 }
