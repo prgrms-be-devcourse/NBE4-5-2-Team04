@@ -27,7 +27,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 public class Place extends BaseTime {
 	@Id
-	@Column(name = "place_id")
 	private Long id;
 
 	@Column(nullable = false)
