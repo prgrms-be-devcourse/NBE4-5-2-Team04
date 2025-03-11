@@ -1,6 +1,7 @@
 import { client } from "@/lib/backend/client";
 import ClientPage from "./ClientPage";
 import { cookies } from "next/headers";
+import { components } from "@/lib/backend/schema";
 
 export default async function Page({
   params,
@@ -9,9 +10,15 @@ export default async function Page({
     memberId: number;
   };
 }) {
+  const pageable: components["schemas"]["Pageable"] = {
+    page: 1,
+    size: 10,
+    sort: ["createdAt,desc"],
+  };
+
   const { memberId } = await params;
 
-  const response = await client.GET("/api/members/{memberId}", {
+  const responseMember = await client.GET("/api/members/{memberId}", {
     params: {
       path: { memberId },
     },
@@ -20,13 +27,38 @@ export default async function Page({
     },
   });
 
-  if (response.error) {
-    return <div>{response.error.msg}</div>;
+  // const responsePost = await client.GET("/api/posts/member/{memberId}", {
+  //   params: {
+  //     path: { memberId },
+  //   },
+  //   headers: {
+  //     cookie: (await cookies()).toString(),
+  //   },
+  // });
+
+  if (responseMember.error) {
+    return <div>{responseMember.error.msg}</div>;
   }
 
-  const rsData = response.data;
+  // if (responsePost.error) {
+  //   return <div>{responsePost.error.msg}</div>;
+  // }
 
-  const profileData = rsData.data;
+  const rsDataMember = responseMember.data;
+  // const rsDataPost = responsePost.data;
 
-  return <ClientPage profileData={profileData} memberId={memberId} />;
+  const profileData = rsDataMember.data;
+  // const postData = rsDataPost?.data;
+
+  return (
+    <ClientPage
+      profileData={{
+        ...profileData,
+      }}
+      // postData={{
+      //   ...postData,
+      // }}
+      memberId={memberId}
+    />
+  );
 }

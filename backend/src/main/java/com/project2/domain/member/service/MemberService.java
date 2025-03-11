@@ -58,4 +58,18 @@ public class MemberService {
 	public List<Member> findAllMembers() {
 		return memberRepository.findAll();
 	}
+
+	@Transactional
+	public Member updateNickname(long memberId, String nickname) {
+		Member member = this.findByIdOrThrow(memberId);
+		member.setNickname(nickname);
+		return member;
+	}
+
+	@Transactional
+	public Member updateProfileImageUrl(long memberId, String profileImageUrl) {
+		Member member = this.findByIdOrThrow(memberId);
+		member.setProfileImageUrl(profileImageUrl);
+		return member;
+	}
 }
