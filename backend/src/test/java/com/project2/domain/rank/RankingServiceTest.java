@@ -85,8 +85,8 @@ class RankingServiceTest {
 			.findPopularPlaces(any(LocalDateTime.class), isNull(), isNull(), eq("LIKES"), eq(pageable));
 
 		// When
-		Page<PopularPlaceDTO> result = rankingService.getPopularPlaces(RankingPeriod.ONE_MONTH, null, RankingSort.LIKES,
-			pageable);
+		Page<PopularPlaceDTO> result = rankingService.getPopularPlaces(RankingPeriod.ONE_MONTH, null, null,
+			RankingSort.LIKES, pageable);
 
 		// Then
 		assertThat(result).isNotNull();
@@ -106,17 +106,17 @@ class RankingServiceTest {
 		Page<PopularPlaceDTO> mockPage = new PageImpl<>(mockPlaces, pageable, mockPlaces.size());
 
 		doReturn(mockPage).when(rankingRepository)
-			.findPopularPlacesByRegion(any(LocalDateTime.class), eq("서울"), isNull(), eq("LIKES"), eq(pageable));
+			.findPopularPlaces(any(LocalDateTime.class), eq("서울"), isNull(), eq("LIKES"), eq(pageable));
 
 		// When
-		Page<PopularPlaceDTO> result = rankingService.getPopularPlacesByRegion(RankingPeriod.ONE_MONTH, "서울", null,
+		Page<PopularPlaceDTO> result = rankingService.getPopularPlaces(RankingPeriod.ONE_MONTH, "서울", null,
 			RankingSort.LIKES, pageable);
 
 		// Then
 		assertThat(result).isNotNull();
 		assertThat(result.getContent().size()).isEqualTo(1);
 		assertThat(result.getContent().getFirst().getPlaceName()).isEqualTo("남산공원");
-		verify(rankingRepository).findPopularPlacesByRegion(any(LocalDateTime.class), eq("서울"), isNull(), eq("LIKES"),
+		verify(rankingRepository).findPopularPlaces(any(LocalDateTime.class), eq("서울"), isNull(), eq("LIKES"),
 			eq(pageable));
 	}
 

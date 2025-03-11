@@ -17,7 +17,7 @@ import com.project2.domain.rank.dto.RegionRankingDTO;
 @Repository
 public interface RankingRepository extends JpaRepository<Post, Long> {
 
-	// 전국 인기 장소 조회 (좋아요 합 or 스크랩 합 기준)
+	// 전국 및 특정 지역 인기 장소 조회 (좋아요 합 or 스크랩 합 기준)
 	@Query("""
 		SELECT new com.project2.domain.rank.dto.PopularPlaceDTO(
 		    pl.id, pl.name, pl.region,
@@ -38,34 +38,6 @@ public interface RankingRepository extends JpaRepository<Post, Long> {
 		       ELSE COUNT(DISTINCT l.id) END DESC
 		""")
 	Page<PopularPlaceDTO> findPopularPlaces(
-		@Param("startDate") LocalDateTime startDate,
-		@Param("region") String region,
-		@Param("placeName") String placeName,
-		@Param("sort") String sort,
-		Pageable pageable
-	);
-
-	// 특정 지역 내 인기 장소 조회
-	@Query("""
-		SELECT new com.project2.domain.rank.dto.PopularPlaceDTO(
-		    pl.id, pl.name, pl.region,
-		    COUNT(DISTINCT l.id),
-		    COUNT(DISTINCT s.id),
-		    COUNT(p.id)
-		)
-		FROM Post p
-		JOIN p.place pl
-		LEFT JOIN p.likes l ON l.post.id = p.id
-		LEFT JOIN p.scraps s ON s.post.id = p.id
-		WHERE p.createdDate >= :startDate
-		  AND pl.region = :region
-		  AND (:placeName IS NULL OR pl.name LIKE %:placeName%)
-		GROUP BY pl.id, pl.name, pl.region
-		ORDER BY
-		  CASE WHEN :sort = 'SCRAPS' THEN COUNT(DISTINCT s.id)
-		       ELSE COUNT(DISTINCT l.id) END DESC
-		""")
-	Page<PopularPlaceDTO> findPopularPlacesByRegion(
 		@Param("startDate") LocalDateTime startDate,
 		@Param("region") String region,
 		@Param("placeName") String placeName,

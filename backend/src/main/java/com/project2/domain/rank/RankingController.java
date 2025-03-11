@@ -25,29 +25,17 @@ public class RankingController {
 
 	private final RankingService rankingService;
 
-	// 전국 인기 장소 목록 조회 (좋아요 순 or 스크랩 순)
+	// 전국 및 특정 지역 인기 장소 목록 조회
 	@GetMapping("/places")
 	public RsData<Page<PopularPlaceDTO>> getPopularPlaces(
 		@RequestParam(defaultValue = "ONE_MONTH") RankingPeriod period,
+		@RequestParam(required = false) String region,
 		@RequestParam(required = false) String placeName,
 		@RequestParam(defaultValue = "LIKES") RankingSort sort,
 		@PageableDefault Pageable pageable) {
 
-		return new RsData<>("200", "전국 인기 장소 조회 성공",
-			rankingService.getPopularPlaces(period, placeName, sort, pageable));
-	}
-
-	// 특정 지역 내 인기 장소 조회 (기본값: 서울)
-	@GetMapping("/places/region")
-	public RsData<Page<PopularPlaceDTO>> getPopularPlacesByRegion(
-		@RequestParam(defaultValue = "ONE_MONTH") RankingPeriod period,
-		@RequestParam(defaultValue = "서울") String region,
-		@RequestParam(required = false) String placeName,
-		@RequestParam(defaultValue = "LIKES") RankingSort sort,
-		@PageableDefault Pageable pageable) {
-
-		return new RsData<>("200", region + " 인기 장소 조회 성공",
-			rankingService.getPopularPlacesByRegion(period, region, placeName, sort, pageable));
+		return new RsData<>("200", "인기 장소 조회 성공",
+			rankingService.getPopularPlaces(period, region, placeName, sort, pageable));
 	}
 
 	// 인기 지역 랭킹 조회 (지역별 좋아요 총합)

@@ -21,22 +21,13 @@ public class RankingService {
 
 	private final RankingRepository rankingRepository;
 
-	// 전국 인기 장소 조회
+	// 전국 및 특정 지역 인기 장소 조회
 	public Page<PopularPlaceDTO> getPopularPlaces(
-		RankingPeriod period, String placeName, RankingSort sort, Pageable pageable) {
-
-		LocalDateTime startDate = period.getStartDate();
-		String sortParam = (sort != null) ? sort.name() : RankingSort.LIKES.name();
-		return rankingRepository.findPopularPlaces(startDate, null, placeName, sortParam, pageable);
-	}
-
-	// 특정 지역 내 인기 장소 조회
-	public Page<PopularPlaceDTO> getPopularPlacesByRegion(
 		RankingPeriod period, String region, String placeName, RankingSort sort, Pageable pageable) {
 
 		LocalDateTime startDate = period.getStartDate();
 		String sortParam = (sort != null) ? sort.name() : RankingSort.LIKES.name();
-		return rankingRepository.findPopularPlacesByRegion(startDate, region, placeName, sortParam, pageable);
+		return rankingRepository.findPopularPlaces(startDate, region, placeName, sortParam, pageable);
 	}
 
 	// 인기 지역 랭킹 조회
