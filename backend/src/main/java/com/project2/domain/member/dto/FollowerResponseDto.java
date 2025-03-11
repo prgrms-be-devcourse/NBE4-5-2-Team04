@@ -9,6 +9,7 @@ import com.project2.domain.member.entity.Member;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class FollowerResponseDto {
     private Long userId;
     private String email;
