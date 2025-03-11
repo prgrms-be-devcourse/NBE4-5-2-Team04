@@ -97,7 +97,7 @@ class PostServiceTest {
 		given(postRepository.findAll(any(Specification.class), eq(pageable))).willReturn(page);
 
 		// When
-		Page<Post> result = postService.getPosts(null, null, pageable);
+		Page<Post> result = postService.getPosts(null, null, null, pageable);
 
 		// Then
 		assertThat(result.getContent()).hasSize(1);

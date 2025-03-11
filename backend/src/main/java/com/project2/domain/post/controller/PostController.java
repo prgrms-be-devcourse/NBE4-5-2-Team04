@@ -46,9 +46,10 @@ public class PostController {
 	public RsData<Page<PostResponseDTO>> getPosts(
 		@RequestParam(required = false) String placeName,
 		@RequestParam(required = false) String placeCategory,
+		@RequestParam(required = false) String placeRegion,
 		Pageable pageable
 	) {
-		Page<Post> posts = postService.getPosts(placeName, placeCategory, pageable);
+		Page<Post> posts = postService.getPosts(placeName, placeCategory, placeRegion, pageable);
 		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공", posts.map(PostResponseDTO::new));
 	}
 
