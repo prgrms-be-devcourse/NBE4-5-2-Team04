@@ -120,6 +120,7 @@ export default function ClientPostDetail({post}: { post: components["schemas"]["
             </div>
 
             {/* 댓글 목록 (예제 데이터) */}
+            {/*TODO 댓글 조회하는거 넣기*/}
             <div className="mt-4 space-y-4">
                 <div className="flex items-center justify-between">
                     <p className="font-semibold">User2</p>
