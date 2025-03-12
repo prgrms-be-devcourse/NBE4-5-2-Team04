@@ -35,7 +35,8 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(
 				auth -> auth.requestMatchers("/h2-console/**", "/auth/**", "/oauth2/**", "/v3/api-docs",
-						"/api/members/login", "/api/members/logout", "/login", "/error")
+						"/api/members/login", "/api/members/logout", "/login", "/error",
+						"/uploads/**", "/_next/image")
 					.permitAll()
 					.anyRequest()
 					.authenticated() // 모든 요청에 대해 인증 필요하도록 변경
@@ -86,6 +87,7 @@ public class SecurityConfig {
 		// CORS 설정을 소스에 등록
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/api/**", configuration);
+		source.registerCorsConfiguration("/uploads/**", configuration);
 
 		return source;
 	}
