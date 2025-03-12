@@ -11,15 +11,15 @@ export default async function Page({
     const { id: idString } = await params;
     const memberId = parseInt(idString);
 
-    try {
-        const profileResponse = await client.GET("/api/members/{memberId}", {
-            params: {
-                path: { memberId },
-            },
-            headers: {
-                cookie: (await cookies()).toString(),
-            },
-        });
+    // try {
+        // const profileResponse = await client.GET("/api/members/{memberId}", {
+        //     params: {
+        //         path: { memberId },
+        //     },
+        //     headers: {
+        //         cookie: (await cookies()).toString(),
+        //     },
+        // });
 
         const followingResponse = await client.GET("/api/follows/{memberId}/followings", {
             params: {
@@ -48,18 +48,12 @@ export default async function Page({
 
 
 
-        if (
-            profileResponse.error ||
-            followingResponse.error ||
-            followerResponse.error ||
-            allMembersResponse.error
-        ) {
-            return <div>데이터 로딩 실패</div>;
-        }
+
+
 
         const followingList = followingResponse.data.data;
         const followerList = followerResponse.data.data;
-        const profileData = profileResponse.data.data;
+        // const profileData = profileResponse.data.data;
         const allMembers = allMembersResponse.data.data;
         const totalPages = 3;
 
@@ -70,11 +64,12 @@ export default async function Page({
                 followerList={followerList}
                 allMembers={allMembers}
                 totalPages={totalPages}
-                profileData={profileData}
+                // profileData={profileData}
+
             />
         );
-    } catch (error) {
-        console.error("데이터 로딩 중 오류 발생:", error);
-        return <div>데이터 로딩 중 오류 발생</div>;
-    }
+    // } catch (error) {
+    //     console.error("데이터 로딩 중 오류 발생:", error);
+    //     return <div>데이터 로딩 중 오류 발생</div>;
+    // }
 }

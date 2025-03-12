@@ -12,9 +12,9 @@ public class FollowRequestDto {
     private Long followerId;
     private Long followingId;
 
-    public FollowRequestDto(Follows follows) {
-
-        this.followerId = follows.getFollower().getId();
-        this.followingId = follows.getFollowing().getId();
-    }
+//    public FollowRequestDto(Follows follows) {
+//
+//        this.followerId = follows.getFollower().getId();
+//        this.followingId = follows.getFollowing().getId();
+//    }
 }

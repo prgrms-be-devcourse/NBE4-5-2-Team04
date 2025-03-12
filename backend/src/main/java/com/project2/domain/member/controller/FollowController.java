@@ -38,9 +38,11 @@ public class FollowController {
 			@RequestBody FollowRequestDto requestDto
 	) {
 		Member actor = rq.getActor();
-		if (!actor.getId().equals(memberid)) {
-			return new RsData<>("403", "권한이 없습니다.");
+
+		if (actor.getId().equals(memberid)) {
+			return new RsData<>("400", "자기 자신을 팔로우할 수 없습니다.");
 		}
+
 		requestDto.setFollowerId(memberid);
 		return followService.toggleFollow(requestDto);
 	}

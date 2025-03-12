@@ -14,6 +14,7 @@
     "@tanstack/react-query": "^5.67.1",
     "@tanstack/react-query-devtools": "^5.67.1",
     "class-variance-authority": "^0.7.1",
+    "classnames": "^2.5.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.5.2",
     "intersection-observer": "^0.12.2",
