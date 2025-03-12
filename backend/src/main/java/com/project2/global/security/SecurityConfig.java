@@ -86,6 +86,7 @@ public class SecurityConfig {
 		// CORS 설정을 소스에 등록
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/api/**", configuration);
+		source.registerCorsConfiguration("/uploads/**", configuration);
 
 		return source;
 	}

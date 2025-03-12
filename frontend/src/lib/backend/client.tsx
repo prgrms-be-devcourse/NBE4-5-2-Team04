@@ -11,7 +11,4 @@ export const client = createClient<paths>({
 
 export const clientFormData = createClient<paths>({
   baseUrl: "http://localhost:8080",
-  headers: {
-    "Content-Type": "multipart/form-data",
-  },
 });

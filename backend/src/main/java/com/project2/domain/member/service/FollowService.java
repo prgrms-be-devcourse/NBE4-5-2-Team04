@@ -27,6 +27,9 @@ public class FollowService {
     @Transactional
     public RsData<FollowResponseDto> toggleFollow(FollowRequestDto requestDto) {
         Member actor = rq.getActor(); // 현재 사용자
+//        System.out.println("aaaaaaaaactor = " + actor.getId()+" "+actor.getEmail());
+//        System.out.println("requestDto.getFollowingId() = " + requestDto.getFollowingId());
+
         Member following = memberRepository.findById(requestDto.getFollowingId())
                 .orElseThrow(() -> new ServiceException(
                         String.valueOf(HttpStatus.NOT_FOUND.value()),
@@ -40,6 +43,7 @@ public class FollowService {
 
         // followerId는 rq에서 가져오는 것으로 변경
         Member follower = actor; // 현재 사용자가 follower 역할을 함
+//        System.out.println("follower " + follower);
 
         Optional<Follows> existingFollow = followRepository.findByFollowerAndFollowing(follower, following);
 
@@ -53,7 +57,10 @@ public class FollowService {
             Follows savedFollow = followRepository.save(newFollow);
 
             FollowResponseDto responseDto = new FollowResponseDto(savedFollow);
+
             responseDto.setId(savedFollow.getId());
+//            System.out.println("savedFollow.getFollower().getId() " + savedFollow.getFollower().getId());
+
             responseDto.setFollowerId(savedFollow.getFollower().getId());
             responseDto.setFollowingId(savedFollow.getFollowing().getId());
 

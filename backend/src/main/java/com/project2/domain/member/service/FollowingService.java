@@ -26,6 +26,8 @@ public class FollowingService {
 	public List<FollowerResponseDto> getFollowings(Long memberId) {
 
 		Member actor = rq.getActor();
+//		System.out.println("aaaaaaaaactor = " + actor.getId()+" "+actor.getEmail());
+
 		if (!actor.getId().equals(memberId)) {
 			throw new ServiceException("403", "자신의 팔로잉 목록만 볼 수 있습니다.");
 		}

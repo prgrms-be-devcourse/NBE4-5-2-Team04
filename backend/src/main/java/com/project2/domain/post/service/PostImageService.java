@@ -29,6 +29,7 @@ public class PostImageService {
 	private final PostImageRepository postImageRepository;
 	@Value("${custom.file.upload-dir}")
 	private String uploadDir;
+	private final String uploadPostImageDir = uploadDir + "/post-images";
 
 	public PostImageService(PostImageRepository postImageRepository) {
 		this.postImageRepository = postImageRepository;
@@ -49,7 +50,7 @@ public class PostImageService {
 		IOException {
 		List<String> imageUrls = new ArrayList<>();
 		deletedFileName.sort(Comparator.naturalOrder());
-		File postDir = new File(uploadDir + post.getId());
+		File postDir = new File(uploadPostImageDir + post.getId());
 		if (!postDir.exists()) {
 			postDir.mkdirs();
 		}
@@ -75,7 +76,7 @@ public class PostImageService {
 				fileName = (maxFileName + i) + extension;
 			}
 
-			Path filePath = Paths.get(uploadDir + post.getId(), fileName);
+			Path filePath = Paths.get(uploadPostImageDir + post.getId(), fileName);
 			Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 			String imageUrl = postDir + "/" + fileName;
 			imageUrls.add(postDir + "/" + fileName);
@@ -105,7 +106,7 @@ public class PostImageService {
 	public List<String> updateImages(Post post, List<MultipartFile> newImages) throws
 		IOException,
 		NoSuchAlgorithmException {
-		List<PostImage> existingImages = post.getImages();
+		Set<PostImage> existingImages = post.getImages();
 		Map<String, PostImage> existingImageMap = new HashMap<>();
 
 		// 기존 이미지 해시값 계산

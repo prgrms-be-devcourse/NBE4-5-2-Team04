@@ -45,6 +45,7 @@ export default function ClientPage({
                         memberid: memberId,
                     },
                 },
+                credentials: 'include'
             });
 
             const followingResponse = await client.GET(
@@ -55,6 +56,8 @@ export default function ClientPage({
                             memberId: memberId,
                         },
                     },
+
+                    credentials: 'include'
                 }
             );
 
@@ -66,11 +69,14 @@ export default function ClientPage({
                             memberId: memberId,
                         },
                     },
+
+                    credentials: 'include'
                 }
             );
-
-            setFollowingList(followingResponse.data.data);
-            setFollowerList(followerResponse.data.data);
+            setFollowingList(followingResponse?.data?.data ?? []);
+            setFollowerList(followerResponse?.data?.data ?? []);
+            // setFollowingList(followingResponse.data.data);
+            // setFollowerList(followerResponse.data.data);
         } catch (error) {
             console.error("팔로우/언팔로우 실패:", error);
         }

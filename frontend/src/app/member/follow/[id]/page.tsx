@@ -45,17 +45,14 @@ export default async function Page({
                 cookie: (await cookies()).toString(),
             },
         });
-
-
-
-
-
-
-        const followingList = followingResponse.data.data;
-        const followerList = followerResponse.data.data;
-        // const profileData = profileResponse.data.data;
-        const allMembers = allMembersResponse.data.data;
-        const totalPages = 3;
+    const followingList = followingResponse?.data?.data ?? [];
+    const followerList = followerResponse?.data?.data ?? [];
+    const allMembers = allMembersResponse?.data?.data ?? [];
+    // const followingList = followingResponse.data.data;
+    // const followerList = followerResponse.data.data;
+    // const allMembers = allMembersResponse.data.data;
+    const totalPages = 3;
+    // const profileData = profileResponse.data.data;
 
         return (
             <ClientPage

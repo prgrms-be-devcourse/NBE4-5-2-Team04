@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a606af7e-7107-4001-b0cf-ecadb5d2eb7e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/rank/RankingController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/rank/RankingService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/rank/dto/PopularPlaceDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/rank/dto/RegionRankingDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/rank/enums/RankingPeriod.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/rank/enums/RankingSort.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/rank/repository/RankingRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/global/app/WebConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/rank/RankingServiceTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/posts/ClientSearchablePostList.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/posts/[postId]/ClientPostDetail.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/posts/[postId]/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/posts/member/[memberId]/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/posts/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/posts/scrapped/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/member/controller/FollowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/member/controller/FollowController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/member/controller/MemberController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/member/controller/MemberController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/member/service/FollowService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/member/service/FollowService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/member/service/FollowingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/member/service/FollowingService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/place/entity/Place.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/place/entity/Place.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/place/enums/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/place/enums/Category.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/place/enums/Region.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/place/enums/Region.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/controller/PostController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/controller/PostController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/dto/PostDetailResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/dto/PostDetailResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/dto/PostResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/dto/PostResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/entity/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/entity/Post.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/repository/PostRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/repository/PostRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/service/PostImageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/service/PostImageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/service/PostService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/domain/post/service/PostService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/project2/global/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/project2/global/security/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/member/controller/MemberControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/member/controller/MemberControllerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/post/service/CommentServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/post/service/CommentServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/post/service/PostServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/post/service/PostServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/post/service/PostToggleServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/test/java/com/project2/domain/post/service/PostToggleServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components.json" beforeDir="false" afterPath="$PROJECT_DIR$/components.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/ClientLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/ClientLayout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/member/follow/[id]/ClientPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/member/follow/[id]/ClientPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/member/follow/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/member/follow/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/posts/following/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/posts/following/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/posts/liked/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/posts/liked/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/posts/form/ClientPostForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/posts/form/ClientPostForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/posts/results/ClientPostList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/posts/results/ClientPostList.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/backend/client.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/backend/client.tsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2uAgtoezCduTClXaftedq7MRm4s" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/25-follower-following-ui&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/junho/IdeaProjects/NBE4-5-2-Team04&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.3.1.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration name="dev" type="js.build_tools.npm" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.22562.218" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-IU-243.22562.218" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a606af7e-7107-4001-b0cf-ecadb5d2eb7e" name="Changes" comment="" />
+      <created>1741697014720</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1741697014720</updated>
+      <workItem from="1741697019042" duration="35159000" />
+      <workItem from="1741763916857" duration="627000" />
+      <workItem from="1741764943322" duration="7771000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/app/member/[memberId]/ClientPage.tsx</url>
+          <line>108</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

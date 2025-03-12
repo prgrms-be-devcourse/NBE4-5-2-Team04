@@ -23,6 +23,7 @@ import com.project2.domain.member.service.AuthService;
 import com.project2.domain.member.service.FollowerService;
 import com.project2.domain.member.service.FollowingService;
 import com.project2.domain.member.service.MemberService;
+import com.project2.domain.post.service.PostService;
 import com.project2.global.security.Rq;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +37,8 @@ class MemberControllerTest {
 	private FollowerService followerService;
 	@Mock
 	private FollowingService followingService;
+	@Mock
+	private PostService postService;
 
 	@Mock
 	private Rq rq;

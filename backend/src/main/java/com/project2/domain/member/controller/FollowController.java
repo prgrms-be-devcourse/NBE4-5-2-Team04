@@ -1,9 +1,21 @@
 package com.project2.domain.member.controller;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.project2.domain.member.dto.FollowRequestDto;
 import com.project2.domain.member.dto.FollowResponseDto;
 import com.project2.domain.member.dto.FollowerResponseDto;
-import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.FollowService;
 import com.project2.domain.member.service.FollowerService;
 import com.project2.domain.member.service.FollowingService;
@@ -11,14 +23,9 @@ import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.RsData;
 import com.project2.global.exception.ServiceException;
-import com.project2.global.security.Rq;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import com.project2.global.security.SecurityUser;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/follows")
@@ -29,20 +36,12 @@ public class FollowController {
 	private final FollowerService followerService;
 	private final FollowingService followingService;
 	private final PostService postService;
-	private final Rq rq;
-
 
 	@PostMapping("/{memberid}/follows")
 	public RsData<FollowResponseDto> toggleFollow(
-			@PathVariable Long memberid,
-			@RequestBody FollowRequestDto requestDto
+		@PathVariable Long memberid,
+		@RequestBody FollowRequestDto requestDto
 	) {
-		Member actor = rq.getActor();
-
-		if (actor.getId().equals(memberid)) {
-			return new RsData<>("400", "자기 자신을 팔로우할 수 없습니다.");
-		}
-
 		requestDto.setFollowerId(memberid);
 		return followService.toggleFollow(requestDto);
 	}
@@ -54,31 +53,31 @@ public class FollowController {
 
 			if (followers.isEmpty()) {
 				return ResponseEntity.ok(
-						new RsData<>(
-								"204",
-								"팔로워가 없습니다.",
-								null
-						)
+					new RsData<>(
+						"204",
+						"팔로워가 없습니다.",
+						null
+					)
 				);
 			}
 
 			return ResponseEntity.ok(
-					new RsData<>(
-							"200",
-							"팔로워 목록이 성공적으로 조회되었습니다.",
-							followers
-					)
+				new RsData<>(
+					"200",
+					"팔로워 목록이 성공적으로 조회되었습니다.",
+					followers
+				)
 			);
 		} catch (ServiceException e) {
 			return ResponseEntity
-					.status(e.getStatusCode())
-					.body(
-							new RsData<>(
-									e.getCode(),
-									e.getMsg(),
-									null
-							)
-					);
+				.status(e.getStatusCode())
+				.body(
+					new RsData<>(
+						e.getCode(),
+						e.getMsg(),
+						null
+					)
+				);
 		}
 	}
 
@@ -90,42 +89,43 @@ public class FollowController {
 			// Check if the list of followings is empty
 			if (followings.isEmpty()) {
 				return ResponseEntity.ok(
-						new RsData<>(
-								"204",
-								"팔로잉이 없습니다.",
-								null
-						)
+					new RsData<>(
+						"204",
+						"팔로잉이 없습니다.",
+						null
+					)
 				);
 			}
 
 			return ResponseEntity.ok(
-					new RsData<>(
-							"200",
-							"팔로잉 목록이 성공적으로 조회되었습니다.",
-							followings
-					)
+				new RsData<>(
+					"200",
+					"팔로잉 목록이 성공적으로 조회되었습니다.",
+					followings
+				)
 			);
 		} catch (ServiceException e) {
 			return ResponseEntity
-					.status(e.getStatusCode())
-					.body(
-							new RsData<>(
-									e.getCode(),
-									e.getMsg(),
-									null
-							)
-					);
+				.status(e.getStatusCode())
+				.body(
+					new RsData<>(
+						e.getCode(),
+						e.getMsg(),
+						null
+					)
+				);
 		}
 	}
 
 	@GetMapping("/{memberId}/following-posts")
 	public Page<Post> getFollowingPosts(
-			@PathVariable Long memberId,
-			Pageable pageable
+		@AuthenticationPrincipal SecurityUser actor,
+		@PathVariable Long memberId,
+		Pageable pageable
 	) {
 		// memberId를 사용하여 PostService의 메서드를 호출
 
-		return postService.getFollowingPosts(pageable);
+		return postService.getFollowingPosts(actor, pageable);
 
 	}
 }
