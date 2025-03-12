@@ -1,5 +1,6 @@
 package com.project2.domain.place.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.project2.domain.place.enums.Category;
@@ -7,6 +8,7 @@ import com.project2.domain.place.enums.Region;
 import com.project2.domain.post.entity.Post;
 import com.project2.global.entity.BaseTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,6 +16,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,24 +33,25 @@ public class Place extends BaseTime {
 	private Long id;
 
 	@Column(nullable = false)
-	private String name;        // 장소명
+	private String name;
 
 	@Column(nullable = false)
-	private Double latitude;    // 위도
+	private Double latitude;
 
 	@Column(nullable = false)
-	private Double longitude;    // 경도
+	private Double longitude;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private Region region;        // 시/도
+	private Region region;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private Category category;    // 카테고리
+	private Category category;
 
-	@OneToMany(mappedBy = "place")
-	private List<Post> posts;
+	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Post> posts = new ArrayList<>();
 
 	public String getKrCategory() {
 		return category.getKrCategory();
