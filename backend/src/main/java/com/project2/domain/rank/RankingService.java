@@ -13,6 +13,7 @@ import com.project2.domain.rank.dto.RegionRankingDTO;
 import com.project2.domain.rank.enums.RankingPeriod;
 import com.project2.domain.rank.enums.RankingSort;
 import com.project2.domain.rank.repository.RankingRepository;
+import com.project2.global.security.SecurityUser;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,18 +38,19 @@ public class RankingService {
 	}
 
 	// 특정 지역의 게시글 조회
-	public Page<PostResponseDTO> getPostsByRegion(Region region, RankingPeriod period, Pageable pageable) {
+	public Page<PostResponseDTO> getPostsByRegion(Region region, RankingPeriod period, Pageable pageable,
+		SecurityUser actor) {
 		LocalDateTime startDate = period.getStartDate();
 		return rankingRepository.findPostsByRegion(region, startDate, pageable)
-			.map(PostResponseDTO::new);
+			.map(post -> new PostResponseDTO(post, actor));
 	}
 
 	// 특정 장소의 게시글 조회 (좋아요, 스크랩, 최신순)
 	public Page<PostResponseDTO> getPostsByPlace(Long placeId, RankingPeriod period, RankingSort sort,
-		Pageable pageable) {
+		Pageable pageable, SecurityUser actor) {
 		LocalDateTime startDate = period.getStartDate();
 		String sortParam = (sort != null) ? sort.name() : RankingSort.LIKES.name();
 		return rankingRepository.findPostsByPlace(placeId, startDate, sortParam, pageable)
-			.map(PostResponseDTO::new);
+			.map(post -> new PostResponseDTO(post, actor));
 	}
 }
