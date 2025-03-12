@@ -52,7 +52,7 @@ public class Post extends BaseTime {
 	private Set<Comment> comments;
 
 	@ManyToOne
-	@JoinColumn(name = "place_id")
+	@JoinColumn(name = "place_id", referencedColumnName = "id")
 	private Place place;
 
 	public void update(String title, String content) {
