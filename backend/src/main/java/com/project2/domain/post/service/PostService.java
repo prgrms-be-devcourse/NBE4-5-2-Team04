@@ -23,6 +23,7 @@ import com.project2.domain.post.repository.PostRepository;
 import com.project2.domain.post.specification.PostSpecification;
 import com.project2.global.exception.ServiceException;
 import com.project2.global.security.Rq;
+import com.project2.global.security.SecurityUser;
 
 import lombok.RequiredArgsConstructor;
 
@@ -74,23 +75,20 @@ public class PostService {
 
 	// 2. 사용자가 좋아요 누른 게시글 조회
 	@Transactional(readOnly = true)
-	public Page<Post> getLikedPosts(Pageable pageable) {
-		Member member = rq.getActor();
-		return postRepository.findLikedPosts(member.getId(), pageable);
+	public Page<Post> getLikedPosts(SecurityUser actor, Pageable pageable) {
+		return postRepository.findLikedPosts(actor.getId(), pageable);
 	}
 
 	// 3. 사용자가 스크랩한 게시글 조회
 	@Transactional(readOnly = true)
-	public Page<Post> getScrappedPosts(Pageable pageable) {
-		Member member = rq.getActor();
-		return postRepository.findScrappedPosts(member.getId(), pageable);
+	public Page<Post> getScrappedPosts(SecurityUser actor, Pageable pageable) {
+		return postRepository.findScrappedPosts(actor.getId(), pageable);
 	}
 
 	// 4. 사용자의 팔로워들의 게시글 조회
 	@Transactional(readOnly = true)
-	public Page<Post> getFollowingPosts(Pageable pageable) {
-		Member member = rq.getActor();
-		return postRepository.findFollowingPosts(member.getId(), pageable);
+	public Page<Post> getFollowingPosts(SecurityUser actor, Pageable pageable) {
+		return postRepository.findFollowingPosts(actor.getId(), pageable);
 	}
 
 	// 5. 특정 사용자의 게시글 조회
@@ -106,20 +104,19 @@ public class PostService {
 
 	@Transactional(readOnly = true)
 	public Post getPostById(Long postId) {
-		return postRepository.findPostById(postId)
+		return postRepository.findById(postId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 	}
 
 	@Transactional
-	public void updatePost(Long postId, PostRequestDTO requestDTO) throws
+	public void updatePost(SecurityUser actor, Long postId, PostRequestDTO requestDTO) throws
 		IOException,
 		NoSuchAlgorithmException {
-		Member actor = rq.getActor();
 
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-		if (!post.getMember().equals(actor)) {
+		if (!post.getMember().getId().equals(actor.getId())) {
 			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN.value()), "게시글 수정 권한이 없습니다.");
 		}
 
@@ -129,13 +126,12 @@ public class PostService {
 	}
 
 	@Transactional
-	public void deletePost(Long postId) {
-		Member actor = rq.getActor();
+	public void deletePost(SecurityUser actor, Long postId) {
 
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-		if (!post.getMember().equals(actor)) {
+		if (!post.getMember().getId().equals(actor.getId())) {
 			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN.value()), "게시글 삭제 권한이 없습니다.");
 		}
 		postRepository.deleteById(postId);

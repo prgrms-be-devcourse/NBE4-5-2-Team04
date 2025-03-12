@@ -105,7 +105,7 @@ public class PostImageService {
 	public List<String> updateImages(Post post, List<MultipartFile> newImages) throws
 		IOException,
 		NoSuchAlgorithmException {
-		List<PostImage> existingImages = post.getImages();
+		Set<PostImage> existingImages = post.getImages();
 		Map<String, PostImage> existingImageMap = new HashMap<>();
 
 		// 기존 이미지 해시값 계산

@@ -66,5 +66,5 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 
 	// 단일 게시글 상세 조회
 	@EntityGraph(attributePaths = {"place", "member", "likes", "scraps", "comments", "images"})
-	Optional<Post> findPostById(Long id);
+	Optional<Post> findById(Long id);
 }

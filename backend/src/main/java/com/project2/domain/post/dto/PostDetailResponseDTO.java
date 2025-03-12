@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.project2.domain.member.dto.AuthorDTO;
-import com.project2.domain.member.entity.Member;
 import com.project2.domain.place.dto.PlaceDTO;
 import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.entity.PostImage;
+import com.project2.global.security.SecurityUser;
 
 import lombok.Getter;
 
@@ -26,15 +26,15 @@ public class PostDetailResponseDTO {
 	private final PlaceDTO placeDTO;
 	private final AuthorDTO authorDTO;
 
-	public PostDetailResponseDTO(Post post, Member actor) {
+	public PostDetailResponseDTO(Post post, SecurityUser actor) {
 		this.id = post.getId();
 		this.title = post.getTitle();
 		this.content = post.getContent();
 		this.likeCount = post.getLikes().size();
 		this.scrapCount = post.getScraps().size();
 		this.imageUrls = post.getImages().stream().map(PostImage::getImageUrl).toList();
-		this.isLiked = post.getLikes().stream().anyMatch(like -> like.getMember().equals(actor));
-		this.isScrapped = post.getScraps().stream().anyMatch(scrap -> scrap.getMember().equals(actor));
+		this.isLiked = post.getLikes().stream().anyMatch(like -> like.getMember().getId().equals(actor.getId()));
+		this.isScrapped = post.getScraps().stream().anyMatch(scrap -> scrap.getMember().getId().equals(actor.getId()));
 		this.createdDate = post.getCreatedDate();
 		this.modifiedDate = post.getModifiedDate();
 		this.authorDTO = new AuthorDTO(post.getMember().getId(), post.getMember().getNickname(),

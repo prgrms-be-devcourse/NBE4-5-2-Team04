@@ -1,6 +1,6 @@
 package com.project2.domain.post.entity;
 
-import java.util.List;
+import java.util.Set;
 
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.place.entity.Place;
@@ -40,13 +40,13 @@ public class Post extends BaseTime {
 	private Member member;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<PostImage> images;
+	private Set<PostImage> images;
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Likes> likes;
+	private Set<Likes> likes;
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Scrap> scraps;
+	private Set<Scrap> scraps;
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Comment> comments;
+	private Set<Comment> comments;
 
 	@ManyToOne
 	@JoinColumn(name = "place_id")
