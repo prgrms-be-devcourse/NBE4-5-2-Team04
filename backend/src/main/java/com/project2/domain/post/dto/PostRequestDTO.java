@@ -28,6 +28,21 @@ public class PostRequestDTO {
 	@NotNull(message = "장소 ID는 필수입니다.")
 	private Long placeId;
 
+	@NotNull(message = "위도(latitude)는 필수입니다.")
+	private Double latitude;
+
+	@NotNull(message = "경도(longitude)는 필수입니다.")
+	private Double longitude;
+
+	@NotBlank(message = "장소 이름은 필수입니다.")
+	private String placeName;
+
+	@NotBlank(message = "카테고리는 필수입니다.")
+	private String category;
+
+	@NotBlank(message = "지역(Region)은 필수입니다.")
+	private String region;
+
 	@NotNull(message = "회원 ID는 필수입니다.")
 	private Long memberId;
 	@ImageFile

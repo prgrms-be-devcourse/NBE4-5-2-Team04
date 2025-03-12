@@ -22,6 +22,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.place.entity.Place;
+import com.project2.domain.place.enums.Category;
+import com.project2.domain.place.enums.Region;
 import com.project2.domain.place.repository.PlaceRepository;
 import com.project2.domain.post.dto.PostRequestDTO;
 import com.project2.domain.post.entity.Post;
@@ -53,7 +55,8 @@ class PostServiceTest {
 	@BeforeEach
 	void setUp() {
 		member = Member.builder().id(1L).nickname("testUser").build();
-		place = Place.builder().id(1L).name("Seoul").build();
+		place = Place.builder().id(1L).name("Seoul").latitude(35.8141).longitude(127.1480).category(
+			Category.fromKrCategory("관광명소")).region(Region.fromKrRegion("전북특별자치도")).build();
 		post = Post.builder()
 			.id(1L)
 			.title("Test Post")
@@ -67,7 +70,10 @@ class PostServiceTest {
 	@Test
 	void createPost_shouldCreateNewPost() throws IOException {
 		// Given
-		PostRequestDTO requestDTO = new PostRequestDTO("Test Title", "Test Content", 1L, 1L, List.of());
+		// PostRequestDTO requestDTO = new PostRequestDTO("Test Title", "Test Content", 1L, 1L, List.of());
+		PostRequestDTO requestDTO = new PostRequestDTO("Test Title", "Test Content", 1L, 35.8141, 127.1480, "전주한옥마을",
+			"관광명소", "전북특별자치도", 1L, List.of());
+
 		given(rq.getActor()).willReturn(member);
 		given(placeRepository.findById(anyLong())).willReturn(Optional.of(place));
 		given(postRepository.save(any(Post.class))).willReturn(post);
@@ -91,7 +97,7 @@ class PostServiceTest {
 		given(postRepository.findAll(any(Specification.class), eq(pageable))).willReturn(page);
 
 		// When
-		Page<Post> result = postService.getPosts(null, null, pageable);
+		Page<Post> result = postService.getPosts(null, null, null, pageable);
 
 		// Then
 		assertThat(result.getContent()).hasSize(1);
@@ -193,7 +199,9 @@ class PostServiceTest {
 	@Test
 	void updatePost_shouldUpdatePost() throws IOException, NoSuchAlgorithmException {
 		// Given
-		PostRequestDTO requestDTO = new PostRequestDTO("Updated Title", "Updated Content", 1L, 1L, List.of());
+		PostRequestDTO requestDTO = new PostRequestDTO("Updated Title", "Updated Content", 1L, 35.8141, 127.1480,
+			"전주한옥마을",
+			"관광명소", "전북특별자치도", 1L, List.of());
 		given(rq.getActor()).willReturn(member);
 		given(postRepository.findById(1L)).willReturn(Optional.of(post));
 

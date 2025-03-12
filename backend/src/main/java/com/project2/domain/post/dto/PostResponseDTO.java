@@ -25,11 +25,12 @@ public class PostResponseDTO {
 		this.id = post.getId();
 		this.title = post.getTitle();
 		this.content = post.getContent();
-		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getCategory());
+		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getKrCategory());
 		this.likeCount = post.getLikes().size();
 		this.scrapCount = post.getScraps().size();
 		this.commentCount = post.getComments().size();
 		this.imageUrls = post.getImages().stream().map(PostImage::getImageUrl).toList();
-		this.author = new AuthorDTO(post.getMember().getId(), post.getMember().getNickname(), post.getMember().getProfileImageUrl());
+		this.author = new AuthorDTO(post.getMember().getId(), post.getMember().getNickname(),
+			post.getMember().getProfileImageUrl());
 	}
 }
