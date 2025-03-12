@@ -57,7 +57,7 @@ public class FollowServiceTest {
         follows.setFollower(follower);
         follows.setFollowing(following);
 
-        requestDto = new FollowRequestDto(follows);
+        requestDto = new FollowRequestDto();
     }
 
     @Test
