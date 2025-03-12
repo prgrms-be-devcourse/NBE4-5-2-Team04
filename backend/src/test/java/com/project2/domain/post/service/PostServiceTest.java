@@ -22,12 +22,13 @@
 //
 // import com.project2.domain.member.entity.Member;
 // import com.project2.domain.place.entity.Place;
+// import com.project2.domain.place.enums.Category;
+// import com.project2.domain.place.enums.Region;
 // import com.project2.domain.place.repository.PlaceRepository;
 // import com.project2.domain.post.dto.PostRequestDTO;
 // import com.project2.domain.post.entity.Post;
 // import com.project2.domain.post.repository.PostRepository;
 // import com.project2.global.security.Rq;
-// import com.project2.global.security.SecurityUser;
 //
 // @ExtendWith(MockitoExtension.class)
 // class PostServiceTest {
@@ -50,12 +51,12 @@
 // 	private Member member;
 // 	private Place place;
 // 	private Post post;
-// 	private SecurityUser testUser;
 //
 // 	@BeforeEach
 // 	void setUp() {
 // 		member = Member.builder().id(1L).nickname("testUser").build();
-// 		place = Place.builder().id(1L).name("Seoul").build();
+// 		place = Place.builder().id(1L).name("Seoul").latitude(35.8141).longitude(127.1480).category(
+// 			Category.fromKrCategory("관광명소")).region(Region.fromKrRegion("전북특별자치도")).build();
 // 		post = Post.builder()
 // 			.id(1L)
 // 			.title("Test Post")
@@ -63,19 +64,16 @@
 // 			.member(member)
 // 			.place(place)
 // 			.build();
-// 		testUser = new SecurityUser(
-// 			member.getId(),
-// 			member.getEmail(),
-// 			member.getNickname(),
-// 			member.getAuthorities()
-// 		);
 // 	}
 //
 // 	// 1. 게시글 생성 테스트
 // 	@Test
 // 	void createPost_shouldCreateNewPost() throws IOException {
 // 		// Given
-// 		PostRequestDTO requestDTO = new PostRequestDTO("Test Title", "Test Content", 1L, 1L, List.of());
+// 		// PostRequestDTO requestDTO = new PostRequestDTO("Test Title", "Test Content", 1L, 1L, List.of());
+// 		PostRequestDTO requestDTO = new PostRequestDTO("Test Title", "Test Content", 1L, 35.8141, 127.1480, "전주한옥마을",
+// 			"관광명소", "전북특별자치도", 1L, List.of());
+//
 // 		given(rq.getActor()).willReturn(member);
 // 		given(placeRepository.findById(anyLong())).willReturn(Optional.of(place));
 // 		given(postRepository.save(any(Post.class))).willReturn(post);
@@ -99,7 +97,7 @@
 // 		given(postRepository.findAll(any(Specification.class), eq(pageable))).willReturn(page);
 //
 // 		// When
-// 		Page<Post> result = postService.getPosts(null, null, pageable);
+// 		Page<Post> result = postService.getPosts(null, null, null, pageable);
 //
 // 		// Then
 // 		assertThat(result.getContent()).hasSize(1);
@@ -116,7 +114,7 @@
 // 		given(postRepository.findLikedPosts(member.getId(), pageable)).willReturn(page);
 //
 // 		// When
-// 		Page<Post> result = postService.getLikedPosts(testUser, pageable);
+// 		Page<Post> result = postService.getLikedPosts(pageable);
 //
 // 		// Then
 // 		assertThat(result.getContent()).hasSize(1);
@@ -132,7 +130,7 @@
 // 		given(postRepository.findScrappedPosts(member.getId(), pageable)).willReturn(page);
 //
 // 		// When
-// 		Page<Post> result = postService.getScrappedPosts(testUser, pageable);
+// 		Page<Post> result = postService.getScrappedPosts(pageable);
 //
 // 		// Then
 // 		assertThat(result.getContent()).hasSize(1);
@@ -148,7 +146,7 @@
 // 		given(postRepository.findFollowingPosts(member.getId(), pageable)).willReturn(page);
 //
 // 		// When
-// 		Page<Post> result = postService.getFollowingPosts(testUser, pageable);
+// 		Page<Post> result = postService.getFollowingPosts(pageable);
 //
 // 		// Then
 // 		assertThat(result.getContent()).hasSize(1);
@@ -188,7 +186,7 @@
 // 	@Test
 // 	void getPostById_shouldReturnPost() {
 // 		// Given
-// 		given(postRepository.findById(1L)).willReturn(Optional.of(post));
+// 		given(postRepository.findPostById(1L)).willReturn(Optional.of(post));
 //
 // 		// When
 // 		Post result = postService.getPostById(1L);
@@ -201,12 +199,14 @@
 // 	@Test
 // 	void updatePost_shouldUpdatePost() throws IOException, NoSuchAlgorithmException {
 // 		// Given
-// 		PostRequestDTO requestDTO = new PostRequestDTO("Updated Title", "Updated Content", 1L, 1L, List.of());
+// 		PostRequestDTO requestDTO = new PostRequestDTO("Updated Title", "Updated Content", 1L, 35.8141, 127.1480,
+// 			"전주한옥마을",
+// 			"관광명소", "전북특별자치도", 1L, List.of());
 // 		given(rq.getActor()).willReturn(member);
 // 		given(postRepository.findById(1L)).willReturn(Optional.of(post));
 //
 // 		// When
-// 		postService.updatePost(testUser, 1L, requestDTO);
+// 		postService.updatePost(1L, requestDTO);
 //
 // 		// Then
 // 		assertThat(post.getTitle()).isEqualTo("Updated Title");
@@ -221,7 +221,7 @@
 // 		given(postRepository.findById(1L)).willReturn(Optional.of(post));
 //
 // 		// When
-// 		postService.deletePost(testUser, 1L);
+// 		postService.deletePost(1L);
 //
 // 		// Then
 // 		verify(postRepository, times(1)).deleteById(1L);
