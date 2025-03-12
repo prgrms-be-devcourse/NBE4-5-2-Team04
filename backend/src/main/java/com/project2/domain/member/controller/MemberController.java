@@ -89,11 +89,11 @@ public class MemberController {
 	@GetMapping("/{memberId}")
 	public RsData<MemberProfileRequestDTO> getMemberProfile(@PathVariable long memberId) {
 		Member member = this.memberService.findByIdOrThrow(memberId);
-		//long totalPostCount = this.postService.getPostById(memberId, pageable).getTotalElements();
+		long totalPostCount = this.postService.getCountByMember(member);
 		long totalFollowersCount = this.followerService.getFollowersCount(memberId);
 		long totalFollowingsService = this.followingService.getFollowingsCount(memberId);
 		return new RsData<>("200", "사용자 프로필 조회가 완료되었습니다.",
-			new MemberProfileRequestDTO(member, 0, totalFollowersCount, totalFollowingsService));
+			new MemberProfileRequestDTO(member, totalPostCount, totalFollowersCount, totalFollowingsService));
 	}
 
 	@Operation(summary = "전체 회원 조회")
