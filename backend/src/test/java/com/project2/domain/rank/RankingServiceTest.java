@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.place.entity.Place;
+import com.project2.domain.place.enums.Category;
+import com.project2.domain.place.enums.Region;
 import com.project2.domain.post.dto.PostResponseDTO;
 import com.project2.domain.post.entity.Comment;
 import com.project2.domain.post.entity.Likes;
@@ -54,8 +56,8 @@ class RankingServiceTest {
 	void getRegionRankings_shouldReturnRankedByLikesTotal() {
 		// Given
 		List<RegionRankingDTO> mockData = List.of(
-			new RegionRankingDTO("서울", 200L, 50L, 300L),
-			new RegionRankingDTO("부산", 180L, 40L, 250L)
+			new RegionRankingDTO(Region.SEOUL, 200L, 50L, 300L),
+			new RegionRankingDTO(Region.BUSAN, 180L, 40L, 250L)
 		);
 		Page<RegionRankingDTO> mockPage = new PageImpl<>(mockData, pageable, mockData.size());
 
@@ -67,7 +69,7 @@ class RankingServiceTest {
 		// Then
 		assertThat(result).isNotNull();
 		assertThat(result.getContent().size()).isEqualTo(2);
-		assertThat(result.getContent().getFirst().getRegion()).isEqualTo("서울");
+		assertThat(result.getContent().getFirst().getRegion()).isEqualTo(Region.SEOUL);
 		verify(rankingRepository).findRegionRankings(any(LocalDateTime.class), eq(pageable));
 	}
 
@@ -76,8 +78,8 @@ class RankingServiceTest {
 	void getPopularPlaces_shouldReturnSortedPlacesByLikes() {
 		// Given
 		List<PopularPlaceDTO> mockPlaces = List.of(
-			new PopularPlaceDTO(1L, "한강공원", "서울", 200L, 50L, 30L),
-			new PopularPlaceDTO(2L, "광안리", "부산", 180L, 40L, 25L)
+			new PopularPlaceDTO(1L, "한강공원", Region.SEOUL, 200L, 50L, 30L),
+			new PopularPlaceDTO(2L, "광안리", Region.BUSAN, 180L, 40L, 25L)
 		);
 		Page<PopularPlaceDTO> mockPage = new PageImpl<>(mockPlaces, pageable, mockPlaces.size());
 
@@ -101,22 +103,22 @@ class RankingServiceTest {
 	void getPopularPlacesByRegion_shouldReturnSortedPlacesByLikes() {
 		// Given
 		List<PopularPlaceDTO> mockPlaces = List.of(
-			new PopularPlaceDTO(1L, "남산공원", "서울", 150L, 70L, 30L)
+			new PopularPlaceDTO(1L, "남산공원", Region.SEOUL, 150L, 70L, 30L)
 		);
 		Page<PopularPlaceDTO> mockPage = new PageImpl<>(mockPlaces, pageable, mockPlaces.size());
 
 		doReturn(mockPage).when(rankingRepository)
-			.findPopularPlaces(any(LocalDateTime.class), eq("서울"), isNull(), eq("LIKES"), eq(pageable));
+			.findPopularPlaces(any(LocalDateTime.class), eq(Region.SEOUL), isNull(), eq("LIKES"), eq(pageable));
 
 		// When
-		Page<PopularPlaceDTO> result = rankingService.getPopularPlaces(RankingPeriod.ONE_MONTH, "서울", null,
+		Page<PopularPlaceDTO> result = rankingService.getPopularPlaces(RankingPeriod.ONE_MONTH, Region.SEOUL, null,
 			RankingSort.LIKES, pageable);
 
 		// Then
 		assertThat(result).isNotNull();
 		assertThat(result.getContent().size()).isEqualTo(1);
 		assertThat(result.getContent().getFirst().getPlaceName()).isEqualTo("남산공원");
-		verify(rankingRepository).findPopularPlaces(any(LocalDateTime.class), eq("서울"), isNull(), eq("LIKES"),
+		verify(rankingRepository).findPopularPlaces(any(LocalDateTime.class), eq(Region.SEOUL), isNull(), eq("LIKES"),
 			eq(pageable));
 	}
 
@@ -127,8 +129,8 @@ class RankingServiceTest {
 		Place mockPlace = Place.builder()
 			.id(100L)
 			.name("강남역")
-			.region("서울")
-			.category("관광지")
+			.region(Region.SEOUL)
+			.category(Category.AT4)
 			.build();
 
 		Member mockMember = Member.builder()

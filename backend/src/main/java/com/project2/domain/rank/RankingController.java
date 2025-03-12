@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project2.domain.place.enums.Region;
 import com.project2.domain.post.dto.PostResponseDTO;
 import com.project2.domain.rank.dto.PopularPlaceDTO;
 import com.project2.domain.rank.dto.RegionRankingDTO;
@@ -29,7 +30,7 @@ public class RankingController {
 	@GetMapping("/places")
 	public RsData<Page<PopularPlaceDTO>> getPopularPlaces(
 		@RequestParam(defaultValue = "ONE_MONTH") RankingPeriod period,
-		@RequestParam(required = false) String region,
+		@RequestParam(required = false) Region region,
 		@RequestParam(required = false) String placeName,
 		@RequestParam(defaultValue = "LIKES") RankingSort sort,
 		@PageableDefault Pageable pageable) {
@@ -63,11 +64,11 @@ public class RankingController {
 	// 특정 지역의 게시글 목록 조회
 	@GetMapping("/regions/{region}/posts")
 	public RsData<Page<PostResponseDTO>> getPostsByRegion(
-		@PathVariable String region,
+		@PathVariable Region region,
 		@RequestParam(defaultValue = "ONE_MONTH") RankingPeriod period,
 		@PageableDefault Pageable pageable) {
 
-		return new RsData<>("200", region + "의 게시글 조회 성공",
+		return new RsData<>("200", region.getKrRegion() + "의 게시글 조회 성공",
 			rankingService.getPostsByRegion(region, period, pageable));
 	}
 }

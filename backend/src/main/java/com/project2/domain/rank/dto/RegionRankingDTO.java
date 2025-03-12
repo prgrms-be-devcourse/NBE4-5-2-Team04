@@ -2,6 +2,8 @@ package com.project2.domain.rank.dto;
 
 import org.springframework.lang.NonNull;
 
+import com.project2.domain.place.enums.Region;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,7 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class RegionRankingDTO {
 	@NonNull
-	private final String region;
+	private final Region region;
 
 	@NonNull
 	private final Long likeCount;
