@@ -68,7 +68,7 @@ springdoc:
 
 custom:
   file:
-    upload-dir: uploads/post-images/
+    upload-dir: uploads/
   jwt:
     secret-key: ${JWT_SECRET_KEY}
     access-token-expire-seconds: 3600
