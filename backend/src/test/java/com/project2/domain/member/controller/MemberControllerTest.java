@@ -23,9 +23,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.enums.Provider;
 import com.project2.domain.member.service.AuthService;
-import com.project2.domain.member.service.FollowerService;
-import com.project2.domain.member.service.FollowingService;
-import com.project2.domain.member.service.MemberService;
 import com.project2.global.security.Rq;
 import com.project2.global.security.SecurityUser;
 
@@ -34,12 +31,6 @@ class MemberControllerTest {
 
 	@InjectMocks
 	private MemberController memberController;
-	@Mock
-	private MemberService memberService;
-	@Mock
-	private FollowerService followerService;
-	@Mock
-	private FollowingService followingService;
 
 	@Mock
 	private Rq rq;
@@ -50,6 +41,9 @@ class MemberControllerTest {
 	private MockMvc mockMvc;
 	private Member mockMember;
 	private SecurityUser actor;
+
+	MemberControllerTest() {
+	}
 
 	@BeforeEach
 	void setUp() {
