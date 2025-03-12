@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.project2.domain.member.entity.Member;
 import com.project2.domain.post.entity.Post;
 
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
@@ -67,4 +68,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 	// 단일 게시글 상세 조회
 	@EntityGraph(attributePaths = {"place", "member", "likes", "scraps", "comments", "images"})
 	Optional<Post> findById(Long id);
+
+	long countByMember(Member actor);
 }

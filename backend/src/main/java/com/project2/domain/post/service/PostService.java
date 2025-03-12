@@ -43,6 +43,11 @@ public class PostService {
 		/* placeId가 존재하는지 먼저 확인한 후, 게시물이 성공적으로 저장되면 장소도 저장 */
 		Place place = placeRepository.findById(requestDTO.getPlaceId()).orElse(null);
 
+		if (place == null) {
+			place = placeService.savePlace(requestDTO.getPlaceId(), requestDTO.getPlaceName(), requestDTO.getLatitude(),
+				requestDTO.getLongitude(), requestDTO.getRegion(), requestDTO.getCategory());
+		}
+
 		Post post = Post.builder()
 			.title(requestDTO.getTitle())
 			.content(requestDTO.getContent())
@@ -50,11 +55,6 @@ public class PostService {
 			.member(actor)
 			.build();
 		Post createdPost = postRepository.save(post);
-
-		if (place == null) {
-			place = placeService.savePlace(requestDTO.getPlaceId(), requestDTO.getPlaceName(), requestDTO.getLatitude(),
-				requestDTO.getLongitude(), requestDTO.getRegion(), requestDTO.getCategory());
-		}
 
 		if (requestDTO.getImages() != null && !requestDTO.getImages().isEmpty()) {
 			postImageService.saveImages(post, requestDTO.getImages(), Collections.emptyList());
@@ -135,5 +135,9 @@ public class PostService {
 			throw new ServiceException(String.valueOf(HttpStatus.FORBIDDEN.value()), "게시글 삭제 권한이 없습니다.");
 		}
 		postRepository.deleteById(postId);
+	}
+
+	public long getCountByMember(Member actor) {
+		return postRepository.countByMember(actor);
 	}
 }
