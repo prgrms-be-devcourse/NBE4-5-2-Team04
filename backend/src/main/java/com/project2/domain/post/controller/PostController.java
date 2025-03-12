@@ -46,10 +46,11 @@ public class PostController {
 		@AuthenticationPrincipal SecurityUser actor,
 		@RequestParam(required = false) String placeName,
 		@RequestParam(required = false) String category,
+		@RequestParam(required = false) String placeRegion,
 		Pageable pageable
 	) {
 
-		Page<Post> posts = postService.getPosts(placeName, category, pageable);
+		Page<Post> posts = postService.getPosts(placeName, category, placeRegion, pageable);
 		return new RsData<>(String.valueOf(HttpStatus.OK.value()), "게시글 조회 성공",
 			posts.map(post -> new PostResponseDTO(post, actor)));
 	}

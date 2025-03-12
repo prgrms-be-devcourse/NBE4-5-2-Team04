@@ -39,6 +39,6 @@ public class PostDetailResponseDTO {
 		this.modifiedDate = post.getModifiedDate();
 		this.authorDTO = new AuthorDTO(post.getMember().getId(), post.getMember().getNickname(),
 			post.getMember().getProfileImageUrl());
-		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getCategory());
+		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getKrCategory());
 	}
 }

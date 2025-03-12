@@ -49,6 +49,7 @@ public class Post extends BaseTime {
 	private Set<Comment> comments;
 
 	@ManyToOne
+	@JoinColumn(name = "place_id")
 	private Place place;
 
 	public void update(String title, String content) {

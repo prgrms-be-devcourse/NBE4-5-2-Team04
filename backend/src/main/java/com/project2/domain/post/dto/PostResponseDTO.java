@@ -28,7 +28,7 @@ public class PostResponseDTO {
 		this.id = post.getId();
 		this.title = post.getTitle();
 		this.content = post.getContent();
-		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getCategory());
+		this.placeDTO = new PlaceDTO(post.getPlace().getName(), post.getPlace().getKrCategory());
 		this.likeCount = post.getLikes().size();
 		this.isLiked = post.getLikes().stream().anyMatch(like -> like.getMember().getId().equals(actor.getId()));
 		this.scrapCount = post.getScraps().size();
