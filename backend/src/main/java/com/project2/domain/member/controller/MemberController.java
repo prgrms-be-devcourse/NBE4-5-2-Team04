@@ -95,14 +95,12 @@ public class MemberController {
 
 		Member member = this.memberService.findByIdOrThrow(memberId);
 		boolean isMe = actor.getId() == member.getId();
+		long totalPostCount = this.postService.getCountByMember(member);
 		long totalFollowersCount = this.followerService.getFollowersCount(member);
 		long totalFollowingsCount = this.followingService.getFollowingsCount(member);
 
-		MemberProfileResponseDTO responseDTO = new MemberProfileResponseDTO(
-			member, 0, totalFollowersCount, totalFollowingsCount, isMe
-		);
-
-		return new RsData<>("200", "사용자 프로필 조회가 완료되었습니다.", responseDTO);
+		return new RsData<>("200", "사용자 프로필 조회가 완료되었습니다.",
+			new MemberProfileResponseDTO(member, totalPostCount, totalFollowersCount, totalFollowingsCount, isMe));
 	}
 
 	@Operation(summary = "전체 회원 조회")
@@ -128,11 +126,8 @@ public class MemberController {
 		@RequestParam("profileImage") MultipartFile profileImage) {
 
 		authService.validateOwner(actor.getId(), memberId, "본인의 이미지만 수정이 가능합니다.");
-		// 파일 저장
-		String savedImagePath = imageService.storeProfileImage(memberId, profileImage);
-
 		// DB에 저장
-		Member updatedMember = memberService.updateProfileImageUrl(memberId, savedImagePath);
+		Member updatedMember = memberService.updateProfileImageUrl(memberId, profileImage);
 
 		return getMemberProfile(actor, updatedMember.getId());
 	}

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.enums.Provider;
@@ -67,9 +68,10 @@ public class MemberService {
 	}
 
 	@Transactional
-	public Member updateProfileImageUrl(long memberId, String profileImageUrl) {
+	public Member updateProfileImageUrl(long memberId, MultipartFile profileImage) {
 		Member member = this.findByIdOrThrow(memberId);
-		member.setProfileImageUrl(profileImageUrl);
+		String savedImagePath = imageService.storeProfileImage(memberId, profileImage);
+		member.setProfileImageUrl(savedImagePath);
 		return member;
 	}
 }

@@ -37,8 +37,7 @@ public class FollowerService {
 	}
 
 	@Transactional(readOnly = true)
-	public long getFollowersCount(Long memberId) {
-		Member member = memberService.findByIdOrThrow(memberId);
+	public long getFollowersCount(Member member) {
 		return followRepository.countByFollower(member);
 	}
 }
