@@ -12,7 +12,7 @@ import jakarta.validation.Payload;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ImageFile {
-	String message() default "Only image files are allowed (jpg, jpeg, png, gif)";
+	String message() default "Only image files are allowed (jpg, jpeg, png, gif, webp)";
 
 	Class<?>[] groups() default {};
 
