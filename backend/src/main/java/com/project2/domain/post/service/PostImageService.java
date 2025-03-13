@@ -27,12 +27,15 @@ import com.project2.global.util.Ut;
 @Service
 public class PostImageService {
 	private final PostImageRepository postImageRepository;
-	@Value("${custom.file.upload-dir}")
-	private String uploadDir;
-	private final String uploadPostImageDir = uploadDir + "/post-images";
 
-	public PostImageService(PostImageRepository postImageRepository) {
+	private String uploadDir;
+	private final String uploadPostImageDir;
+
+	public PostImageService(PostImageRepository postImageRepository
+		, @Value("${custom.file.upload-dir}") String uploadDir) {
 		this.postImageRepository = postImageRepository;
+		this.uploadDir = uploadDir;
+		this.uploadPostImageDir = uploadDir + "post-images";
 	}
 
 	/**
@@ -50,7 +53,9 @@ public class PostImageService {
 		IOException {
 		List<String> imageUrls = new ArrayList<>();
 		deletedFileName.sort(Comparator.naturalOrder());
-		File postDir = new File(uploadPostImageDir + post.getId());
+
+		// post-id별 디렉토리 생성
+		File postDir = new File(uploadPostImageDir, String.valueOf(post.getId()));
 		if (!postDir.exists()) {
 			postDir.mkdirs();
 		}
@@ -60,7 +65,7 @@ public class PostImageService {
 			String originalFilename = image.getOriginalFilename();
 			String extension = "";
 
-			if (originalFilename.contains(".")) {
+			if (originalFilename != null && originalFilename.contains(".")) {
 				extension = originalFilename.substring(originalFilename.lastIndexOf("."));
 			}
 
@@ -76,10 +81,18 @@ public class PostImageService {
 				fileName = (maxFileName + i) + extension;
 			}
 
-			Path filePath = Paths.get(uploadPostImageDir + post.getId(), fileName);
+			// 파일 경로 설정
+			Path filePath = Paths.get(uploadPostImageDir, String.valueOf(post.getId()), fileName);
 			Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-			String imageUrl = postDir + "/" + fileName;
-			imageUrls.add(postDir + "/" + fileName);
+
+			// 🚀 수정된 부분: uploadDir을 포함하면서, 경로 구분자를 통일하여 URL 생성
+			String imageUrl = Paths.get(uploadDir, "post-images", String.valueOf(post.getId()), fileName)
+				.toString()
+				.replace("\\", "/"); // 윈도우에서 `\` 대신 `/`로 변환
+
+			imageUrl = "/" + imageUrl;
+
+			imageUrls.add(imageUrl);
 
 			PostImage postImage = new PostImage();
 			postImage.setPost(post);

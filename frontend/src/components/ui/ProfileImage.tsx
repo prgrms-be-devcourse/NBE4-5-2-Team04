@@ -8,10 +8,35 @@ interface ProfileImageProps
 export default function ProfileImage({
   src,
   alt,
+  width = 120,
+  height = 120,
   ...props
 }: ProfileImageProps) {
-  // 🔥 blob: URL일 경우에는 ?timestamp 추가 안 함 (미리보기 때문)
-  const updatedSrc = src?.startsWith("blob:") ? src : `${src}?t=${Date.now()}`;
+  const updatedSrc = src?.startsWith("blob:")
+    ? src
+    : `${process.env.NEXT_PUBLIC_BASE_URL}${src}`;
 
-  return <Image src={updatedSrc} alt={alt || "프로필 이미지"} {...props} />;
+  console.log(updatedSrc);
+
+  return (
+    <div
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+        position: "relative",
+      }}
+    >
+      <Image
+        src={updatedSrc}
+        alt={alt}
+        fill
+        sizes={`(max-width: ${width}px) 100vw, ${width}px`}
+        style={{
+          borderRadius: "50%",
+          objectFit: "cover",
+        }}
+        {...props}
+      />
+    </div>
+  );
 }

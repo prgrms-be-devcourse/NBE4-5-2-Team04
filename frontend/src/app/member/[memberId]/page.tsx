@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { client } from "@/lib/backend/client";
-import ClientPage from "./ClientPage";
+import PageContent from "@/app/member/[memberId]/PageContent";
 import { cookies } from "next/headers";
 import { components } from "@/lib/backend/schema";
+import PostList from "@/components/posts/results/ClientPostList";
 
 export default async function Page({
   params,
@@ -10,14 +12,9 @@ export default async function Page({
     memberId: number;
   };
 }) {
-  const pageable: components["schemas"]["Pageable"] = {
-    page: 1,
-    size: 10,
-    sort: ["createdAt,desc"],
-  };
+  const { memberId } = params;
 
-  const { memberId } = await params;
-
+  // 초기 프로필 데이터 불러오기
   const responseMember = await client.GET("/api/members/{memberId}", {
     params: {
       path: { memberId },
@@ -27,38 +24,13 @@ export default async function Page({
     },
   });
 
-  // const responsePost = await client.GET("/api/posts/member/{memberId}", {
-  //   params: {
-  //     path: { memberId },
-  //   },
-  //   headers: {
-  //     cookie: (await cookies()).toString(),
-  //   },
-  // });
-
   if (responseMember.error) {
     return <div>{responseMember.error.msg}</div>;
   }
 
-  // if (responsePost.error) {
-  //   return <div>{responsePost.error.msg}</div>;
-  // }
-
-  const rsDataMember = responseMember.data;
-  // const rsDataPost = responsePost.data;
-
-  const profileData = rsDataMember.data;
-  // const postData = rsDataPost?.data;
+  const initialProfileData = responseMember.data.data;
 
   return (
-    <ClientPage
-      profileData={{
-        ...profileData,
-      }}
-      // postData={{
-      //   ...postData,
-      // }}
-      memberId={memberId}
-    />
+    <PageContent initialProfileData={initialProfileData} memberId={memberId} />
   );
 }

@@ -40,8 +40,7 @@ public class FollowingService {
 	}
 
 	@Transactional(readOnly = true)
-	public long getFollowingsCount(Long memberId) {
-		Member member = memberService.findByIdOrThrow(memberId);
+	public long getFollowingsCount(Member member) {
 		return followRepository.countByFollowing(member);
 	}
 }
