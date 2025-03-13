@@ -65,9 +65,7 @@ public class PostService {
 
 	// 1. 전체 게시글 조회 (정렬 기준 적용)
 	@Transactional(readOnly = true)
-	public Page<Post> getPosts(String placeName, String categoryKr, String regionKr, Pageable pageable) {
-		Region region = Region.fromKrRegion(regionKr);
-		Category category = Category.fromKrCategory(categoryKr);
+	public Page<Post> getPosts(String placeName, Category category, Region region, Pageable pageable) {
 		// 동적 검색 적용
 		Specification<Post> spec = PostSpecification.filterByPlaceAndCategory(placeName, category, region);
 		return postRepository.findAll(spec, pageable);

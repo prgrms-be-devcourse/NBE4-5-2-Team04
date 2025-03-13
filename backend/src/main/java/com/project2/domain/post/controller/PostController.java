@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project2.domain.place.enums.Category;
+import com.project2.domain.place.enums.Region;
 import com.project2.domain.post.dto.PostDetailResponseDTO;
 import com.project2.domain.post.dto.PostRequestDTO;
 import com.project2.domain.post.dto.PostResponseDTO;
@@ -45,8 +47,8 @@ public class PostController {
 	public RsData<Page<PostResponseDTO>> getPosts(
 		@AuthenticationPrincipal SecurityUser actor,
 		@RequestParam(required = false) String placeName,
-		@RequestParam(required = false) String category,
-		@RequestParam(required = false) String placeRegion,
+		@RequestParam(required = false) Category category,
+		@RequestParam(required = false) Region placeRegion,
 		Pageable pageable
 	) {
 
