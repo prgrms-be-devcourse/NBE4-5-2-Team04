@@ -11,14 +11,12 @@ import lombok.Getter;
 public class ChatMessageResponseDTO {
 	public final Long id;
 	private final MemberDTO sender;
-	private final MemberDTO receiver;
 	private final String content;
 	private final LocalDateTime createdAt;
 
 	public ChatMessageResponseDTO(ChatMessage chatMessage) {
 		this.id = chatMessage.getId();
 		this.sender = new MemberDTO(chatMessage.getSender());
-		this.receiver = new MemberDTO(chatMessage.getReceiver());
 		this.content = chatMessage.getContent();
 		this.createdAt = chatMessage.getCreatedDate();
 	}

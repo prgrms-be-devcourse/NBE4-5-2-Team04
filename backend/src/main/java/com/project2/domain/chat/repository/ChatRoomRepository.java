@@ -10,9 +10,11 @@ import org.springframework.data.repository.query.Param;
 import com.project2.domain.chat.entity.ChatRoom;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
-
-	@Query("SELECT cr FROM ChatRoom cr WHERE EXISTS (" +
-		   "SELECT m FROM cr.members m WHERE m.id IN (:myId, :opponentId))")
+	@Query("SELECT cr FROM ChatRoom cr " +
+		   "WHERE EXISTS (SELECT 1 FROM cr.members m1 WHERE m1.id = :myId) " +
+		   "AND EXISTS (SELECT 1 FROM cr.members m2 WHERE m2.id = :opponentId) " +
+		   "AND SIZE(cr.members) = 2")
 	@EntityGraph(attributePaths = {"messages"})
-	Optional<ChatRoom> findChatRoomsByMemberIds(@Param("myId") Long myId, @Param("opponentId") Long opponentId);
+	Optional<ChatRoom> findChatRoomByMemberIds(@Param("myId") Long myId, @Param("opponentId") Long opponentId);
+
 }

@@ -39,14 +39,7 @@ public class ChatMessage extends BaseTime {
 	@JoinColumn(name = "sender_id", nullable = false)
 	private Member sender;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "receiver_id", nullable = false)
-	private Member receiver;
-
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String content;
-
-	@Column(nullable = false)
-	private Boolean isRead = false;
 
 }

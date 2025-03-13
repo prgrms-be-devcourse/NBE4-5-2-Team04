@@ -1,5 +1,6 @@
 package com.project2.domain.chat.controller;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatController {
 
 	private final ChatService chatService;
+	private final SimpMessagingTemplate messagingTemplate;
 
 	// 1:1 대화 내역 조회
 	@GetMapping("/room/{opponentId}")
@@ -35,14 +37,17 @@ public class ChatController {
 			new ChatRoomResponseDTO(chatService.getOrCreateChatRoom(actor.getId(), opponentId)));
 	}
 
-	// 메시지 전송
 	@PostMapping("/send")
 	@Transactional
 	public RsData<ChatMessageResponseDTO> sendMessage(@AuthenticationPrincipal SecurityUser actor,
 		@RequestBody ChatMessageRequestDTO request) {
-		ChatMessage chatMessage = chatService.sendMessage(actor.getId(), request.getOpponentId(),
-			request.getChatRoomId(),
+		ChatMessage chatMessage = chatService.sendMessage(actor.getId(), request.getChatRoomId(),
 			request.getContent());
-		return new RsData<>("200", "성공", new ChatMessageResponseDTO(chatMessage));
+
+		ChatMessageResponseDTO responseDTO = new ChatMessageResponseDTO(chatMessage);
+
+		messagingTemplate.convertAndSend("/queue/chatroom/" + request.getChatRoomId(), responseDTO);
+
+		return new RsData<>("200", "성공", responseDTO);
 	}
 }

@@ -19,7 +19,6 @@ interface MemberDTO {
 interface ChatMessageResponseDTO {
     id: number;
     sender: MemberDTO;
-    receiver: MemberDTO;
     content: string;
     isRead: boolean;
     createdAt: string;
@@ -64,11 +63,6 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
                         id: msg.sender.id,
                         nickname: msg.sender.nickname,
                         profileImageUrl: msg.sender.profileImageUrl,
-                    },
-                    receiver: {
-                        id: msg.receiver.id,
-                        nickname: msg.receiver.nickname,
-                        profileImageUrl: msg.receiver.profileImageUrl,
                     },
                 })));
             }
@@ -131,7 +125,6 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
         if (!message.trim() || !stompClient || !stompClient.connected || !chatRoomId || !opponentId) return;
 
         const chatMessage = {
-            opponentId,
             chatRoomId,
             content: message,
         };
