@@ -4,7 +4,6 @@ server:
 spring:
   application.name: project2
   output.ansi.enabled: always
-  profiles.active: dev
   servlet:
     multipart:
       max-file-size: 10MB
