@@ -19,6 +19,7 @@ export default function ClientLayout({
   const pathname = usePathname();
   const [isLogin, setIsLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null); // 추가
 
   const isLoginPage = pathname === "/member/login";
   const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ export default function ClientLayout({
     if (storedToken) {
       setIsLogin(true);
       setIsLoading(true);
+      setUserId(getUserIdFromToken()); // 사용자 ID 설정
       return;
     }
 
@@ -48,6 +50,7 @@ export default function ClientLayout({
         if (response.data?.data) {
           saveAccessTokenFromCookie();
           setIsLogin(true);
+          setUserId(getUserIdFromToken()); // 사용자 ID 설정
         }
       } catch (_error) {
         console.error("로그인 확인 실패", _error);
@@ -61,7 +64,6 @@ export default function ClientLayout({
 
   const goToMyPage = (e: React.MouseEvent) => {
     e.preventDefault();
-    const userId = getUserIdFromToken();
     if (userId) {
       router.push(`/member/${userId}`);
     }
@@ -129,11 +131,14 @@ export default function ClientLayout({
               <Link href="#" className="block hover:bg-gray-400 p-2 rounded">
                 인기장소
               </Link>
-              <Link href="#" className="block hover:bg-gray-400 p-2 rounded">
+              <Link
+                href="/places/map"
+                className="block hover:bg-gray-400 p-2 rounded"
+              >
                 지도 검색
               </Link>
               <Link
-                href="/member/follow"
+                href={userId ? `/member/follow/${userId}` : "/member/follow"}
                 className="block hover:bg-gray-400 p-2 rounded"
               >
                 팔로잉/팔로우
