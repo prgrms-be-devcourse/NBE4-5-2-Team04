@@ -36,15 +36,15 @@ jobs:
         if: env.USE_MYSQL == 'true'
         uses: mirromutth/mysql-action@v1.1
         with:
-          host_port: 3306
-          container_port: 3306
-          character_set_server: "utf8mb4"
-          collation_server: "utf8mb4_general_ci"
-          mysql_version: "8.0"
-          mysql_database: "Pathy"
-          mysql_user: ${{ secrets.MYSQL_USERNAME }}
-          mysql_password: ${{ secrets.MYSQL_PASSWORD }}
-          mysql_root_password: ${{ secrets.MYSQL_PASSWORD }}
+          host port: 3306
+          container port: 3306
+          character set server: "utf8mb4"
+          collation server: "utf8mb4_general_ci"
+          mysql version: "8.0"
+          mysql database: "Pathy"
+          mysql user: ${{ secrets.MYSQL_USERNAME }}
+          mysql password: ${{ secrets.MYSQL_PASSWORD }}
+          mysql root password: ${{ secrets.MYSQL_PASSWORD }}
 
       - name: Wait for MySQL
         if: env.USE_MYSQL == 'true'
