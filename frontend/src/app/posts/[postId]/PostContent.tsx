@@ -19,19 +19,55 @@ export default function PostContent({
   const [scrapCount, setScrapCount] = useState(post.scrapCount);
 
   const handleLike = async () => {
-    setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
-    await client.POST(`/api/posts/${post.id}/likes`, {
-      credentials: "include",
-    });
+    if (!post.id) {
+      console.error("post.id가 없습니다.");
+      alert("게시글 정보를 확인할 수 없습니다.");
+      return;
+    }
+
+    try {
+      const res = await client.POST("/api/posts/{postId}/likes", {
+        params: {
+          path: { postId: post.id },
+        },
+        credentials: "include",
+      });
+
+      console.log(res);
+      if (res?.data?.data && "liked" in res.data.data) {
+        setIsLiked(res.data.data.liked);
+        setLikeCount(res.data.data.likeCount);
+      }
+    } catch (error) {
+      console.error("좋아요 요청 실패:", error);
+      alert("좋아요 처리 중 오류가 발생했습니다.");
+    }
   };
 
   const handleScrap = async () => {
-    setIsScrapped(!isScrapped);
-    setScrapCount(isScrapped ? scrapCount - 1 : scrapCount + 1);
-    await client.POST(`/api/posts/${post.id}/scrap`, {
-      credentials: "include",
-    });
+    if (!post.id) {
+      console.error("post.id가 없습니다.");
+      alert("게시글 정보를 확인할 수 없습니다.");
+      return;
+    }
+
+    try {
+      const res = await client.POST("/api/posts/{postId}/scraps", {
+        params: {
+          path: { postId: post.id },
+        },
+        credentials: "include",
+      });
+
+      console.log(res);
+      if (res?.data?.data && "scrapped" in res.data.data) {
+        setIsScrapped(res.data.data.scrapped);
+        setScrapCount(res.data.data.scrapCount);
+      }
+    } catch (error) {
+      console.error("스크랩 요청 실패:", error);
+      alert("스크랩 처리 중 오류가 발생했습니다.");
+    }
   };
 
   return (

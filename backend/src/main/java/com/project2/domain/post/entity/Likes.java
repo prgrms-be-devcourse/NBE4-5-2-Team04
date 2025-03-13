@@ -33,5 +33,4 @@ public class Likes extends BaseTime {
 	@ManyToOne
 	@JoinColumn(nullable = false)
 	private Member member;
-
 }
