@@ -32,27 +32,35 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x backend/gradlew
 
-      - name: Set up MySQL
+      - name: Start MySQL Container
         if: env.USE_MYSQL == 'true'
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          host port: 3306
-          container port: 3306
-          character set server: "utf8mb4"
-          collation server: "utf8mb4_general_ci"
-          mysql version: "8.0"
-          mysql database: "Pathy"
-          mysql user: ${{ secrets.MYSQL_USERNAME }}
-          mysql password: ${{ secrets.MYSQL_PASSWORD }}
-          mysql root password: ${{ secrets.MYSQL_PASSWORD }}
+        run: |
+          docker run -d --name mysql-container \
+            -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e MYSQL_USER=${{ secrets.MYSQL_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+            -e MYSQL_DATABASE=Pathy \
+            -p 3306:3306 \
+            --health-cmd="mysqladmin ping -h localhost" \
+            --health-interval=10s --health-timeout=5s --health-retries=5 \
+            mysql:8.0
+
+      - name: Check MySQL Logs
+        if: env.USE_MYSQL == 'true'
+        run: |
+          docker ps -a
+          docker logs $(docker ps -aqf "ancestor=mysql:8.0")
 
       - name: Wait for MySQL
         if: env.USE_MYSQL == 'true'
         run: |
-          echo "Waiting for MySQL to be ready..."
-          until mysql --protocol=TCP -h127.0.0.1 -u${{ secrets.MYSQL_USERNAME }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1"; do
-            sleep 1
+          echo "Checking MySQL connection..."
+          until mysql --protocol=TCP -h127.0.0.1 -u${{ secrets.MYSQL_USERNAME }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1" || \
+                mysql --protocol=TCP -hlocalhost -u${{ secrets.MYSQL_USERNAME }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1"; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 2
           done
+          echo "MySQL is ready!"
 
       - name: Build and Test
         working-directory: ./backend
