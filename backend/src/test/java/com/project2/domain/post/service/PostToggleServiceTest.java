@@ -63,7 +63,7 @@ class PostToggleServiceTest {
 		assertEquals("좋아요 상태 변경 완료", result.getMsg());
 		assertTrue(result.getData().isLiked());
 		assertEquals(1, result.getData().getLikeCount());
-		verify(likesRepository).save(any(Likes.class));
+		verify(likesRepository).save(any(Likes.class)); // ✅ 저장 여부 검증
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class PostToggleServiceTest {
 		assertEquals("좋아요 상태 변경 완료", result.getMsg());
 		assertFalse(result.getData().isLiked());
 		assertEquals(0, result.getData().getLikeCount());
-		verify(likesRepository, never()).save(any(Likes.class));
+		verify(likesRepository, never()).save(any(Likes.class)); // ✅ 저장이 호출되지 않는지 검증
 	}
 
 	@Test
@@ -101,7 +101,7 @@ class PostToggleServiceTest {
 		assertEquals("스크랩 상태 변경 완료", result.getMsg());
 		assertTrue(result.getData().isScrapped());
 		assertEquals(1, result.getData().getScrapCount());
-		verify(scrapRepository).save(any(Scrap.class));
+		verify(scrapRepository).save(any(Scrap.class)); // ✅ 저장 여부 검증
 	}
 
 	@Test
@@ -119,7 +119,7 @@ class PostToggleServiceTest {
 		assertEquals("스크랩 상태 변경 완료", result.getMsg());
 		assertFalse(result.getData().isScrapped());
 		assertEquals(0, result.getData().getScrapCount());
-		verify(scrapRepository, never()).save(any(Scrap.class));
+		verify(scrapRepository, never()).save(any(Scrap.class)); // ✅ 저장이 호출되지 않는지 검증
 	}
 
 	@Test
