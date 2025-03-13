@@ -13,6 +13,7 @@ jobs:
     env:
       SPRING_PROFILES_ACTIVE: test
       USE_MYSQL: true
+      MYSQL_HOST: host.docker.internal
       MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
@@ -32,36 +33,46 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x backend/gradlew
 
+      # ✅ 기존 MySQL 컨테이너 제거 후 다시 실행
       - name: Start MySQL Container
         if: env.USE_MYSQL == 'true'
         run: |
+          docker rm -f mysql-container || true
           docker run -d --name mysql-container \
             -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
             -e MYSQL_USER=${{ secrets.MYSQL_USERNAME }} \
             -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
             -e MYSQL_DATABASE=Pathy \
             -p 3306:3306 \
-            --health-cmd="mysqladmin ping -h localhost" \
-            --health-interval=10s --health-timeout=5s --health-retries=5 \
-            mysql:8.0
+            --add-host=host.docker.internal:host-gateway \
+            mysql:8.4.1
 
-      - name: Check MySQL Logs
+      # ✅ MySQL 실행 상태 확인
+      - name: Check MySQL Container Status
         if: env.USE_MYSQL == 'true'
         run: |
+          echo "Checking running containers..."
           docker ps -a
-          docker logs $(docker ps -aqf "ancestor=mysql:8.0")
+          echo "Checking MySQL logs..."
+          docker logs mysql-container || true
 
+      # ✅ MySQL이 완전히 실행될 때까지 대기
       - name: Wait for MySQL
         if: env.USE_MYSQL == 'true'
         run: |
-          echo "Checking MySQL connection..."
-          until mysql --protocol=TCP -h127.0.0.1 -u${{ secrets.MYSQL_USERNAME }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1" || \
-                mysql --protocol=TCP -hlocalhost -u${{ secrets.MYSQL_USERNAME }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1"; do
-            echo "Waiting for MySQL to be ready..."
+          echo "Waiting for MySQL to be ready..."
+          for i in {1..30}; do
+            if mysql --protocol=TCP -h $MYSQL_HOST -u${{ secrets.MYSQL_USERNAME }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1"; then
+              echo "MySQL is ready!"
+              exit 0
+            fi
+            echo "Waiting..."
             sleep 2
           done
-          echo "MySQL is ready!"
+          echo "MySQL did not start in time."
+          exit 1
 
+      # ✅ Gradle 빌드 및 테스트 실행
       - name: Build and Test
         working-directory: ./backend
         run: ./gradlew build --no-daemon
