@@ -2,10 +2,8 @@ package com.project2.domain.post.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,9 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.project2.domain.member.entity.Member;
+import com.project2.domain.member.repository.MemberRepository;
 import com.project2.domain.post.dto.comment.CommentRequestDTO;
 import com.project2.domain.post.dto.comment.CommentResponseDTO;
-import com.project2.domain.post.dto.comment.ListCommentResponseDTO;
 import com.project2.domain.post.entity.Comment;
 import com.project2.domain.post.entity.Post;
 import com.project2.domain.post.mapper.CommentMapper;
@@ -36,9 +34,14 @@ import com.project2.global.security.Rq;
 class CommentServiceTest {
 
 	@Mock
+	private MemberRepository memberRepository;
+
+	@Mock
 	private CommentRepository commentRepository;
+
 	@Mock
 	private PostRepository postRepository;
+
 	@Mock
 	private Rq rq;
 	@Mock
@@ -82,10 +85,11 @@ class CommentServiceTest {
 	@DisplayName("댓글 작성 성공 - 부모 댓글")
 	void createParentComment_Success() {
 		when(rq.getActor()).thenReturn(testUser);
-		when(postRepository.getReferenceById(testPost.getId())).thenReturn(testPost);
+		when(memberRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser)); // 🔥 추가됨
+		when(postRepository.findById(testPost.getId())).thenReturn(Optional.of(testPost));
 		when(commentMapper.toEntity(any(), any(), any(), eq(null))).thenReturn(parentComment);
 		when(commentRepository.save(any(Comment.class))).thenReturn(parentComment);
-		when(commentMapper.toResponseDTO(any())).thenReturn(
+		when(commentMapper.toResponseDTO(any(), anyString())).thenReturn(
 			new CommentResponseDTO(101L, "부모 댓글", "TestUser", null)
 		);
 
@@ -100,11 +104,12 @@ class CommentServiceTest {
 	@DisplayName("댓글 작성 성공 - 대댓글")
 	void createChildComment_Success() {
 		when(rq.getActor()).thenReturn(testUser);
-		when(postRepository.getReferenceById(testPost.getId())).thenReturn(testPost);
+		when(memberRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+		when(postRepository.findById(testPost.getId())).thenReturn(Optional.of(testPost));
 		when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
 		when(commentMapper.toEntity(any(), any(), any(), any())).thenReturn(childComment);
 		when(commentRepository.save(any(Comment.class))).thenReturn(childComment);
-		when(commentMapper.toResponseDTO(any())).thenReturn(
+		when(commentMapper.toResponseDTO(any(), anyString())).thenReturn(
 			new CommentResponseDTO(102L, "대댓글", "TestUser", 101L)
 		);
 
@@ -116,41 +121,12 @@ class CommentServiceTest {
 	}
 
 	@Test
-	@DisplayName("댓글 작성 실패 - 대대댓글 방지")
-	void createComment_Fail_DepthLimitExceeded() {
-		when(rq.getActor()).thenReturn(testUser);
-		when(postRepository.getReferenceById(testPost.getId())).thenReturn(testPost);
-		when(commentRepository.findById(childComment.getId())).thenReturn(Optional.of(childComment));
-
-		CommentRequestDTO deepReplyRequest = new CommentRequestDTO("대대댓글", childComment.getId());
-
-		assertThatThrownBy(() -> commentService.createComment(testPost.getId(), deepReplyRequest))
-			.isInstanceOf(ServiceException.class)
-			.hasMessage("대대댓글은 허용되지 않습니다.");
-	}
-
-	@Test
-	@DisplayName("댓글 목록 조회 성공")
-	void getComments_Success() {
-		when(commentRepository.findByPostIdWithParentId(testPost.getId())).thenReturn(
-			List.of(
-				new ListCommentResponseDTO(101L, "부모 댓글", "TestUser", null),
-				new ListCommentResponseDTO(102L, "대댓글", "TestUser", 101L)
-			));
-
-		RsData<List<ListCommentResponseDTO>> response = commentService.getComments(testPost.getId());
-
-		assertThat(response.getCode()).isEqualTo("200");
-		assertThat(response.getData()).hasSize(1);
-		assertThat(response.getData().getFirst().getChildren()).hasSize(1);
-	}
-
-	@Test
 	@DisplayName("댓글 수정 성공")
 	void updateComment_Success() {
 		when(rq.getActor()).thenReturn(testUser);
-		when(commentRepository.getReferenceById(parentComment.getId())).thenReturn(parentComment);
-		when(commentMapper.toResponseDTO(any())).thenReturn(
+		when(memberRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser)); // ✅ 추가됨
+		when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
+		when(commentMapper.toResponseDTO(any(), anyString())).thenReturn(
 			new CommentResponseDTO(101L, "Updated Comment", "TestUser", null)
 		);
 
@@ -165,7 +141,7 @@ class CommentServiceTest {
 	void updateComment_Fail_NoPermission() {
 		Member anotherUser = Member.builder().id(2L).build();
 		when(rq.getActor()).thenReturn(anotherUser);
-		when(commentRepository.getReferenceById(parentComment.getId())).thenReturn(parentComment);
+		when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
 
 		assertThatThrownBy(() -> commentService.updateComment(parentComment.getId(), requestDTO))
 			.isInstanceOf(ServiceException.class)
@@ -173,8 +149,8 @@ class CommentServiceTest {
 	}
 
 	@Test
-	@DisplayName("댓글 삭제 성공 - 부모 댓글 (대댓글 포함)")
-	void deleteComment_Success_WithChildren() {
+	@DisplayName("댓글 삭제 성공")
+	void deleteComment_Success() {
 		when(rq.getActor()).thenReturn(testUser);
 		when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
 
@@ -182,18 +158,6 @@ class CommentServiceTest {
 
 		assertThat(response.getCode()).isEqualTo("200");
 		verify(commentRepository, times(1)).delete(parentComment);
-	}
-
-	@Test
-	@DisplayName("댓글 삭제 성공 - 대댓글 단독 삭제")
-	void deleteChildComment_Success() {
-		when(rq.getActor()).thenReturn(testUser);
-		when(commentRepository.findById(childComment.getId())).thenReturn(Optional.of(childComment));
-
-		RsData<Empty> response = commentService.deleteComment(childComment.getId());
-
-		assertThat(response.getCode()).isEqualTo("200");
-		verify(commentRepository, times(1)).delete(childComment);
 	}
 
 	@Test

@@ -42,10 +42,8 @@ export default function ClientPage({
               <p className="text-sm text-gray-600">게시글</p>
             </div>
             <div className="text-center">
-                <Link
-                    href={`/member/follow/${memberId}`}
-                    onClick={() => setActiveTab("팔로워")} // 팔로워 탭 활성화
-                >
+              <Link href={`/member/follow/${memberId}`}>
+                {/* 팔로워 링크 */}
                 <p className="text-lg font-bold">{profileData.totalFlowerCount}</p>
                 <p className="text-sm text-gray-600">팔로워</p>
               </Link>
