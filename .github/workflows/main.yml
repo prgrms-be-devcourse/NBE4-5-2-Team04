@@ -53,4 +53,4 @@ jobs:
 
       - name: Build and Test
         working-directory: ./backend
-        run: SPRING_PROFILES_ACTIVE=test ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon
