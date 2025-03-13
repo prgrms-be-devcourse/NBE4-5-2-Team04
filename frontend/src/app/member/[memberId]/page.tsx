@@ -1,18 +1,14 @@
-import { useState, useEffect } from "react";
 import { client } from "@/lib/backend/client";
 import PageContent from "@/app/member/[memberId]/PageContent";
 import { cookies } from "next/headers";
-import { components } from "@/lib/backend/schema";
-import PostList from "@/components/posts/results/ClientPostList";
 
 export default async function Page({
   params,
 }: {
-  params: {
-    memberId: number;
-  };
+  params: Promise<{ memberId: string }>; // 비동기적으로 가져오기
 }) {
-  const { memberId } = params;
+  const resolvedParams = await params; // `params`를 `await`하여 동기적으로 처리
+  const memberId = parseInt(resolvedParams.memberId, 10);
 
   // 초기 프로필 데이터 불러오기
   const responseMember = await client.GET("/api/members/{memberId}", {
