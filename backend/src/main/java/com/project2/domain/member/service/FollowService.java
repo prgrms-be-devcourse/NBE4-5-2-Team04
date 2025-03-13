@@ -43,7 +43,6 @@ public class FollowService {
 
         // followerId는 rq에서 가져오는 것으로 변경
         Member follower = actor; // 현재 사용자가 follower 역할을 함
-//        System.out.println("follower " + follower);
 
         Optional<Follows> existingFollow = followRepository.findByFollowerAndFollowing(follower, following);
 
@@ -59,8 +58,6 @@ public class FollowService {
             FollowResponseDto responseDto = new FollowResponseDto(savedFollow);
 
             responseDto.setId(savedFollow.getId());
-//            System.out.println("savedFollow.getFollower().getId() " + savedFollow.getFollower().getId());
-
             responseDto.setFollowerId(savedFollow.getFollower().getId());
             responseDto.setFollowingId(savedFollow.getFollowing().getId());
 
