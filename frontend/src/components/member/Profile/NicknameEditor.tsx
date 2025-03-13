@@ -1,4 +1,4 @@
-import { useNicknameEditor } from "@/app/member/[memberId]/hooks/useNicknameEditor";
+import { useNicknameEditor } from "@/app/member/[memberId]/hooks/UseNicknameEditor";
 
 export default function NicknameEditor({
   initialNickname,

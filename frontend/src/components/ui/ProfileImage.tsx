@@ -12,11 +12,13 @@ export default function ProfileImage({
   height = 120,
   ...props
 }: ProfileImageProps) {
+  const defaultUrl = "/default-profile.png";
+
   const updatedSrc = src?.startsWith("blob:")
     ? src
-    : `${process.env.NEXT_PUBLIC_BASE_URL}${src}`;
-
-  console.log(updatedSrc);
+    : src && src !== defaultUrl
+    ? `${process.env.NEXT_PUBLIC_BASE_URL}${src}`
+    : defaultUrl;
 
   return (
     <div

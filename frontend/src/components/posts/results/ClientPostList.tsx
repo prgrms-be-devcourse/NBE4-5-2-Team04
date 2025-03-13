@@ -180,8 +180,11 @@ export default function PostList({
                   {post.author.profileImageUrl ? (
                     <AvatarImage
                       src={
-                        process.env.NEXT_PUBLIC_BASE_URL +
-                        post.author.profileImageUrl
+                        post.author.profileImageUrl &&
+                        post.author.profileImageUrl !== "/default-profile.png"
+                          ? process.env.NEXT_PUBLIC_BASE_URL +
+                            post.author.profileImageUrl
+                          : "/default-profile.png"
                       }
                       alt={post.author.nickname}
                     />
