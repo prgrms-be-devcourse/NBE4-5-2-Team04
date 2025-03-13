@@ -85,7 +85,7 @@ class CommentServiceTest {
 	@DisplayName("댓글 작성 성공 - 부모 댓글")
 	void createParentComment_Success() {
 		when(rq.getActor()).thenReturn(testUser);
-		when(memberRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser)); // 🔥 추가됨
+		when(memberRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 		when(postRepository.findById(testPost.getId())).thenReturn(Optional.of(testPost));
 		when(commentMapper.toEntity(any(), any(), any(), eq(null))).thenReturn(parentComment);
 		when(commentRepository.save(any(Comment.class))).thenReturn(parentComment);
@@ -124,7 +124,7 @@ class CommentServiceTest {
 	@DisplayName("댓글 수정 성공")
 	void updateComment_Success() {
 		when(rq.getActor()).thenReturn(testUser);
-		when(memberRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser)); // ✅ 추가됨
+		when(memberRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 		when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
 		when(commentMapper.toResponseDTO(any(), anyString())).thenReturn(
 			new CommentResponseDTO(101L, "Updated Comment", "TestUser", null)
