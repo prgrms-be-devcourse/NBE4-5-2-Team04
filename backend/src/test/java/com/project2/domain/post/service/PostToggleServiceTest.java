@@ -51,16 +51,16 @@ class PostToggleServiceTest {
 	@DisplayName("좋아요가 없는 경우 추가하고 상태 반환")
 	void toggleLikes_addLike() {
 		// Given
-		when(likesRepository.toggleLikeIfExists(postId, userId)).thenReturn(0);
+		when(likesRepository.existsByPostIdAndMemberId(postId, userId)).thenReturn(false);
+		when(likesRepository.countByPostId(postId)).thenReturn(1);
 		when(toggleMapper.toLikes(userId, postId)).thenReturn(new Likes());
-		when(likesRepository.getLikeStatus(postId, userId)).thenReturn(new LikeResponseDTO(true, 1));
 
 		// When
 		RsData<LikeResponseDTO> result = postToggleService.toggleLikes(userId, postId);
 
 		// Then
 		assertEquals("200", result.getCode());
-		assertEquals("좋아요가 추가되었습니다.", result.getMsg());
+		assertEquals("좋아요 상태 변경 완료", result.getMsg());
 		assertTrue(result.getData().isLiked());
 		assertEquals(1, result.getData().getLikeCount());
 		verify(likesRepository).save(any(Likes.class));
@@ -70,27 +70,28 @@ class PostToggleServiceTest {
 	@DisplayName("좋아요가 이미 있는 경우 삭제하고 상태 반환")
 	void toggleLikes_removeLike() {
 		// Given
-		when(likesRepository.toggleLikeIfExists(postId, userId)).thenReturn(1);
-		when(likesRepository.getLikeStatus(postId, userId)).thenReturn(new LikeResponseDTO(false, 0));
+		when(likesRepository.existsByPostIdAndMemberId(postId, userId)).thenReturn(true);
+		when(likesRepository.countByPostId(postId)).thenReturn(0);
 
 		// When
 		RsData<LikeResponseDTO> result = postToggleService.toggleLikes(userId, postId);
 
 		// Then
 		assertEquals("200", result.getCode());
-		assertEquals("좋아요가 취소되었습니다.", result.getMsg());
+		assertEquals("좋아요 상태 변경 완료", result.getMsg());
 		assertFalse(result.getData().isLiked());
 		assertEquals(0, result.getData().getLikeCount());
+		verify(likesRepository, never()).save(any(Likes.class));
 	}
 
 	@Test
 	@DisplayName("스크랩이 없는 경우 추가하고 상태 반환")
 	void toggleScrap_addScrap() {
 		// Given
-		when(scrapRepository.toggleScrapIfExists(postId, userId)).thenReturn(0);
+		when(scrapRepository.existsByPostIdAndMemberId(postId, userId)).thenReturn(false);
 		when(postRepository.getReferenceById(postId)).thenReturn(new Post());
 		when(toggleMapper.toScrap(eq(userId), any(Post.class))).thenReturn(new Scrap());
-		when(scrapRepository.getScrapStatus(postId, userId)).thenReturn(new ScrapResponseDTO(true, 1));
+		when(scrapRepository.countByPostId(postId)).thenReturn(1);
 
 		// When
 		RsData<ScrapResponseDTO> result = postToggleService.toggleScrap(userId, postId);
@@ -107,8 +108,8 @@ class PostToggleServiceTest {
 	@DisplayName("스크랩이 이미 있는 경우 삭제하고 상태 반환")
 	void toggleScrap_removeScrap() {
 		// Given
-		when(scrapRepository.toggleScrapIfExists(postId, userId)).thenReturn(1);
-		when(scrapRepository.getScrapStatus(postId, userId)).thenReturn(new ScrapResponseDTO(false, 0));
+		when(scrapRepository.existsByPostIdAndMemberId(postId, userId)).thenReturn(true);
+		when(scrapRepository.countByPostId(postId)).thenReturn(0);
 
 		// When
 		RsData<ScrapResponseDTO> result = postToggleService.toggleScrap(userId, postId);
@@ -118,13 +119,14 @@ class PostToggleServiceTest {
 		assertEquals("스크랩 상태 변경 완료", result.getMsg());
 		assertFalse(result.getData().isScrapped());
 		assertEquals(0, result.getData().getScrapCount());
+		verify(scrapRepository, never()).save(any(Scrap.class));
 	}
 
 	@Test
 	@DisplayName("스크랩 추가 시 게시물이 존재하지 않으면 예외 발생")
 	void toggleScrap_postNotFound() {
 		// Given
-		when(scrapRepository.toggleScrapIfExists(postId, userId)).thenReturn(0);
+		when(scrapRepository.existsByPostIdAndMemberId(postId, userId)).thenReturn(false);
 		when(postRepository.getReferenceById(postId)).thenThrow(new EntityNotFoundException("게시물을 찾을 수 없습니다."));
 
 		// When & Then
