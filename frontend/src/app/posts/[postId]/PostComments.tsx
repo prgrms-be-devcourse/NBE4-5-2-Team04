@@ -212,6 +212,7 @@ export default function PostComments({
                 <Button onClick={() => handleCommentSubmit(comment.id ?? 0)}>
                   작성
                 </Button>
+                <Button onClick={() => setReplyTo(null)}>취소</Button>
               </div>
             )}
 
