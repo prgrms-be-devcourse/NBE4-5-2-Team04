@@ -12,10 +12,8 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: test
-      USE_MYSQL: true
-      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
-      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      USE_MYSQL: false # 기본적으로 H2 사용, MySQL 사용하려면 true로 변경
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }} # GitHub Secrets에서 환경 변수 주입
 
     steps:
       - uses: actions/checkout@v4
@@ -32,35 +30,26 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x backend/gradlew
 
+      # MySQL 설정 (기본적으로 비활성화)
       - name: Set up MySQL
-        if: ${{ env.USE_MYSQL == 'true' }}
+        if: env.USE_MYSQL == 'true' # USE_MYSQL이 true이면 MySQL 실행
         uses: mirromutth/mysql-action@v1.1
         with:
-          host port: 3306
-          container port: 3306
-          character set server: "utf8mb4"
-          collation server: "utf8mb4_general_ci"
-          mysql version: "8.4"
-          mysql database: "Pathy"
-          mysql user: ${{ secrets.MYSQL_USERNAME }}
-          mysql password: ${{ secrets.MYSQL_PASSWORD }}
-          mysql root password: ${{ secrets.MYSQL_PASSWORD }}
-          mysql additional args: "--default-authentication-plugin=mysql_native_password"
-
-      - name: Set MySQL ENV Vars
-        run: |
-          echo "MYSQL_URL=jdbc:mysql://localhost:3306/Pathy?serverTimezone=Asia/Seoul&useSSL=false" >> $GITHUB_ENV
-          echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> $GITHUB_ENV
-          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> $GITHUB_ENV
+          host-port: 3306
+          container-port: 3306
+          character-set-server: "utf8mb4"
+          collation-server: "utf8mb4_general_ci"
+          mysql-version: "8.0"
+          mysql-database: "project2_team4"
+          mysql-root-password: 1234
 
       - name: Wait for MySQL
+        if: env.USE_MYSQL == 'true' # USE_MYSQL이 true이면 실행
         run: |
-          for i in {1..30}; do
-            nc -zv 127.0.0.1 3306 && echo "MySQL is up" && exit 0
-            echo "Waiting for MySQL..."
-            sleep 2
+          echo "Waiting for MySQL to be ready..."
+          until mysql -h127.0.0.1 -uroot -p1234 -e "SELECT 1"; do
+            sleep 1
           done
-          echo "MySQL failed to start" && exit 1
 
       - name: Build and Test
         working-directory: ./backend
