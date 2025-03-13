@@ -6,6 +6,8 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project2.domain.chat.dto.ChatMessageResponseDTO;
+import com.project2.domain.chat.dto.ChatRoomResponseDTO;
 import com.project2.domain.chat.entity.ChatMessage;
 import com.project2.domain.chat.entity.ChatRoom;
 import com.project2.domain.chat.repository.ChatMessageRepository;
@@ -25,11 +27,11 @@ public class ChatService {
 
 	// 유저 간 메시지 조회
 	@Transactional(readOnly = true)
-	public ChatRoom getOrCreateChatRoom(Long myId, Long opponentId) {
+	public ChatRoomResponseDTO getOrCreateChatRoom(Long myId, Long opponentId) {
 		Optional<ChatRoom> existingRoom = chatRoomRepository.findChatRoomByMemberIds(myId, opponentId);
 
 		if (existingRoom.isPresent()) {
-			return existingRoom.get();
+			return new ChatRoomResponseDTO(existingRoom.get());
 		}
 
 		// 채팅방이 없으면 새로 생성
@@ -41,11 +43,13 @@ public class ChatService {
 		ChatRoom newChatRoom = new ChatRoom();
 		newChatRoom.setMembers(Set.of(me, opponent));
 
-		return chatRoomRepository.save(newChatRoom);
+		newChatRoom = chatRoomRepository.save(newChatRoom);
+		return new ChatRoomResponseDTO(newChatRoom);
 	}
 
 	// 메시지 전송
-	public ChatMessage sendMessage(Long actorId, Long chatRoomId, String content) {
+	@Transactional
+	public ChatMessageResponseDTO sendMessage(Long actorId, Long chatRoomId, String content) {
 		Member actor = memberRepository.getReferenceById(actorId);
 		ChatRoom chatRoom = chatRoomRepository.getReferenceById(chatRoomId);
 
@@ -55,6 +59,7 @@ public class ChatService {
 			.content(content)
 			.build();
 
-		return chatMessageRepository.save(chatMessage);
+		chatMessage = chatMessageRepository.save(chatMessage);
+		return new ChatMessageResponseDTO(chatMessage);
 	}
 }
