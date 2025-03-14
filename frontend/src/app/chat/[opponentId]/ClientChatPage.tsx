@@ -40,7 +40,6 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
 
     // ✅ 스크롤을 가장 아래로 이동하는 함수
     const scrollToBottom = () => {
-        console.log(scrollRef.current?.children[1]);
         if (scrollRef.current?.children[1]) {
             const scrollableElement = scrollRef.current?.children[1] as HTMLDivElement;
             requestAnimationFrame(() => {
@@ -56,7 +55,6 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
                 withCredentials: true,
             });
 
-            console.log(res.data);
             if (res.data.data) {
                 setChatRoomId(res.data.data.id);
                 setRoomMembers(res.data.data.members);
@@ -127,7 +125,6 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
         });
 
         return () => {
-            console.log("🛑 Unsubscribing from chat room:", chatRoomId);
             subscription.unsubscribe();
         };
     }, [stompClient, chatRoomId]);
