@@ -52,7 +52,7 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
     // 채팅방 조회 또는 생성 후 메시지와 함께 불러오기
     const fetchChatRoom = async () => {
         try {
-            const res = await axios.get(`http://localhost:8080/api/chat/room/${opponentId}`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/room/${opponentId}`, {
                 withCredentials: true,
             });
 
@@ -82,7 +82,7 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
             fetchChatRoom();
         }
 
-        const socket = new SockJS("http://localhost:8080/ws");
+        const socket = new SockJS(`${process.env.NEXT_PUBLIC_BASE_URL}/ws`);
         const client = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
@@ -143,7 +143,7 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
 
         try {
             const res = await axios.post(
-                "http://localhost:8080/api/chat/send",
+                `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/send`,
                 chatMessage,
                 {
                     headers: {
