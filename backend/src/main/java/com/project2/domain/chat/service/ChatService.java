@@ -27,6 +27,7 @@ public class ChatService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final MemberRepository memberRepository;
 
+	@Transactional
 	public UUID findOrCreateChatRoomId(Long myId, Long opponentId) {
 		Optional<UUID> existingRoomId = chatRoomRepository.findChatRoomIdByMemberIds(myId, opponentId);
 		if (existingRoomId.isPresent()) {
@@ -43,6 +44,7 @@ public class ChatService {
 		return chatRoomRepository.save(newChatRoom).getId();
 	}
 
+	@Transactional(readOnly = true)
 	public Page<ChatMessageResponseDTO> getChatMessages(UUID roomId, Pageable pageable) {
 		Page<ChatMessage> messages = chatMessageRepository.findByChatRoomId(roomId, pageable);
 		return messages.map(ChatMessageResponseDTO::new);

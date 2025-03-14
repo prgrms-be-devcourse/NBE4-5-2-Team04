@@ -27,58 +27,45 @@ interface ChatMessageResponseDTO {
 const me = getUserIdFromToken();
 
 interface ClientChatPageProps {
-    opponentId?: number;
+    chatRoomId: string;
 }
 
-const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
+const ClientChatPage = ({chatRoomId}: ClientChatPageProps) => {
     const [messages, setMessages] = useState<ChatMessageResponseDTO[]>([]);
     const [message, setMessage] = useState("");
     const [stompClient, setStompClient] = useState<Client | null>(null);
-    const [chatRoomId, setChatRoomId] = useState<number | null>(null);
-    const [roomMembers, setRoomMembers] = useState<Set<MemberDTO> | null>(null);
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
-    // ✅ 스크롤을 가장 아래로 이동하는 함수
     const scrollToBottom = () => {
-        if (scrollRef.current?.children[1]) {
-            const scrollableElement = scrollRef.current?.children[1] as HTMLDivElement;
-            requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (scrollRef.current?.children[1]) {
+                const scrollableElement = scrollRef.current.children[1] as HTMLDivElement;
                 scrollableElement.scrollTop = scrollableElement.scrollHeight;
-            });
-        }
+            }
+        });
     };
 
-    // 채팅방 조회 또는 생성 후 메시지와 함께 불러오기
-    const fetchChatRoom = async () => {
+    const fetchChatMessages = async () => {
+        if (!chatRoomId) return;
         try {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/room/${opponentId}`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/room/${chatRoomId}`, {
+                params: {page: 0},
                 withCredentials: true,
             });
 
-            if (res.data.data) {
-                setChatRoomId(res.data.data.id);
-                setRoomMembers(res.data.data.members);
-                setMessages(
-                    res.data.data.messages
-                        .map((msg: ChatMessageResponseDTO) => ({
-                            ...msg,
-                            sender: {
-                                id: msg.sender.id,
-                                nickname: msg.sender.nickname,
-                                profileImageUrl: msg.sender.profileImageUrl,
-                            },
-                        }))
-                );
+            if (res.data) {
+                console.log(res.data.data.content);
+                setMessages(res.data.data.content);
+                scrollToBottom();
             }
         } catch (error) {
-            console.error("채팅방 가져오기 실패", error);
+            console.error("채팅 메시지 가져오기 실패", error);
         }
     };
 
     useEffect(() => {
-        if (opponentId) {
-            fetchChatRoom();
-        }
+        if (!chatRoomId) return;
+        fetchChatMessages();
 
         const socket = new SockJS(`${process.env.NEXT_PUBLIC_BASE_URL}/ws`);
         const client = new Client({
@@ -87,7 +74,9 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
             debug: (str) => console.log(str),
             onConnect: () => {
                 console.log("✅ WebSocket 연결 성공");
-                setStompClient(client);
+                if (!stompClient) {
+                    setStompClient(client);
+                }
             },
             onDisconnect: () => {
                 console.log("❌ WebSocket 연결 해제");
@@ -95,13 +84,33 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
         });
 
         client.activate();
-        setStompClient(client);
         return () => {
             client.deactivate();
         };
-    }, [opponentId]);
+    }, [chatRoomId]);
 
-    // ✅ WebSocket 구독에서 받아온 메시지를 정확하게 반영
+    const sendMessage = async () => {
+        if (!message.trim() || !stompClient || !stompClient.connected || !chatRoomId) return;
+
+        const chatMessage = {
+            chatRoomId,
+            content: message,
+        };
+
+        try {
+            await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/send`, chatMessage, {
+                headers: {"Content-Type": "application/json"},
+                withCredentials: true,
+            });
+
+            setMessage("");
+            scrollToBottom();
+        } catch (error) {
+            console.error("메시지 전송 실패", error);
+        }
+    };
+
+// WebSocket 을 통해 메시지를 받을 때 중복 체크
     useEffect(() => {
         if (!stompClient || !stompClient.connected || !chatRoomId) return;
 
@@ -111,14 +120,15 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
             try {
                 const receivedMessage: ChatMessageResponseDTO = JSON.parse(msg.body);
 
+                // 중복 메시지 체크
                 setMessages((prev) => {
-                    if (prev.some((m) => m.id === receivedMessage.id)) return prev;
-                    return [...prev, receivedMessage].sort(
-                        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-                    );
+                    if (!prev.some((m) => m.id === receivedMessage.id)) {
+                        return [...prev, receivedMessage];
+                    }
+                    return prev;
                 });
 
-                setTimeout(scrollToBottom, 100);
+                scrollToBottom();
             } catch (error) {
                 console.error("📩 Message parse error:", error);
             }
@@ -129,50 +139,8 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
         };
     }, [stompClient, chatRoomId]);
 
-    // ✅ 메시지 전송 (콘솔 로그 추가)
-    const sendMessage = async () => {
-        if (!message.trim() || !stompClient || !stompClient.connected || !chatRoomId || !opponentId) return;
-
-        const chatMessage = {
-            chatRoomId,
-            content: message,
-        };
-
-        try {
-            const res = await axios.post(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/send`,
-                chatMessage,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    withCredentials: true,
-                }
-            );
-
-            console.log("📤 Sent message:", res.data.data);
-            setMessage("");
-            setTimeout(scrollToBottom, 100);
-        } catch (error) {
-            console.error("메시지 전송 실패", error);
-        }
-    };
-
-    // ✅ messages 상태가 변경될 때마다 자동 스크롤 적용
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
     return (
         <Card className="w-full max-w-2xl mx-auto p-4 shadow-md">
-            {roomMembers && (
-                <h1 className="text-lg font-bold mb-4 text-center">
-                    {Array.from(roomMembers)
-                        .filter(member => member.id !== me)
-                        .map(member => member.nickname)
-                        .join(", ")}
-                </h1>
-            )}
             <ScrollArea ref={scrollRef} className="h-80 border p-2 overflow-y-auto">
                 {messages.map((msg) => (
                     <div key={msg.id}
@@ -180,7 +148,9 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
                         {msg.sender.id !== me && (
                             <Avatar className="mr-2">
                                 {msg.sender.profileImageUrl ? (
-                                    <AvatarImage src={msg.sender.profileImageUrl} alt={msg.sender.nickname}/>
+                                    <AvatarImage
+                                        src={`${process.env.NEXT_PUBLIC_BASE_URL}${msg.sender.profileImageUrl}`}
+                                        alt={msg.sender.nickname}/>
                                 ) : (
                                     <AvatarFallback>{msg.sender.nickname[0]}</AvatarFallback>
                                 )}
@@ -197,20 +167,9 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
                 ))}
             </ScrollArea>
             <div className="flex items-center mt-4">
-                <Input
-                    type="text"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
-                            sendMessage();
-                        }
-                    }}
-                    placeholder="메시지 입력..."
-                    className="flex-1"
-                    aria-label="메시지 입력"
-                />
+                <Input type="text" value={message} onChange={(e) => setMessage(e.target.value)}
+                       onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="메시지 입력..." className="flex-1"
+                       aria-label="메시지 입력"/>
                 <Button onClick={sendMessage} disabled={!message.trim()} className="ml-2">전송</Button>
             </div>
         </Card>
