@@ -40,9 +40,11 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
 
     // ✅ 스크롤을 가장 아래로 이동하는 함수
     const scrollToBottom = () => {
-        if (scrollRef.current) {
+        console.log(scrollRef.current?.children[1]);
+        if (scrollRef.current?.children[1]) {
+            const scrollableElement = scrollRef.current?.children[1] as HTMLDivElement;
             requestAnimationFrame(() => {
-                scrollRef.current!.scrollTop = scrollRef.current!.scrollHeight;
+                scrollableElement.scrollTop = scrollableElement.scrollHeight;
             });
         }
     };
@@ -166,15 +168,15 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
 
     return (
         <Card className="w-full max-w-2xl mx-auto p-4 shadow-md">
+            {roomMembers && (
+                <h1 className="text-lg font-bold mb-4 text-center">
+                    {Array.from(roomMembers)
+                        .filter(member => member.id !== me)
+                        .map(member => member.nickname)
+                        .join(", ")}
+                </h1>
+            )}
             <ScrollArea ref={scrollRef} className="h-80 border p-2 overflow-y-auto">
-                {roomMembers && (
-                    <h1 className="text-lg font-bold mb-4 text-center">
-                        {Array.from(roomMembers)
-                            .filter(member => member.id !== me)
-                            .map(member => member.nickname)
-                            .join(", ")}
-                    </h1>
-                )}
                 {messages.map((msg) => (
                     <div key={msg.id}
                          className={`flex ${msg.sender.id === me ? "justify-end" : "justify-start"} mb-2 items-start`}>
