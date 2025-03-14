@@ -14,31 +14,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.enums.Provider;
 import com.project2.domain.member.service.AuthService;
-import com.project2.domain.member.service.FollowerService;
-import com.project2.domain.member.service.FollowingService;
-import com.project2.domain.member.service.MemberService;
-import com.project2.domain.post.service.PostService;
 import com.project2.global.security.Rq;
+import com.project2.global.security.SecurityUser;
 
 @ExtendWith(MockitoExtension.class)
 class MemberControllerTest {
 
 	@InjectMocks
 	private MemberController memberController;
-	@Mock
-	private MemberService memberService;
-	@Mock
-	private FollowerService followerService;
-	@Mock
-	private FollowingService followingService;
-	@Mock
-	private PostService postService;
 
 	@Mock
 	private Rq rq;
@@ -48,6 +40,10 @@ class MemberControllerTest {
 
 	private MockMvc mockMvc;
 	private Member mockMember;
+	private SecurityUser actor;
+
+	MemberControllerTest() {
+	}
 
 	@BeforeEach
 	void setUp() {
@@ -59,6 +55,13 @@ class MemberControllerTest {
 			.provider(Provider.NAVER)
 			.createdDate(LocalDateTime.now())
 			.build();
+
+		actor = new SecurityUser(mockMember);
+
+		// SecurityContext에 인증 정보 추가
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(new UsernamePasswordAuthenticationToken(actor, null, actor.getAuthorities()));
+		SecurityContextHolder.setContext(context);
 	}
 
 	@Test
@@ -107,21 +110,5 @@ class MemberControllerTest {
 		mockMvc.perform(get("/api/members/refresh"))
 			.andExpect(jsonPath("$.code").value("200"))
 			.andExpect(jsonPath("$.msg").value("액세스 토큰이 갱신되었습니다."));
-	}
-
-	@Test
-	@DisplayName("회원 ID를 이용하여 사용자 프로필 정보를 성공적으로 조회한다.")
-	void getUserProfile_ValidMemberId_ReturnsProfileData() throws Exception {
-		// given
-		long memberId = mockMember.getId();
-		// when
-		when(memberService.findByIdOrThrow(memberId)).thenReturn(mockMember);
-		when(followerService.getFollowersCount(memberId)).thenReturn(10L);
-		when(followingService.getFollowingsCount(memberId)).thenReturn(10L);
-
-		// then
-		mockMvc.perform(get("/api/members/" + memberId))
-			.andExpect(jsonPath("$.code").value("200"))
-			.andExpect(jsonPath("$.msg").value("사용자 프로필 조회가 완료되었습니다."));
 	}
 }

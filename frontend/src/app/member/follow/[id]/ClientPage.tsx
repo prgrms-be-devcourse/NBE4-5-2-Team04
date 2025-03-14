@@ -1,193 +1,175 @@
 "use client";
 
-import client from "@/lib/backend/client";
-import { useState, useEffect } from "react";
 import { components } from "@/lib/backend/schema";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { client } from "@/lib/backend/client";
+import ProfileImage from "@/components/ui/ProfileImage";
+import { Button } from "@/components/ui/button";
 
-export default function ClientPage() {
-    const [activeTab, setActiveTab] = useState("팔로잉");
-    const [followingList, setFollowingList] = useState<components["schemas"]["FollowResponseDto"]>();
-    const [followerList, setFollowerList] = useState<components["schemas"]["FollowResponseDto"]>();
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const usersPerPage = 4;
-    const [allMembers, setAllMembers] = useState<components["schemas"]["MemberDTO"][]>([]); // 빈 배열로 초기화
-    const [isLoading, setIsLoading] = useState(true);
+interface ClientPageProps {
+  memberId: number;
+  followingList?: components["schemas"]["FollowerResponseDto"][];
+  followerList?: components["schemas"]["FollowerResponseDto"][];
+  allMembers: components["schemas"]["MemberDTO"][];
+  totalPages: number;
+}
 
-    useEffect(() => {
-        const memberId = 1;
+export default function ClientPage({
+  memberId,
+  followingList,
+  followerList,
+  allMembers,
+  totalPages,
+}: ClientPageProps) {
+  const searchParams = useSearchParams();
+  const tabFromURL = searchParams.get("tab") || "following";
+  const [activeTab, setActiveTab] = useState(tabFromURL);
 
-        const fetchData = async () => {
-            try {
-                const response = await client.get(
-                    `/api/members/${memberId}/${activeTab === "팔로잉" ? "followings" : "followers"}`,
-                    {
-                        params: {
-                            page: currentPage - 1,
-                            size: usersPerPage,
-                        },
-                    }
-                );
-                if (activeTab === "팔로잉") {
-                    setFollowingList(response.data.data);
-                } else {
-                    setFollowerList(response.data.data);
-                }
-                setTotalPages(Math.ceil(response.data.totalElements / usersPerPage));
-            } catch (error) {
-                console.error(`${activeTab} 목록 가져오기 실패:`, error);
-            }
-        };
+  const [followingListState, setFollowingList] = useState(followingList);
+  const [followerListState, setFollowerList] = useState(followerList);
+  const [searchTerm, setSearchTerm] = useState("");
 
-        const fetchAllMembers = async () => {
-            setIsLoading(true);
-            try {
-                const response = await client.get(`/api/members`);
-                if (response.data) {
-                    setAllMembers(response.data);
-                }
-            } catch (error) {
-                console.error("전체 멤버 목록 가져오기 실패:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+  useEffect(() => {
+    setActiveTab(tabFromURL);
+  }, []);
 
-        fetchData();
-        fetchAllMembers();
-    }, [currentPage, activeTab, followerList]);
+  const handleTabChange = (tab: "follower" | "following") => {
+    setActiveTab(tab);
+  };
 
-    const handleFollowToggle = async (userId: number) => {
-        const memberId = 1;
-        const userIndex =
-            activeTab === "팔로잉"
-                ? followingList.findIndex((user) => user.followingId === userId)
-                : followerList.findIndex((user) => user.followerId === userId);
-        const updatedList =
-            activeTab === "팔로잉" ? [...followingList] : [...followerList];
-        const updatedUser = updatedList[userIndex];
+  const handleFollowToggle = async (userId: number) => {
+    try {
+      const requestBody: components["schemas"]["FollowRequestDto"] = {
+        followerId: memberId,
+        followingId: userId,
+      };
 
-        if (updatedUser) {
-            try {
-                const requestBody: components["schemas"]["FollowRequestDto"] = {
-                    followerId: memberId,
-                    followingId: userId,
-                };
+      await client.POST("/api/follows/{memberid}/follows", {
+        body: requestBody,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        params: { path: { memberid: memberId } },
+        credentials: "include",
+      });
 
-                if (updatedUser.followingId === userId) {
-                    await client.post(`/api/members/${memberId}/follows`, requestBody);
-                } else {
-                    await client.delete(`/api/members/${memberId}/follows/${userId}`);
-                }
-
-                if (activeTab === "팔로잉") {
-                    setFollowingList(updatedList);
-                } else {
-                    setFollowerList(updatedList);
-                }
-            } catch (error) {
-                console.error("팔로우/언팔로우 실패:", error);
-            }
+      const followingResponse = await client.GET(
+        "/api/follows/{memberId}/followings",
+        {
+          params: { path: { memberId } },
+          credentials: "include",
         }
-    };
+      );
 
-    return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-50">
-            <div className="w-full max-w-md p-8 bg-white border border-gray-200 rounded shadow-sm">
-                <div className="flex justify-between mb-4">
-                    <button
-                        className={`px-4 py-2 rounded ${
-                            activeTab === "팔로우" ? "bg-blue-500 text-white" : "bg-gray-200"
-                        }`}
-                        onClick={() => setActiveTab("팔로우")}
-                    >
-                        팔로우
-                    </button>
-                    <button
-                        className={`px-4 py-2 rounded ${
-                            activeTab === "팔로잉" ? "bg-blue-500 text-white" : "bg-gray-200"
-                        }`}
-                        onClick={() => setActiveTab("팔로잉")}
-                    >
-                        팔로잉
-                    </button>
-                </div>
-                <div className="flex items-center mb-4">
-                    <input
-                        type="text"
-                        placeholder="사용자 검색"
-                        className="border rounded px-4 py-2 w-full mr-2"
-                    />
-                    <button className="px-4 py-2 bg-gray-200 rounded">검색</button>
-                </div>
-                {activeTab === "팔로잉" ? (
-                    isLoading ? (
-                        <div>로딩 중...</div>
-                    ) : allMembers && allMembers.length > 0 ? (
-                        allMembers.map((member) => {
-                            const isFollowing = followingList?.some((user) => user.followingId === member.id);
-                            return (
-                                <div key={member.id} className="flex items-center justify-between border-b py-2">
-                                    <div className="flex items-center">
-                                        <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
-                                        <span>{member.nickname}</span>
-                                    </div>
-                                    <button
-                                        className={`px-4 py-2 rounded ${
-                                            isFollowing ? "bg-red-500" : "bg-green-500"
-                                        } text-white`}
-                                        onClick={() => handleFollowToggle(member.id)}
-                                    >
-                                        {isFollowing ? "언팔로우" : "팔로우"}
-                                    </button>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <div>팔로잉 목록이 없습니다.</div>
-                    )
-                ) : followerList?.length > 0 ? (
-                    followerList.map((user) => (
-                        <div key={user.followerId} className="flex items-center justify-between border-b py-2">
-                            <div className="flex items-center">
-                                <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
-                                <span>{user.followerId}</span>
-                            </div>
-                            <button
-                                className={`px-4 py-2 rounded ${
-                                    user.isFollowing ? "bg-red-500" : "bg-green-500"
-                                } text-white`}
-                                onClick={() => handleFollowToggle(user.followerId)}
-                            >
-                                {user.isFollowing ? "언팔로우" : "팔로우"}
-                            </button>
-                        </div>
-                    ))
-                ) : (
-                    <div>팔로워 목록이 없습니다.</div>
-                )}
-                <div className="flex justify-center mt-4">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                            key={page}
-                            className={`mx-1 px-3 py-1 rounded ${
-                                currentPage === page ? "bg-blue-500 text-white" : "bg-gray-200"
-                            }`}
-                            onClick={() => setCurrentPage(page)}
-                        >
-                            {page}
-                        </button>
-                    ))}
-                    {currentPage < totalPages && (
-                        <button
-                            className="ml-2 px-3 py-1 rounded bg-gray-200"
-                            onClick={() => setCurrentPage(currentPage + 1)}
-                        >
-                            &gt;
-                        </button>
-                    )}
-                </div>
+      const followerResponse = await client.GET(
+        "/api/follows/{memberId}/followers",
+        {
+          params: { path: { memberId } },
+          credentials: "include",
+        }
+      );
+
+      setFollowingList(followingResponse?.data?.data ?? []);
+      setFollowerList(followerResponse?.data?.data ?? []);
+    } catch (error) {
+      console.error("팔로우/언팔로우 실패:", error);
+    }
+  };
+
+  const isFollowing = (userId: number) => {
+    return followingListState?.some((user) => user.userId === userId);
+  };
+
+  const filteredFollowerList = followerListState?.filter(
+    (follower) => follower.userId !== memberId
+  );
+  const filteredMembers = allMembers.filter((member) =>
+    member.nickname.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="flex flex-col items-center w-full min-h-screen bg-white p-6">
+      <div className="flex justify-between mb-4 mt-8 w-full max-w-2xl">
+        <Button
+          className={`px-4 py-2 rounded ${
+            activeTab === "follower" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => handleTabChange("follower")}
+        >
+          팔로워
+        </Button>
+        <Button
+          className={`px-4 py-2 rounded ${
+            activeTab === "following" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => handleTabChange("following")}
+        >
+          팔로잉
+        </Button>
+      </div>
+
+      {activeTab === "following" ? (
+        allMembers
+          .filter((member) => member.id !== memberId)
+          .map((member) => (
+            <div
+              key={member.id}
+              className="flex items-center justify-between border-b py-2 w-full max-w-2xl"
+            >
+              <div className="flex items-center">
+                <ProfileImage
+                  src={member.profileImageUrl || "/default-profile.png"}
+                  alt="프로필 이미지"
+                  width={32}
+                  height={32}
+                  className="rounded-full mr-2"
+                />
+                <span>{member.nickname}</span>
+              </div>
+              {isFollowing(member.id) ? (
+                <Button
+                  className="px-4 py-2 rounded bg-red-500 text-white"
+                  onClick={() => handleFollowToggle(member.id)}
+                >
+                  언팔로우
+                </Button>
+              ) : (
+                <Button
+                  className="px-4 py-2 rounded bg-blue-500 text-white"
+                  onClick={() => handleFollowToggle(member.id)}
+                >
+                  팔로우
+                </Button>
+              )}
             </div>
-        </div>
-    );
+          ))
+      ) : filteredFollowerList && filteredFollowerList.length > 0 ? (
+        filteredFollowerList.map((follow) => {
+          const follower = allMembers.find(
+            (member) => member.id === follow.userId
+          );
+          return (
+            <div
+              key={follow.userId}
+              className="flex items-center border-b py-2 w-full max-w-2xl"
+            >
+              <div className="flex items-center">
+                <ProfileImage
+                  src={follow.profileImageUrl || "/default-profile.png"}
+                  alt="프로필 이미지"
+                  width={32}
+                  height={32}
+                  className="rounded-full mr-2"
+                />
+                <span>{follower?.nickname || "알 수 없는 사용자"}</span>
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <div className="w-full max-w-2xl">팔로워 목록이 없습니다.</div>
+      )}
+    </div>
+  );
 }

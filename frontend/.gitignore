@@ -48,3 +48,6 @@ schema.d.ts
 
 # profile 이미지 저장경로 제외
 /public/profiles/*
+
+#custom
+.idea/

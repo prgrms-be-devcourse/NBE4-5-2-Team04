@@ -135,15 +135,13 @@ public class FollowerServiceTest {
 	public void testGetFollowerCount_Success() {
 		// Given
 		long memberId = 1L;
-		when(memberService.findByIdOrThrow(memberId)).thenReturn(user);
 		when(followRepository.countByFollower(user)).thenReturn(5L);
 
 		// When
-		long followerCount = followerService.getFollowersCount(memberId);
+		long followerCount = followerService.getFollowersCount(user);
 
 		// Then
 		assertEquals(5L, followerCount);
-		verify(memberService).findByIdOrThrow(memberId);
 		verify(followRepository).countByFollower(user);
 	}
 }

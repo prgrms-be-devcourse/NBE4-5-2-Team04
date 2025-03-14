@@ -4,12 +4,14 @@ import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 import {useInfiniteQuery} from "@tanstack/react-query";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel";
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "@/components/ui/carousel";
 import {Card, CardContent} from "@/components/ui/card";
 import Image from "next/image";
 import {client} from "@/lib/backend/client";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBookmark, faHeart} from "@fortawesome/free-solid-svg-icons";
+import {CategoryEnum} from "@/enums/CategoryEnum";
+import {RegionEnum} from "@/enums/RegionEnum";
 
 type Post = {
     id: number;
@@ -20,7 +22,11 @@ type Post = {
     scrapCount: number;
     commentCount: number;
     imageUrls: string[];
-    author: { memberId: number; nickname: string; profileImageUrl: string | null };
+    author: {
+        memberId: number;
+        nickname: string;
+        profileImageUrl: string | null;
+    };
     isLiked: boolean;
     isScrapped: boolean;
 };
@@ -29,25 +35,40 @@ interface PostListProps {
     queryKey?: string;
     apiEndpoint: string;
     placeName?: string;
-    category?: string;
+    category?: CategoryEnum;
+    region?: RegionEnum;
     memberId?: string;
 }
 
-export default function PostList({queryKey, apiEndpoint, placeName, category, memberId}: PostListProps) {
+export default function PostList({
+                                     queryKey,
+                                     apiEndpoint,
+                                     placeName,
+                                     category,
+                                     region,
+                                     memberId,
+                                 }: PostListProps) {
     const router = useRouter();
-    const [activeIndices, setActiveIndices] = useState<Record<number, number>>({});
-    const [likes, setLikes] = useState<Record<number, { isLiked: boolean; count: number }>>({});
-    const [scraps, setScraps] = useState<Record<number, { isScrapped: boolean; count: number }>>({});
+    const [activeIndices, setActiveIndices] = useState<Record<number, number>>(
+        {}
+    );
+    const [likes, setLikes] = useState<
+        Record<number, { isLiked: boolean; count: number }>
+    >({});
+    const [scraps, setScraps] = useState<
+        Record<number, { isScrapped: boolean; count: number }>
+    >({});
 
     const fetchPosts = async ({pageParam = 0}) => {
         const {data, error} = await client.GET(apiEndpoint, {
             params: {
-                path: {memberId} || null,
+                path: {memberId},
                 query: {
                     page: pageParam,
                     size: 5,
                     placeName: placeName || null,
                     category: category || null,
+                    region: region || null,
                 },
             },
             credentials: "include",
@@ -59,14 +80,15 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
         return data.data;
     };
 
-    const {data, fetchNextPage, hasNextPage, isFetchingNextPage} = useInfiniteQuery({
-        queryFn: fetchPosts,
-        getNextPageParam: (lastPage) => {
-            return lastPage.last === false ? lastPage.number! + 1 : undefined;
-        },
-        initialPageParam: 0,
-        queryKey: [queryKey, placeName, category],
-    });
+    const {data, fetchNextPage, hasNextPage, isFetchingNextPage} =
+        useInfiniteQuery({
+            queryFn: fetchPosts,
+            getNextPageParam: (lastPage) => {
+                return lastPage.last === false ? lastPage.number! + 1 : undefined;
+            },
+            initialPageParam: 0,
+            queryKey: [queryKey, placeName, category],
+        });
 
     const observerRef = useRef(null);
 
@@ -88,7 +110,8 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
     useEffect(() => {
         if (data?.pages) {
             const newLikes: Record<number, { isLiked: boolean; count: number }> = {};
-            const newScraps: Record<number, { isScrapped: boolean; count: number }> = {};
+            const newScraps: Record<number, { isScrapped: boolean; count: number }> =
+                {};
 
             data.pages.forEach((page) => {
                 page.content?.forEach((post: Post) => {
@@ -116,7 +139,9 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
                 ...prev,
                 [postId]: {
                     isLiked: !previousLike.isLiked,
-                    count: previousLike.isLiked ? previousLike.count - 1 : previousLike.count + 1,
+                    count: previousLike.isLiked
+                        ? previousLike.count - 1
+                        : previousLike.count + 1,
                 },
             };
         });
@@ -132,7 +157,9 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
                 ...prev,
                 [postId]: {
                     isScrapped: !previousScrap.isScrapped,
-                    count: previousScrap.isScrapped ? previousScrap.count - 1 : previousScrap.count + 1,
+                    count: previousScrap.isScrapped
+                        ? previousScrap.count - 1
+                        : previousScrap.count + 1,
                 },
             };
         });
@@ -150,7 +177,16 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
                             <div className="flex items-center space-x-3">
                                 <Avatar>
                                     {post.author.profileImageUrl ? (
-                                        <AvatarImage src={post.author.profileImageUrl} alt={post.author.nickname}/>
+                                        <AvatarImage
+                                            src={
+                                                post.author.profileImageUrl &&
+                                                post.author.profileImageUrl !== "/default-profile.png"
+                                                    ? process.env.NEXT_PUBLIC_BASE_URL +
+                                                    post.author.profileImageUrl
+                                                    : "/default-profile.png"
+                                            }
+                                            alt={post.author.nickname}
+                                        />
                                     ) : (
                                         <AvatarFallback>{post.author.nickname[0]}</AvatarFallback>
                                     )}
@@ -208,7 +244,9 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
                                             <span
                                                 key={index}
                                                 className={`h-2 w-2 rounded-full ${
-                                                    index === (activeIndices[post.id] || 0) ? "bg-blue-500" : "bg-gray-400"
+                                                    index === (activeIndices[post.id] || 0)
+                                                        ? "bg-blue-500"
+                                                        : "bg-gray-400"
                                                 }`}
                                             ></span>
                                         ))}
@@ -220,7 +258,9 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
                             <div className="mt-2 flex justify-start space-x-4 text-sm">
                                 <button
                                     className={`flex items-center cursor-pointer ${
-                                        likes[post.id]?.isLiked ? "text-yellow-500" : "text-gray-500"
+                                        likes[post.id]?.isLiked
+                                            ? "text-yellow-500"
+                                            : "text-gray-500"
                                     }`}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -229,13 +269,17 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
                                 >
                                     <FontAwesomeIcon
                                         icon={faHeart}
-                                        className={`w-5 h-5 ${likes[post.id]?.isLiked ? "text-red-500" : "text-gray-400"}`}
+                                        className={`w-5 h-5 ${
+                                            likes[post.id]?.isLiked ? "text-red-500" : "text-gray-400"
+                                        }`}
                                     />{" "}
                                     좋아요 {likes[post.id]?.count ?? post.likeCount}
                                 </button>
                                 <button
                                     className={`flex items-center cursor-pointer ${
-                                        scraps[post.id]?.isScrapped ? "text-yellow-500" : "text-gray-500"
+                                        scraps[post.id]?.isScrapped
+                                            ? "text-yellow-500"
+                                            : "text-gray-500"
                                     }`}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -244,7 +288,11 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
                                 >
                                     <FontAwesomeIcon
                                         icon={faBookmark}
-                                        className={`w-5 h-5 ${scraps[post.id]?.isScrapped ? "text-blue-500" : "text-gray-400"}`}
+                                        className={`w-5 h-5 ${
+                                            scraps[post.id]?.isScrapped
+                                                ? "text-blue-500"
+                                                : "text-gray-400"
+                                        }`}
                                     />{" "}
                                     스크랩 {scraps[post.id]?.count ?? post.scrapCount}
                                 </button>
@@ -256,7 +304,10 @@ export default function PostList({queryKey, apiEndpoint, placeName, category, me
             )}
 
             {/* 무한 스크롤 트리거 */}
-            <div ref={observerRef} className="h-10 w-full flex justify-center items-center">
+            <div
+                ref={observerRef}
+                className="h-10 w-full flex justify-center items-center"
+            >
                 {isFetchingNextPage && <p>로딩 중...</p>}
             </div>
         </div>

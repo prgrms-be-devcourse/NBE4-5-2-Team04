@@ -28,7 +28,7 @@ import com.project2.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/members")
+@RequestMapping("/api/follows")
 @RequiredArgsConstructor
 public class FollowController {
 

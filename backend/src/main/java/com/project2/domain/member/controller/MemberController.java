@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.project2.domain.member.dto.MemberDTO;
-import com.project2.domain.member.dto.MemberProfileRequestDTO;
+import com.project2.domain.member.dto.MemberProfileResponseDTO;
 import com.project2.domain.member.dto.UpdateNicknameDTO;
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.AuthService;
@@ -26,6 +27,7 @@ import com.project2.domain.post.service.PostService;
 import com.project2.global.dto.Empty;
 import com.project2.global.dto.RsData;
 import com.project2.global.security.Rq;
+import com.project2.global.security.SecurityUser;
 import com.project2.global.util.ImageService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -87,13 +89,18 @@ public class MemberController {
 
 	@Operation(summary = "사용자 정보 프로필을 조회합니다.")
 	@GetMapping("/{memberId}")
-	public RsData<MemberProfileRequestDTO> getMemberProfile(@PathVariable long memberId) {
+	public RsData<MemberProfileResponseDTO> getMemberProfile(
+		@AuthenticationPrincipal SecurityUser actor,
+		@PathVariable long memberId) {
+
 		Member member = this.memberService.findByIdOrThrow(memberId);
+		boolean isMe = actor.getId() == member.getId();
 		long totalPostCount = this.postService.getCountByMember(member);
-		long totalFollowersCount = this.followerService.getFollowersCount(memberId);
-		long totalFollowingsService = this.followingService.getFollowingsCount(memberId);
+		long totalFollowersCount = this.followerService.getFollowersCount(member);
+		long totalFollowingsCount = this.followingService.getFollowingsCount(member);
+
 		return new RsData<>("200", "사용자 프로필 조회가 완료되었습니다.",
-			new MemberProfileRequestDTO(member, totalPostCount, totalFollowersCount, totalFollowingsService));
+			new MemberProfileResponseDTO(member, totalPostCount, totalFollowersCount, totalFollowingsCount, isMe));
 	}
 
 	@Operation(summary = "전체 회원 조회")
@@ -113,24 +120,27 @@ public class MemberController {
 
 	@Operation(summary = "사용자 정보 프로필 이미지를 수정합니다.")
 	@PutMapping(value = "/profile-image/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public RsData<MemberProfileRequestDTO> updateProfileImage(
+	public RsData<MemberProfileResponseDTO> updateProfileImage(
+		@AuthenticationPrincipal SecurityUser actor,
 		@PathVariable long memberId,
-		@RequestParam("profileImage") MultipartFile profileImage) {  // ✅ @RequestParam을 사용하여 파일을 받음
+		@RequestParam("profileImage") MultipartFile profileImage) {
 
-		// 파일 저장
-		String savedImagePath = imageService.storeProfileImage(memberId, profileImage);
-
+		authService.validateOwner(actor.getId(), memberId, "본인의 이미지만 수정이 가능합니다.");
 		// DB에 저장
-		Member updatedMember = memberService.updateProfileImageUrl(memberId, savedImagePath);
+		Member updatedMember = memberService.updateProfileImageUrl(memberId, profileImage);
 
-		return getMemberProfile(updatedMember.getId());
+		return getMemberProfile(actor, updatedMember.getId());
 	}
 
 	@Operation(summary = "사용자 닉네임을 수정합니다.")
 	@PutMapping("/nickname/{memberId}")
-	public RsData<MemberProfileRequestDTO> updateNickname(@PathVariable long memberId,
+	public RsData<MemberProfileResponseDTO> updateNickname(
+		@AuthenticationPrincipal SecurityUser actor,
+		@PathVariable long memberId,
 		@RequestBody UpdateNicknameDTO updateNicknameDTO) {
+
+		authService.validateOwner(actor.getId(), memberId, "본인의 닉네임만 수정이 가능합니다.");
 		Member updatedMember = memberService.updateNickname(memberId, updateNicknameDTO.getNickname());
-		return getMemberProfile(updatedMember.getId());
+		return getMemberProfile(actor, updatedMember.getId());
 	}
 }
