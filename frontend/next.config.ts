@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         port: "8080", //
         pathname: "/uploads/**",
       },
+      {
+        protocol: "http",
+        hostname: "pahtymytravelpathy.duckdns.org",
+        port: "8080", //
+        pathname: "/uploads/**",
+      },
     ],
   },
 };
