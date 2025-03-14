@@ -2,6 +2,7 @@ package com.project2.global.security;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,7 +16,6 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.project2.global.app.AppConfig;
 import com.project2.global.dto.RsData;
 import com.project2.global.util.Ut;
 
@@ -30,6 +30,9 @@ public class SecurityConfig {
 	private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+
+	@Value("${custom.url.front-url}")
+	private String siteFrontUrl;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -77,7 +80,7 @@ public class SecurityConfig {
 	public UrlBasedCorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		// 허용할 오리진 설정
-		configuration.setAllowedOrigins(Arrays.asList("https://cdpn.io", AppConfig.getSiteFrontUrl()));
+		configuration.setAllowedOrigins(Arrays.asList("https://cdpn.io", siteFrontUrl));
 		// 허용할 HTTP 메서드 설정
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
 		// 자격 증명 허용 설정

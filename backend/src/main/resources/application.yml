@@ -11,18 +11,18 @@ spring:
       max-request-size: 50MB
       enabled: true
 
-  # H2 설정 (MySQL을 사용하지만, 테스트용으로 남겨둠)
-  #  datasource:
-  #    url: jdbc:h2:file:./db_project2;MODE=MySQL
-  #    username: sa
-  #    password:
-  #    driver-class-name: org.h2.Driver
+    # H2 설정 (MySQL을 사용하지만, 테스트용으로 남겨둠)
+    datasource:
+      url: jdbc:h2:file:./db_project2;MODE=MySQL
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
 
-  datasource:
-    url: ${MYSQL_URL}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  #  datasource:
+  #    url: ${MYSQL_URL}
+  #    username: ${MYSQL_USERNAME}
+  #    password: ${MYSQL_PASSWORD}
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     open-in-view: false
@@ -46,14 +46,14 @@ spring:
             scope: name,profile,email
             client-name: naver
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/login/oauth2/code/naver
+            redirect-uri: ${PUBLIC_BASE_URL}/login/oauth2/code/naver
           google:
             client-id: ${OAUTH2_GOOGLE_CLIENT_ID}
             client-secret: ${OAUTH2_GOOGLE_CLIENT_SECRET}
             scope: https://www.googleapis.com/auth/userinfo.profile,https://www.googleapis.com/auth/userinfo.email
             client-name: google
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: ${PUBLIC_BASE_URL}/login/oauth2/code/google
         provider:
           naver:
             authorization-uri: https://nid.naver.com/oauth2.0/authorize
@@ -84,3 +84,6 @@ custom:
     secret-key: ${JWT_SECRET_KEY}
     access-token-expire-seconds: 3600
     refresh-token-expire-seconds: 86400
+  url:
+    base-url: ${PUBLIC_BASE_URL}
+    front-url: ${PUBLIC_FRONT_URL}

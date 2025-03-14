@@ -1,42 +1,49 @@
 package com.project2.global.security;
 
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+
 import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.service.AuthService;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final Rq rq;
-    private final AuthService authService;
+	private final Rq rq;
+	private final AuthService authService;
 
-    @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        HttpSession session = request.getSession();
+	@Value("${custom.url.front-url}")
+	private String siteFrontUrl;
 
-        String redirectUrl = (String)session.getAttribute("redirectUrl");
-        if(redirectUrl == null) {
-            redirectUrl = "http://localhost:3000";
-        }
-        session.removeAttribute("redirectUrl");
+	@Override
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+		Authentication authentication) throws IOException, ServletException {
+		HttpSession session = request.getSession();
 
-        Member member = rq.getActor();
-        String accessToken = authService.genAccessToken(member);
-        String refreshToken = authService.genRefreshToken(member);
+		String redirectUrl = (String)session.getAttribute("redirectUrl");
+		if (redirectUrl == null) {
+			redirectUrl = siteFrontUrl;
+		}
+		session.removeAttribute("redirectUrl");
 
-        rq.addCookie("accessToken", accessToken, false);
-        rq.addCookie("refreshToken", refreshToken, true);
+		Member member = rq.getActor();
+		String accessToken = authService.genAccessToken(member);
+		String refreshToken = authService.genRefreshToken(member);
 
-        response.sendRedirect(redirectUrl);
-    }
+		rq.addCookie("accessToken", accessToken, false);
+		rq.addCookie("refreshToken", refreshToken, true);
+
+		response.sendRedirect(redirectUrl);
+	}
 }
