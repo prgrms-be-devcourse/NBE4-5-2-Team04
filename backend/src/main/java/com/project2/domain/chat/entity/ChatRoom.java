@@ -2,6 +2,7 @@ package com.project2.domain.chat.entity;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import com.project2.domain.member.entity.Member;
 
@@ -29,8 +30,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class ChatRoom {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
 
 	@ManyToMany
 	@JoinTable(

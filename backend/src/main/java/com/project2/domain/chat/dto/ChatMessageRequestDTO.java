@@ -1,5 +1,7 @@
 package com.project2.domain.chat.dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessageRequestDTO {
-	private Long chatRoomId;
+	private UUID chatRoomId;
 	private String content;
 }
