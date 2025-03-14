@@ -71,6 +71,11 @@ logging:
 
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    config-url: /v3/api-docs
+    disable-swagger-default-url: true
 
 custom:
   file:

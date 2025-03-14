@@ -34,9 +34,9 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(
-				auth -> auth.requestMatchers("/h2-console/**", "/auth/**", "/oauth2/**", "/v3/api-docs",
+				auth -> auth.requestMatchers("/h2-console/**", "/auth/**", "/oauth2/**", "/v3/api-docs/**",
 						"/api/members/login", "/api/members/logout", "/login", "/error",
-						"/uploads/**", "/_next/image")
+						"/uploads/**", "/_next/image", "/swagger-ui/**")
 					.permitAll()
 					.anyRequest()
 					.authenticated() // 모든 요청에 대해 인증 필요하도록 변경
