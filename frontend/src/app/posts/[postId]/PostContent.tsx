@@ -91,6 +91,12 @@ export default function PostContent({
         <Button variant="outline">팔로우</Button>
       </div>
 
+      {post.placeDTO && (
+        <div className="mt-4 p-2 border border-black rounded-lg text-center">
+          <p className="font-semibold text-sm">{post.placeDTO.placeName}</p>
+        </div>
+      )}
+
       <p className="mt-4">{post.content}</p>
 
       <div className="flex mt-4 space-x-6 text-gray-600">
