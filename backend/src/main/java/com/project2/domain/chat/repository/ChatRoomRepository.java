@@ -14,7 +14,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 		   "WHERE EXISTS (SELECT 1 FROM cr.members m1 WHERE m1.id = :myId) " +
 		   "AND EXISTS (SELECT 1 FROM cr.members m2 WHERE m2.id = :opponentId) " +
 		   "AND SIZE(cr.members) = 2")
-	@EntityGraph(attributePaths = {"messages"})
+	@EntityGraph(attributePaths = {"messages", "members"})
 	Optional<ChatRoom> findChatRoomByMemberIds(@Param("myId") Long myId, @Param("opponentId") Long opponentId);
 
 }

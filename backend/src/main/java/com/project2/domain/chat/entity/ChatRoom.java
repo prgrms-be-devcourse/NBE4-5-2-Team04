@@ -3,7 +3,6 @@ package com.project2.domain.chat.entity;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project2.domain.member.entity.Member;
 
 import jakarta.persistence.CascadeType;
@@ -34,7 +33,6 @@ public class ChatRoom {
 	private Long id;
 
 	@ManyToMany
-	@JsonIgnore
 	@JoinTable(
 		name = "chat_room_member",
 		joinColumns = @JoinColumn(name = "chat_room_id"),

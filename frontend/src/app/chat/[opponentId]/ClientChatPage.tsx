@@ -9,6 +9,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
 import {ScrollArea} from "@/components/ui/scroll-area";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 
 interface MemberDTO {
     id: number;
@@ -20,7 +21,6 @@ interface ChatMessageResponseDTO {
     id: number;
     sender: MemberDTO;
     content: string;
-    isRead: boolean;
     createdAt: string;
 }
 
@@ -35,6 +35,7 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
     const [message, setMessage] = useState("");
     const [stompClient, setStompClient] = useState<Client | null>(null);
     const [chatRoomId, setChatRoomId] = useState<number | null>(null);
+    const [roomMembers, setRoomMembers] = useState<Set<MemberDTO> | null>(null);
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
     // ✅ 스크롤을 가장 아래로 이동하는 함수
@@ -55,16 +56,19 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
 
             console.log(res.data);
             if (res.data.data) {
-                const roomId = res.data.data.id;
-                setChatRoomId(roomId);
-                setMessages(res.data.data.messages.map((msg: ChatMessageResponseDTO) => ({
-                    ...msg,
-                    sender: {
-                        id: msg.sender.id,
-                        nickname: msg.sender.nickname,
-                        profileImageUrl: msg.sender.profileImageUrl,
-                    },
-                })));
+                setChatRoomId(res.data.data.id);
+                setRoomMembers(res.data.data.members);
+                setMessages(
+                    res.data.data.messages
+                        .map((msg: ChatMessageResponseDTO) => ({
+                            ...msg,
+                            sender: {
+                                id: msg.sender.id,
+                                nickname: msg.sender.nickname,
+                                profileImageUrl: msg.sender.profileImageUrl,
+                            },
+                        }))
+                );
             }
         } catch (error) {
             console.error("채팅방 가져오기 실패", error);
@@ -101,21 +105,27 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
     useEffect(() => {
         if (!stompClient || !stompClient.connected || !chatRoomId) return;
 
-        console.log("📡 WebSocket 구독 시작:", chatRoomId);
+        console.log("📡 Subscribing to chat room:", chatRoomId);
 
         const subscription = stompClient.subscribe(`/queue/chatroom/${chatRoomId}`, (msg) => {
             try {
                 const receivedMessage: ChatMessageResponseDTO = JSON.parse(msg.body);
-                console.log("📩 받은 메시지:", receivedMessage);
-                setMessages((prev) => [...prev, receivedMessage]);
+
+                setMessages((prev) => {
+                    if (prev.some((m) => m.id === receivedMessage.id)) return prev;
+                    return [...prev, receivedMessage].sort(
+                        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                    );
+                });
+
                 setTimeout(scrollToBottom, 100);
             } catch (error) {
-                console.error("📩 메시지 파싱 오류:", error);
+                console.error("📩 Message parse error:", error);
             }
         });
 
         return () => {
-            console.log("🛑 WebSocket 구독 취소:", chatRoomId);
+            console.log("🛑 Unsubscribing from chat room:", chatRoomId);
             subscription.unsubscribe();
         };
     }, [stompClient, chatRoomId]);
@@ -141,18 +151,7 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
                 }
             );
 
-            console.log("📤 보낸 메시지:", res.data.data); // ✅ 메시지 전송 로그 추가
-
-            stompClient.publish({
-                destination: `/app/chat/${chatRoomId}`,
-                body: JSON.stringify(res.data.data),
-            });
-
-            setMessages((prev) => {
-                const updatedMessages = [...prev, res.data.data];
-                return updatedMessages;
-            });
-
+            console.log("📤 Sent message:", res.data.data);
             setMessage("");
             setTimeout(scrollToBottom, 100);
         } catch (error) {
@@ -168,14 +167,32 @@ const ClientChatPage = ({opponentId}: ClientChatPageProps) => {
     return (
         <Card className="w-full max-w-2xl mx-auto p-4 shadow-md">
             <ScrollArea ref={scrollRef} className="h-80 border p-2 overflow-y-auto">
-                {messages.map((msg, index) => (
-                    <div key={index}
-                         className={`flex ${msg.sender.id === me ? "justify-end" : "justify-start"} mb-2`}>
+                {roomMembers && (
+                    <h1 className="text-lg font-bold mb-4 text-center">
+                        {Array.from(roomMembers)
+                            .filter(member => member.id !== me)
+                            .map(member => member.nickname)
+                            .join(", ")}
+                    </h1>
+                )}
+                {messages.map((msg) => (
+                    <div key={msg.id}
+                         className={`flex ${msg.sender.id === me ? "justify-end" : "justify-start"} mb-2 items-start`}>
+                        {msg.sender.id !== me && (
+                            <Avatar className="mr-2">
+                                {msg.sender.profileImageUrl ? (
+                                    <AvatarImage src={msg.sender.profileImageUrl} alt={msg.sender.nickname}/>
+                                ) : (
+                                    <AvatarFallback>{msg.sender.nickname[0]}</AvatarFallback>
+                                )}
+                            </Avatar>
+                        )}
                         <div
                             className={`p-2 rounded-lg max-w-xs ${msg.sender.id === me ? "bg-blue-500 dark:bg-blue-700 " : "bg-gray-200 dark:bg-gray-800 "}`}>
-                            <strong>{msg.sender.id === me ? "나" : msg.sender.nickname}:</strong> {msg.content}
-                            <span
-                                className="text-xs block text-gray-500 dark:text-gray-400">{new Date(msg.createdAt).toLocaleTimeString()}</span>
+                            <span>{msg.content}</span>
+                            <span className="text-xs block text-gray-500 dark:text-gray-400">
+                                {new Date(msg.createdAt).toLocaleTimeString()}
+                            </span>
                         </div>
                     </div>
                 ))}
