@@ -25,7 +25,7 @@ export function useProfileImage(
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/members/profile-image/${memberId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/members/profile-image/${memberId}`,
         {
           method: "PUT",
           body: formData,

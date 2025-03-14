@@ -4,25 +4,17 @@ server:
 spring:
   application.name: project2
   output.ansi.enabled: always
-  profiles.active: dev
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 50MB
       enabled: true
 
-    # H2 설정 (MySQL을 사용하지만, 테스트용으로 남겨둠)
-    datasource:
-      url: jdbc:h2:file:./db_project2;MODE=MySQL
-      username: sa
-      password:
-      driver-class-name: org.h2.Driver
-
-  #  datasource:
-  #    url: ${MYSQL_URL}
-  #    username: ${MYSQL_USERNAME}
-  #    password: ${MYSQL_PASSWORD}
-  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+    url: jdbc:h2:file:./db_project2;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
 
   jpa:
     open-in-view: false
@@ -71,11 +63,6 @@ logging:
 
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    config-url: /v3/api-docs
-    disable-swagger-default-url: true
 
 custom:
   file:

@@ -2,6 +2,7 @@ package com.project2.global.security;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,7 +16,6 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.project2.global.app.AppConfig;
 import com.project2.global.dto.RsData;
 import com.project2.global.util.Ut;
 
@@ -31,12 +31,15 @@ public class SecurityConfig {
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
+	@Value("${custom.url.front-url}")
+	private String siteFrontUrl;
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(
-				auth -> auth.requestMatchers("/h2-console/**", "/auth/**", "/oauth2/**", "/v3/api-docs",
+				auth -> auth.requestMatchers("/h2-console/**", "/auth/**", "/oauth2/**", "/v3/api-docs/**",
 						"/api/members/login", "/api/members/logout", "/login", "/error",
-						"/uploads/**", "/_next/image")
+						"/uploads/**", "/_next/image", "/swagger-ui/**")
 					.permitAll()
 					.anyRequest()
 					.authenticated() // 모든 요청에 대해 인증 필요하도록 변경
@@ -77,7 +80,7 @@ public class SecurityConfig {
 	public UrlBasedCorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		// 허용할 오리진 설정
-		configuration.setAllowedOrigins(Arrays.asList("https://cdpn.io", AppConfig.getSiteFrontUrl()));
+		configuration.setAllowedOrigins(Arrays.asList("https://cdpn.io", siteFrontUrl));
 		// 허용할 HTTP 메서드 설정
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
 		// 자격 증명 허용 설정

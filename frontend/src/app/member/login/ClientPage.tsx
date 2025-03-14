@@ -22,14 +22,12 @@ export default function ClientPage() {
   if (isChecking) return null;
 
   const handleNaverLogin = () => {
-    const backendAuthUrl =
-      "http://localhost:8080/oauth2/authorization/naver?redirectUrl=http://localhost:3000";
+    const backendAuthUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/oauth2/authorization/naver?redirectUrl=${process.env.NEXT_PUBLIC_FRONT_URL}`;
     window.location.href = backendAuthUrl;
   };
 
   const handleGoogleLogin = () => {
-    const backendAuthUrl =
-      "http://localhost:8080/oauth2/authorization/google?redirectUrl=http://localhost:3000";
+    const backendAuthUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/oauth2/authorization/google?redirectUrl=${process.env.NEXT_PUBLIC_FRONT_URL}`;
     window.location.href = backendAuthUrl;
   };
 

@@ -11,9 +11,10 @@ jobs:
       contents: read
 
     env:
-      SPRING_PROFILES_ACTIVE: test
       USE_MYSQL: false # 기본적으로 H2 사용, MySQL 사용하려면 true로 변경
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }} # GitHub Secrets에서 환경 변수 주입
+      PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
+      PUBLIC_FRONT_URL: ${{ secrets.PUBLIC_FRONT_URL }}
 
     steps:
       - uses: actions/checkout@v4
@@ -53,4 +54,8 @@ jobs:
 
       - name: Build and Test
         working-directory: ./backend
-        run: ./gradlew build --no-daemon
+        run: |
+          echo "🔥 Using profile: $SPRING_PROFILES_ACTIVE"
+          ./gradlew build --no-daemon
+        env:
+          SPRING_PROFILES_ACTIVE: test
