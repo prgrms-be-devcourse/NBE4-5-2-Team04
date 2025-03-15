@@ -15,6 +15,7 @@ jobs:
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }} # GitHub Secrets에서 환경 변수 주입
       PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
       PUBLIC_FRONT_URL: ${{ secrets.PUBLIC_FRONT_URL }}
+      PUBLIC_DOMAIN: ${{ secrets.PUBLIC_DOMAIN }}
 
     steps:
       - uses: actions/checkout@v4
