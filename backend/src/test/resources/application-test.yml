@@ -74,3 +74,4 @@ custom:
   url:
     base-url: ${PUBLIC_BASE_URL}
     front-url: ${PUBLIC_FRONT_URL}
+    domain: ${PUBLIC_DOMAIN}

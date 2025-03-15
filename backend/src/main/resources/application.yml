@@ -12,17 +12,17 @@ spring:
       enabled: true
 
     # H2 설정 (MySQL을 사용하지만, 테스트용으로 남겨둠)
-    datasource:
-      url: jdbc:h2:file:./db_project2;MODE=MySQL
-      username: sa
-      password:
-      driver-class-name: org.h2.Driver
+    #    datasource:
+    #      url: jdbc:h2:file:./db_project2;MODE=MySQL
+    #      username: sa
+    #      password:
+    #      driver-class-name: org.h2.Driver
 
-  #  datasource:
-  #    url: ${MYSQL_URL}
-  #    username: ${MYSQL_USERNAME}
-  #    password: ${MYSQL_PASSWORD}
-  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     open-in-view: false
@@ -87,3 +87,4 @@ custom:
   url:
     base-url: ${PUBLIC_BASE_URL}
     front-url: ${PUBLIC_FRONT_URL}
+    domain: ${PUBLIC_DOMAIN}
