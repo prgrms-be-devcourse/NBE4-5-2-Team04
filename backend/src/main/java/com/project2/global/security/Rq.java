@@ -94,7 +94,7 @@ public class Rq {
 		accsessTokenCookie.setDomain(siteDomain);
 		accsessTokenCookie.setPath("/");
 		accsessTokenCookie.setHttpOnly(isHttpOnly);
-		//accsessTokenCookie.setSecure(true);
+		accsessTokenCookie.setSecure(true);
 		accsessTokenCookie.setAttribute("SameSite", "Strict");
 
 		response.addCookie(accsessTokenCookie);
@@ -111,7 +111,7 @@ public class Rq {
 		cookie.setDomain(siteDomain);
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
-		//cookie.setSecure(true);
+		cookie.setSecure(true);
 		cookie.setAttribute("SameSite", "Strict");
 		cookie.setMaxAge(0);
 
