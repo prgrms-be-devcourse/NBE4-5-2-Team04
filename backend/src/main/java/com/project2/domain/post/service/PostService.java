@@ -1,8 +1,6 @@
 package com.project2.domain.post.service;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,7 +55,7 @@ public class PostService {
 		Post createdPost = postRepository.save(post);
 
 		if (requestDTO.getImages() != null && !requestDTO.getImages().isEmpty()) {
-			postImageService.saveImages(post, requestDTO.getImages(), Collections.emptyList());
+			postImageService.saveImages(post, requestDTO.getImages());
 		}
 
 		return createdPost.getId();
@@ -102,14 +100,11 @@ public class PostService {
 
 	@Transactional(readOnly = true)
 	public Post getPostById(Long postId) {
-		return postRepository.findById(postId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+		return postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 	}
 
 	@Transactional
-	public void updatePost(SecurityUser actor, Long postId, PostRequestDTO requestDTO) throws
-		IOException,
-		NoSuchAlgorithmException {
+	public void updatePost(SecurityUser actor, Long postId, PostRequestDTO requestDTO) throws IOException {
 
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
@@ -137,5 +132,10 @@ public class PostService {
 
 	public long getCountByMember(Member actor) {
 		return postRepository.countByMember(actor);
+	}
+
+	public Post getPostByIdForEdit(Long postId) {
+		return postRepository.findByIdForEdit(postId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 	}
 }

@@ -69,5 +69,11 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 	@EntityGraph(attributePaths = {"place", "member", "likes", "scraps", "comments", "images"})
 	Optional<Post> findById(Long id);
 
+	@Query("""
+		SELECT p from Post p WHERE p.id = :id
+		""")
+	@EntityGraph(attributePaths = {"place", "images"})
+	Optional<Post> findByIdForEdit(Long id);
+
 	long countByMember(Member actor);
 }
