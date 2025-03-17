@@ -75,7 +75,7 @@ public class PostController {
 
 	// 4. 사용자의 팔로워들의 게시글 조회
 	@GetMapping("/following")
-	public RsData<Page<PostResponseDTO>> getFollowerPosts(@AuthenticationPrincipal SecurityUser actor,
+	public RsData<Page<PostResponseDTO>> getFollowingPosts(@AuthenticationPrincipal SecurityUser actor,
 		Pageable pageable) {
 
 		Page<Post> posts = postService.getFollowingPosts(actor, pageable);
