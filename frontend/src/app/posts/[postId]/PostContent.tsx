@@ -9,6 +9,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBookmark, faHeart} from "@fortawesome/free-solid-svg-icons";
 import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function PostContent({
                                         post,
@@ -98,7 +99,9 @@ export default function PostContent({
                     )}
                 </Avatar>
                 <div>
-                    <p className="font-semibold">{post.authorDTO!.nickname}</p>
+                    <Link href={"/member/" + post.authorDTO?.memberId}>
+                        <p className="font-semibold">{post.authorDTO!.nickname}</p>
+                    </Link>
                 </div>
                 <Button variant="outline">팔로우</Button>
             </div>

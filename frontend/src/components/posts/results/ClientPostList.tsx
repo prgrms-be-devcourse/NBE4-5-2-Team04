@@ -12,6 +12,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBookmark, faHeart} from "@fortawesome/free-solid-svg-icons";
 import {CategoryEnum} from "@/enums/CategoryEnum";
 import {RegionEnum} from "@/enums/RegionEnum";
+import Link from "next/link";
 
 type Post = {
     id: number;
@@ -192,7 +193,9 @@ export default function PostList({
                                     )}
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold">{post.author.nickname}</p>
+                                    <Link href={"/member/" + post.author.memberId!}>
+                                        <p className="font-semibold">{post.author.nickname}</p>
+                                    </Link>
                                     <p className="text-xs text-gray-500">
                                         {post.placeDTO.placeName} • {post.placeDTO.category}
                                     </p>
