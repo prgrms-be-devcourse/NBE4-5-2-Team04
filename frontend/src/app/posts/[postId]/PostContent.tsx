@@ -22,6 +22,7 @@ export default function PostContent({
     const [scrapCount, setScrapCount] = useState(post.scrapCount);
     const [activeIndices, setActiveIndices] = useState<number>(0);
 
+
     const handleLike = async () => {
         if (!post.id) {
             console.error("post.id가 없습니다.");
@@ -74,6 +75,37 @@ export default function PostContent({
         }
     };
 
+    const handleFollowToggle = async (userId: number) => {
+        if (!post.id) {
+            console.error("post.id가 없습니다.");
+            alert("게시글 정보를 확인할 수 없습니다.");
+            return;
+        }
+
+        try {
+
+
+            const requestBody: components["schemas"]["FollowRequestDto"] = {
+
+                followingId: userId,
+            };
+
+            await client.POST("/api/posts/{postId}/follow", { // 엔드포인트 수정 및 postId 사용
+                body: requestBody,
+                params: { // params 속성 추가
+                    path: { postId: post.id }, // postId 설정
+                },
+                credentials: "include",
+            });
+
+            console.log("팔로우 토글 성공");
+
+        } catch (error) {
+            console.error("팔로우/언팔로우 실패:", error);
+            alert("팔로우 처리 중 오류가 발생했습니다.");
+        }
+    };
+
     return (
         <div>
             <h1 className="text-2xl font-bold">{post.title}</h1>
@@ -103,7 +135,7 @@ export default function PostContent({
                         <p className="font-semibold">{post.authorDTO!.nickname}</p>
                     </Link>
                 </div>
-                <Button variant="outline">팔로우</Button>
+                <Button variant="outline" onClick={() => handleFollowToggle(post.authorDTO?.memberId!)}>팔로우</Button>
             </div>
 
             {post.placeDTO && (
