@@ -122,7 +122,7 @@ export default function ClientPostForm({initialData, postId}: {
                 });
             }
 
-            if (response.data!.code !== '201') {
+            if (response.data!.code === '201' || response.data!.code === '201') {
                 alert(response.data!.msg);
                 router.push(`/posts/${response.data!.data}`);
             }

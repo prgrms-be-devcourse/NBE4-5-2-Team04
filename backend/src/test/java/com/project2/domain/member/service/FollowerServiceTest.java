@@ -20,6 +20,9 @@ import com.project2.domain.member.entity.Member;
 import com.project2.domain.member.repository.FollowRepository;
 import com.project2.global.exception.ServiceException;
 import com.project2.global.security.Rq;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 public class FollowerServiceTest {
@@ -56,92 +59,82 @@ public class FollowerServiceTest {
 		follower2.setNickname("follower2");
 	}
 
-	@Test
-	public void testGetFollowers_Success() {
-		// Given
-		when(rq.getActor()).thenReturn(user);
-		when(memberService.findByIdOrThrow(1L)).thenReturn(user);
+    @Test
+    public void testGetFollowers_Success() {
+        when(rq.getActor()).thenReturn(user);
+        when(memberService.findByIdOrThrow(1L)).thenReturn(user);
 
-		// Create Follows entities
-		Follows follow1 = new Follows();
-		follow1.setFollower(follower1);
-		follow1.setFollowing(user);
+        Follows follow1 = new Follows();
+        follow1.setFollower(follower1);
+        follow1.setFollowing(user);
 
-		Follows follow2 = new Follows();
-		follow2.setFollower(follower2);
-		follow2.setFollowing(user);
+        Follows follow2 = new Follows();
+        follow2.setFollower(follower2);
+        follow2.setFollowing(user);
 
-		when(followRepository.findByFollowing(user)).thenReturn(Arrays.asList(follow1, follow2));
+        List<Follows> followsList = Arrays.asList(follow1, follow2);
+        Page<Follows> followsPage = new PageImpl<>(followsList);
 
-		// When
-		List<FollowerResponseDto> followers = followerService.getFollowers(1L);
+        when(followRepository.findByFollowing(eq(user), any(Pageable.class))).thenReturn(followsPage);
 
-		// Then
-		assertNotNull(followers);
-		assertEquals(2, followers.size());
+        Page<FollowerResponseDto> followers = followerService.getFollowers(1L, Pageable.unpaged());
 
-		// Verify the followers match the mocked data
-		assertTrue(followers.stream().anyMatch(f -> f.getUserId().equals(follower1.getId())));
-		assertTrue(followers.stream().anyMatch(f -> f.getUserId().equals(follower2.getId())));
+        assertNotNull(followers);
+        assertEquals(2, followers.getContent().size());
 
-		// Verify interactions
-		verify(rq).getActor(); // 실제로 getActor()가 호출되었는지 검증
-		verify(memberService).findByIdOrThrow(1L);
-		verify(followRepository).findByFollowing(user);
-	}
+        assertTrue(followers.getContent().stream().anyMatch(f -> f.getUserId().equals(follower1.getId())));
+        assertTrue(followers.getContent().stream().anyMatch(f -> f.getUserId().equals(follower2.getId())));
 
-	@Test
-	public void testGetFollowers_NoFollowers() {
-		// Given
-		when(rq.getActor()).thenReturn(user);  // 현재 로그인된 사용자
-		when(memberService.findByIdOrThrow(1L)).thenReturn(user);
-		when(followRepository.findByFollowing(user)).thenReturn(Arrays.asList());
+        verify(rq).getActor();
+        verify(memberService).findByIdOrThrow(1L);
+        verify(followRepository).findByFollowing(eq(user), any(Pageable.class));
+    }
+    @Test
+    public void testGetFollowers_NoFollowers() {
+        when(rq.getActor()).thenReturn(user);
+        when(memberService.findByIdOrThrow(1L)).thenReturn(user);
 
-		// When
-		List<FollowerResponseDto> followers = followerService.getFollowers(1L);
+        Page<Follows> emptyPage = Page.empty();
+        when(followRepository.findByFollowing(eq(user), any(Pageable.class))).thenReturn(emptyPage);
 
-		// Then
-		assertNotNull(followers);
-		assertTrue(followers.isEmpty());
+        Page<FollowerResponseDto> followers = followerService.getFollowers(1L, Pageable.unpaged());
 
-		// Verify interactions
-		verify(rq).getActor();
-		verify(memberService).findByIdOrThrow(1L);
-		verify(followRepository).findByFollowing(user);
-	}
+        assertNotNull(followers);
+        assertTrue(followers.isEmpty());
 
-	@Test
-	public void testGetFollowers_UserNotFound() {
-		// Given
-		when(rq.getActor()).thenReturn(user);
-		when(memberService.findByIdOrThrow(1L)).thenThrow(new ServiceException("404", "사용자를 찾을 수 없습니다."));
+        verify(rq).getActor();
+        verify(memberService).findByIdOrThrow(1L);
+        verify(followRepository).findByFollowing(eq(user), any(Pageable.class));
+    }
 
-		// When & Then
-		ServiceException exception = assertThrows(ServiceException.class, () -> {
-			followerService.getFollowers(1L);
-		});
+    @Test
+    public void testGetFollowers_UserNotFound() {
+        when(rq.getActor()).thenReturn(user);
+        when(memberService.findByIdOrThrow(1L)).thenThrow(new ServiceException("404", "사용자를 찾을 수 없습니다."));
 
-		// Then
-		assertEquals("404", exception.getCode());
-		assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            followerService.getFollowers(1L, Pageable.unpaged());
+        });
 
-		// Verify interactions
-		verify(rq).getActor();
-		verify(memberService).findByIdOrThrow(1L);
-	}
+        assertEquals("404", exception.getCode());
+        assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
+
+        verify(rq).getActor();
+        verify(memberService).findByIdOrThrow(1L);
+    }
 
 	@Test
 	@DisplayName("회원이 존재할 경우 팔로워 수를 정상적으로 반환해야 한다")
 	public void testGetFollowerCount_Success() {
 		// Given
 		long memberId = 1L;
-		when(followRepository.countByFollower(user)).thenReturn(5L);
+		when(followRepository.countByFollowing(user)).thenReturn(5L);
 
 		// When
 		long followerCount = followerService.getFollowersCount(user);
 
 		// Then
 		assertEquals(5L, followerCount);
-		verify(followRepository).countByFollower(user);
+		verify(followRepository).countByFollowing(user);
 	}
 }

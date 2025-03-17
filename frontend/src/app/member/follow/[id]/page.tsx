@@ -38,7 +38,14 @@ export default async function Page({
     "/api/follows/{memberId}/followers",
     {
       params: {
-        path: { memberId },
+          path: {memberId},
+          query: {
+              pageable: {
+                  page: undefined,
+                  size: undefined,
+                  sort: undefined
+              }
+          }
       },
       headers: {
         cookie: (await cookies()).toString(),
@@ -52,13 +59,19 @@ export default async function Page({
     },
   });
   const followingList = followingResponse?.data?.data ?? [];
-  const followerList = followerResponse?.data?.data ?? [];
+  const followerList = followerResponse?.data?.data.content ?? [];
   const allMembers = allMembersResponse?.data?.data ?? [];
   // const followingList = followingResponse.data.data;
   // const followerList = followerResponse.data.data;
   // const allMembers = allMembersResponse.data.data;
-  const totalPages = 3;
+  const totalPages = followerResponse?.data?.data?.totalPages;
+  const totalElements=followerResponse?.data?.data?.totalElements;
+  const onepageElements=followerList?.length;
   // const profileData = profileResponse.data.data;
+    console.log("전체 페이지 수:", followerResponse?.data?.data?.totalPages);
+    console.log("현재 페이지 번호:", followerResponse?.data?.data?.pageable?.pageNumber);
+    console.log("팔로워 수 (followerList.length):", followerList?.length);
+    console.log("전체 요소 수 (totalElements):", followerResponse?.data?.data?.totalElements);
 
   return (
     <ClientPage
@@ -66,7 +79,9 @@ export default async function Page({
       followingList={followingList}
       followerList={followerList}
       allMembers={allMembers}
-      totalPages={totalPages}
+      totalPages={totalPages || 1}
+      totalElements={totalElements}
+        onepageElements={onepageElements}
       // profileData={profileData}
     />
   );

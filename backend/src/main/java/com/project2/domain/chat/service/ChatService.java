@@ -1,5 +1,6 @@
 package com.project2.domain.chat.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.project2.domain.chat.dto.ChatMessageResponseDTO;
+import com.project2.domain.chat.dto.ChatRoomResponseDTO;
 import com.project2.domain.chat.entity.ChatMessage;
 import com.project2.domain.chat.entity.ChatRoom;
 import com.project2.domain.chat.repository.ChatMessageRepository;
@@ -42,6 +44,14 @@ public class ChatService {
 		ChatRoom newChatRoom = new ChatRoom();
 		newChatRoom.setMembers(Set.of(me, opponent));
 		return chatRoomRepository.save(newChatRoom).getId();
+	}
+
+	@Transactional(readOnly = true)
+	public List<ChatRoomResponseDTO> getAllChatRooms(Long actorId) {
+		return chatRoomRepository.findByMembers_IdOrderByLatestMessage(actorId)
+			.stream()
+			.map(chatRoom -> new ChatRoomResponseDTO(chatRoom, actorId))
+			.toList();
 	}
 
 	@Transactional(readOnly = true)

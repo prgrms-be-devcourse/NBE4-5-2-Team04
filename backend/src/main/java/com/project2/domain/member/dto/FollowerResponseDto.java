@@ -15,13 +15,16 @@ public class FollowerResponseDto {
     private String email;
     private String nickname;
     private String profileImageUrl;
+    private int totalPages; // totalPages 추가
+
 
     public static FollowerResponseDto fromEntity(Member member) {
         return new FollowerResponseDto(
                 member.getId(),
                 member.getEmail(),
                 member.getNickname(),
-                member.getProfileImageUrl()
+                member.getProfileImageUrl(),
+                0 // 초기값 설정 (나중에 컨트롤러에서 설정)
         );
     }
 }

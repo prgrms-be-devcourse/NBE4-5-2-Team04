@@ -41,6 +41,6 @@ public class FollowingService {
 
 	@Transactional(readOnly = true)
 	public long getFollowingsCount(Member member) {
-		return followRepository.countByFollowing(member);
+		return followRepository.countByFollower(member);
 	}
 }

@@ -121,18 +121,17 @@ public class FollowingServiceTest {
 		verify(memberService).findByIdOrThrow(1L);
 	}
 
-	@Test
-	@DisplayName("회원이 존재할 경우 팔로잉 수를 정상적으로 반환해야 한다")
-	public void testGetFollowingsCount_Success() {
-		// Given
-		long memberId = 1L;
-		when(followRepository.countByFollowing(user)).thenReturn(5L);
+    @Test
+    @DisplayName("회원이 존재할 경우 팔로잉 수를 정상적으로 반환해야 한다")
+    public void testGetFollowingsCount_Success() {
+        // Given
+        when(followRepository.countByFollower(user)).thenReturn(5L);
 
-		// When
-		long followerCount = followingService.getFollowingsCount(user);
+        // When
+        long followingCount = followingService.getFollowingsCount(user);
 
-		// Then
-		assertEquals(5L, followerCount);
-		verify(followRepository).countByFollowing(user);
-	}
+        // Then
+        assertEquals(5L, followingCount);
+        verify(followRepository).countByFollower(user);
+    }
 }

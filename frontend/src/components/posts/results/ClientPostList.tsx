@@ -169,6 +169,7 @@ export default function PostList({
     };
 
     return (
+
         <div className="max-w-2xl mx-auto space-y-4">
             {data?.pages.map((page) =>
                 page.content?.map((post: Post) => (
