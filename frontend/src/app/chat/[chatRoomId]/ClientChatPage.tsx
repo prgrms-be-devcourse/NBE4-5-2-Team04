@@ -48,7 +48,7 @@ const ClientChatPage = ({chatRoomId}: ClientChatPageProps) => {
     const fetchChatMessages = async () => {
         if (!chatRoomId) return;
         try {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/room/${chatRoomId}`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/rooms/${chatRoomId}`, {
                 params: {page: 0},
                 withCredentials: true,
             });
