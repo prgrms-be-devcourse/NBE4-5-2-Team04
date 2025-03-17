@@ -2,6 +2,7 @@ package com.project2.global.security;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,6 +27,9 @@ public class Rq {
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
 	private final MemberService memberService;
+
+	@Value("${custom.url.domain}")
+	private String siteDomain;
 
 	public void setLogin(Member actor) {
 
@@ -87,7 +91,7 @@ public class Rq {
 	public void addCookie(String name, String value, boolean isHttpOnly) {
 		Cookie accsessTokenCookie = new Cookie(name, value);
 
-		accsessTokenCookie.setDomain("localhost");
+		accsessTokenCookie.setDomain(siteDomain);
 		accsessTokenCookie.setPath("/");
 		accsessTokenCookie.setHttpOnly(isHttpOnly);
 		accsessTokenCookie.setSecure(true);
@@ -104,7 +108,7 @@ public class Rq {
 		// 원칙적으로 쿠키를 서버에서 삭제하는 것은 불가능.
 
 		Cookie cookie = new Cookie(name, null);
-		cookie.setDomain("localhost");
+		cookie.setDomain(siteDomain);
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		cookie.setSecure(true);
