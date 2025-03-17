@@ -93,6 +93,7 @@ public class PostService {
 		return postRepository.findPostsByMember(targetMemberId, pageable);
 	}
 
+	// 6. 특정 장소의 게시글 조회
 	@Transactional(readOnly = true)
 	public Page<Post> getPostsByPlaceId(Long placeId, Pageable pageable) {
 		return postRepository.findPostsByPlace(placeId, pageable);

@@ -10,6 +10,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class RegionRankingDTO {
+
+	@NonNull
+	private final String regionName;
+
 	@NonNull
 	private final Region region;
 
@@ -21,4 +25,12 @@ public class RegionRankingDTO {
 
 	@NonNull
 	private final Long postCount;
+
+	public RegionRankingDTO(Region region, Long likeCount, Long scrapCount, Long postCount) {
+		this.region = region;
+		this.regionName = region.getKrRegion();
+		this.likeCount = likeCount;
+		this.scrapCount = scrapCount;
+		this.postCount = postCount;
+	}
 }
