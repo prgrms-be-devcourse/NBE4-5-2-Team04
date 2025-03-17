@@ -67,6 +67,13 @@ export default function SearchablePostList({
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       <div className="flex flex-col space-y-2 mb-4">
+              {/* 글쓰기 버튼 */}
+      <Button
+        onClick={() => router.push("/posts/new")}
+        className="mt-4 ml-auto text-black bg-transparent border border-black hover:bg-transparent hover:text-black"
+      >
+        글쓰기
+      </Button> 
         <Input
           type="text"
           placeholder="장소명"

@@ -18,7 +18,7 @@ import com.project2.domain.rank.dto.RegionRankingDTO;
 @Repository
 public interface RankingRepository extends JpaRepository<Post, Long> {
 
-	// 전국 및 특정 지역 인기 장소 조회 (좋아요 or 스크랩 기준)
+	// 전국 인기 장소 조회
 	@Query("""
 		    SELECT new com.project2.domain.rank.dto.PopularPlaceDTO(
 		        pl.id, pl.name, pl.region,
@@ -28,22 +28,16 @@ public interface RankingRepository extends JpaRepository<Post, Long> {
 		    )
 		    FROM Post p
 		    JOIN p.place pl
-		    LEFT JOIN p.likes l ON l.post.id = p.id
-		    LEFT JOIN p.scraps s ON s.post.id = p.id
+		    LEFT JOIN p.likes l ON l.post = p
+		    LEFT JOIN p.scraps s ON s.post = p
 		    WHERE p.createdDate >= :startDate
-		      AND (:region IS NULL OR pl.region = :region)
-		      AND (:placeName IS NULL OR pl.name LIKE %:placeName%)
+		      AND (:placeName IS NULL OR pl.name LIKE CONCAT('%', :placeName, '%'))
 		    GROUP BY pl.id, pl.name, pl.region
-		    ORDER BY
-		      CASE WHEN :sort = 'SCRAPS' THEN COUNT(DISTINCT s.id)
-		           WHEN :sort = 'LATEST' THEN MAX(p.createdDate)
-		           ELSE COUNT(DISTINCT l.id) END DESC
+		    ORDER BY COUNT(DISTINCT l.id) DESC
 		""")
 	Page<PopularPlaceDTO> findPopularPlaces(
 		@Param("startDate") LocalDateTime startDate,
-		@Param("region") Region region,
 		@Param("placeName") String placeName,
-		@Param("sort") String sort,
 		Pageable pageable
 	);
 
@@ -63,38 +57,23 @@ public interface RankingRepository extends JpaRepository<Post, Long> {
 		    GROUP BY pl.region
 		    ORDER BY COUNT(DISTINCT l.id) DESC
 		""")
-	Page<RegionRankingDTO> findRegionRankings(
-		@Param("startDate") LocalDateTime startDate,
-		Pageable pageable
-	);
+	Page<RegionRankingDTO> findRegionRankings(@Param("startDate") LocalDateTime startDate, Pageable pageable);
 
-	// 특정 지역의 게시글 조회
+	// 특정 장소의 게시글 조회
 	@Query("""
 		    SELECT p FROM Post p
 		    WHERE p.place.region = :region AND p.createdDate >= :startDate
 		    ORDER BY SIZE(p.likes) DESC
 		""")
-	Page<Post> findPostsByRegion(
-		@Param("region") Region region,
-		@Param("startDate") LocalDateTime startDate,
-		Pageable pageable
-	);
+	Page<Post> findPostsByRegion(@Param("region") Region region, @Param("startDate") LocalDateTime startDate,
+		Pageable pageable);
 
-	// 특정 장소의 게시글 조회 (좋아요, 스크랩, 최신순)
 	@EntityGraph(attributePaths = {"place", "member", "images", "likes", "scraps", "comments"})
 	@Query("""
 		    SELECT p FROM Post p
 		    WHERE p.place.id = :placeId AND p.createdDate >= :startDate
-		    ORDER BY
-		        CASE 
-		            WHEN :sort = 'SCRAPS' THEN SIZE(p.scraps)
-		            WHEN :sort = 'LATEST' THEN p.createdDate
-		            ELSE SIZE(p.likes) END DESC
+		    ORDER BY SIZE(p.likes) DESC
 		""")
-	Page<Post> findPostsByPlace(
-		@Param("placeId") Long placeId,
-		@Param("startDate") LocalDateTime startDate,
-		@Param("sort") String sort,
-		Pageable pageable
-	);
+	Page<Post> findPostsByPlace(@Param("placeId") Long placeId,
+		@Param("startDate") LocalDateTime startDate, Pageable pageable);
 }

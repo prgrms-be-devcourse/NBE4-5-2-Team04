@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.project2.domain.member.entity.Member;
+import com.project2.global.entity.BaseTime;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -28,7 +29,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class ChatRoom {
+public class ChatRoom extends BaseTime {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
