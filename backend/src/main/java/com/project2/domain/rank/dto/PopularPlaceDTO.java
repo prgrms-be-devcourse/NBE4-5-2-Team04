@@ -17,7 +17,7 @@ public class PopularPlaceDTO {
 	private final String placeName;
 
 	@NonNull
-	private final Region region;
+	private final String region;
 
 	@NonNull
 	private final Long likeCount;
@@ -27,4 +27,14 @@ public class PopularPlaceDTO {
 
 	@NonNull
 	private final Long postCount;
+
+	public PopularPlaceDTO(Long placeId, String placeName, Region region, Long likeCount, Long scrapCount,
+		Long postCount) {
+		this.placeId = placeId;
+		this.placeName = placeName;
+		this.region = region.getKrRegion();
+		this.likeCount = likeCount;
+		this.scrapCount = scrapCount;
+		this.postCount = postCount;
+	}
 }
