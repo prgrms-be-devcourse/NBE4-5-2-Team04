@@ -16,7 +16,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, UUID> {
 		   "AND EXISTS (SELECT 1 FROM cr.members m2 WHERE m2.id = :opponentId) " +
 		   "AND SIZE(cr.members) = 2")
 	Optional<UUID> findChatRoomIdByMemberIds(@Param("myId") Long myId, @Param("opponentId") Long opponentId);
-
+	
 	@Query("SELECT cr FROM ChatRoom cr JOIN cr.members m WHERE m.id in :actorId ORDER BY cr.createdDate DESC")
-	List<ChatRoom> findByMembers_IdOrderByCreatedDateDesc(Long actorId);
+	List<ChatRoom> findByMembers_IdOrderByLatestMessage(Long actorId);
 }

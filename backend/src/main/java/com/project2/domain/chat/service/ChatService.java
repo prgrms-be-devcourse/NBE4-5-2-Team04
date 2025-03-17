@@ -48,7 +48,7 @@ public class ChatService {
 
 	@Transactional(readOnly = true)
 	public List<ChatRoomResponseDTO> getAllChatRooms(Long actorId) {
-		return chatRoomRepository.findByMembers_IdOrderByCreatedDateDesc(actorId)
+		return chatRoomRepository.findByMembers_IdOrderByLatestMessage(actorId)
 			.stream()
 			.map(chatRoom -> new ChatRoomResponseDTO(chatRoom, actorId))
 			.toList();
