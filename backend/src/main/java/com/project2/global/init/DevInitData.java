@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +22,13 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class DevInitData {
 
+	@Value("${custom.url.base-url}")
+	private String siteBaseUrl;
+
 	@Bean
 	public ApplicationRunner devApplicationRunner() {
 		return args -> {
-			genApiJsonFile("http://localhost:8080/v3/api-docs", "apiV1.json");
+			genApiJsonFile(siteBaseUrl + "/v3/api-docs", "apiV1.json");
 			runCmd(getPlatformSpecificCommand());
 		};
 	}

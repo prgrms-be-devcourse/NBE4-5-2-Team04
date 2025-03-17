@@ -1,0 +1,4 @@
+.env
+volumes/
+logs/
+*.log
