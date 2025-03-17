@@ -93,3 +93,9 @@ SNS 와 여행을 결합한 프로젝트 **Pathy**
 ### 🔗 컨벤션
 
 🛠 [Code Convention](https://www.notion.so/1a73550b7b5580abb9c8c8f25fb5febc)
+
+### 🌍 배포된 서비스
+
+🔗 [서비스 URL](https://pahtymytravelpathy.duckdns.org/)
+
+⚠ 주의사항 현재 Naver와 Google에 배포 요청이 승인되지 않은 상태로, 테스트 ID를 요청하셔야 사용 가능합니다.
