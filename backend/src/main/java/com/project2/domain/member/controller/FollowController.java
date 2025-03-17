@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,40 +48,32 @@ public class FollowController {
 	}
 
 	@GetMapping("/{memberId}/followers")
-	public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowers(@PathVariable Long memberId) {
-		try {
-			List<FollowerResponseDto> followers = followerService.getFollowers(memberId);
+	public ResponseEntity<RsData<Page<FollowerResponseDto>>> getFollowers(
+			@PathVariable Long memberId,
+			@PageableDefault(size = 8) Pageable pageable
+	) {
+//		try {
+			Page<FollowerResponseDto> followers = followerService.getFollowers(memberId, pageable);
 
 			if (followers.isEmpty()) {
-				return ResponseEntity.ok(
-					new RsData<>(
-						"204",
-						"팔로워가 없습니다.",
-						null
-					)
-				);
+				return ResponseEntity.noContent().build();
+
 			}
 
-			return ResponseEntity.ok(
-				new RsData<>(
-					"200",
-					"팔로워 목록이 성공적으로 조회되었습니다.",
-					followers
-				)
-			);
-		} catch (ServiceException e) {
-			return ResponseEntity
-				.status(e.getStatusCode())
-				.body(
-					new RsData<>(
-						e.getCode(),
-						e.getMsg(),
-						null
-					)
-				);
-		}
-	}
+			System.out.println("가져온 팔로워 페이지 수: " + followers.getTotalPages());
+		System.out.println("가져온 팔로워 명 수: " + followers.getTotalElements());
 
+			return ResponseEntity.ok(
+					new RsData<>(
+							"200",
+							"팔로워 목록이 성공적으로 조회되었습니다.",
+							followers
+					)
+			);
+//		} catch (ServiceException e) {
+//			return ResponseEntity.noContent().build();
+//		}
+	}
 	@GetMapping("/{memberId}/followings")
 	public ResponseEntity<RsData<List<FollowerResponseDto>>> getFollowings(@PathVariable Long memberId) {
 		try {
@@ -88,13 +81,8 @@ public class FollowController {
 
 			// Check if the list of followings is empty
 			if (followings.isEmpty()) {
-				return ResponseEntity.ok(
-					new RsData<>(
-						"204",
-						"팔로잉이 없습니다.",
-						null
-					)
-				);
+				return ResponseEntity.noContent().build();
+
 			}
 
 			return ResponseEntity.ok(
@@ -105,15 +93,7 @@ public class FollowController {
 				)
 			);
 		} catch (ServiceException e) {
-			return ResponseEntity
-				.status(e.getStatusCode())
-				.body(
-					new RsData<>(
-						e.getCode(),
-						e.getMsg(),
-						null
-					)
-				);
+			return ResponseEntity.noContent().build();
 		}
 	}
 
