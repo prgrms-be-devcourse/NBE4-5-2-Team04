@@ -1,5 +1,6 @@
 package com.project2.domain.chat.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project2.domain.chat.dto.ChatMessageRequestDTO;
 import com.project2.domain.chat.dto.ChatMessageResponseDTO;
+import com.project2.domain.chat.dto.ChatRoomResponseDTO;
 import com.project2.domain.chat.service.ChatService;
 import com.project2.global.dto.RsData;
 import com.project2.global.security.SecurityUser;
@@ -32,13 +34,19 @@ public class ChatController {
 	private final ChatService chatService;
 	private final SimpMessagingTemplate messagingTemplate;
 
-	@GetMapping("/room/find/{opponentId}")
-	public RsData<UUID> findOrCreateChatRoomId(@AuthenticationPrincipal SecurityUser actor,
+	@GetMapping("/rooms")
+	public RsData<List<ChatRoomResponseDTO>> getAllChatRooms(@AuthenticationPrincipal SecurityUser actor) {
+		return new RsData<>("200", "성공",
+			chatService.getAllChatRooms(actor.getId()));
+	}
+
+	@GetMapping("/rooms/find/{opponentId}")
+	public RsData<UUID> getOrCreateChatRoomId(@AuthenticationPrincipal SecurityUser actor,
 		@PathVariable Long opponentId) {
 		return new RsData<>("200", "성공", chatService.findOrCreateChatRoomId(actor.getId(), opponentId));
 	}
 
-	@GetMapping("/room/{roomId}")
+	@GetMapping("/rooms/{roomId}")
 	public RsData<Page<ChatMessageResponseDTO>> getChatMessages(
 		@PathVariable UUID roomId,
 		@RequestParam(defaultValue = "0") int offset,

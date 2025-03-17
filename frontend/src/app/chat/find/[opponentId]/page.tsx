@@ -8,7 +8,7 @@ export default async function FindChatRoomId({params}: {
     const {opponentId} = await params;
 
 
-    const res = await client.GET(`/api/chat/room/find/{opponentId}`, {
+    const res = await client.GET(`/api/chat/rooms/find/{opponentId}`, {
         headers: {
             cookie: (await cookies()).toString(),
         },

@@ -1,5 +1,6 @@
 package com.project2.domain.chat.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,4 +17,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, UUID> {
 		   "AND SIZE(cr.members) = 2")
 	Optional<UUID> findChatRoomIdByMemberIds(@Param("myId") Long myId, @Param("opponentId") Long opponentId);
 
+	@Query("SELECT cr FROM ChatRoom cr JOIN cr.members m WHERE m.id in :actorId ORDER BY cr.createdDate DESC")
+	List<ChatRoom> findByMembers_IdOrderByCreatedDateDesc(Long actorId);
 }
