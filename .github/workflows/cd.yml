@@ -29,15 +29,15 @@ jobs:
             # 기존 백엔드 프로세스 종료
             tmux send-keys -t deploy_session "pkill -f 'project2-0.0.1-SNAPSHOT.jar' || true" C-m
 
-            # 새로 빌드 후 실행
-            tmux send-keys -t deploy_session "./gradlew build -x test -Dorg.gradle.jvmargs='-Xmx256m'" C-m
-            tmux send-keys -t deploy_session "nohup java -Xms64m -Xmx128m -jar build/libs/project2-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &" C-m
+            # 새로 빌드 후 실행 + 완료 신호 보내기
+            tmux send-keys -t deploy_session "./gradlew build -x test -Dorg.gradle.jvmargs='-Xmx256m' && nohup java -Xms64m -Xmx128m -jar build/libs/project2-0.0.1-SNAPSHOT.jar > backend.log 2>&1 & disown && tmux wait-for -S backend_done" C-m
 
             # 프론트엔드 배포용 새 창 생성
             tmux new-window -t deploy_session -n frontend
 
-            # 프론트엔드 빌드 및 실행 (frontend 창에서)
+            # 프론트는 백엔드 완료를 기다렸다가 실행
+            tmux send-keys -t deploy_session:frontend "tmux wait-for backend_done" C-m
             tmux send-keys -t deploy_session:frontend "cd ~/NBE4-5-2-Team04/frontend" C-m
             tmux send-keys -t deploy_session:frontend "pkill -f 'npm start' || true" C-m
             tmux send-keys -t deploy_session:frontend "npm install" C-m
-            tmux send-keys -t deploy_session:frontend "npm run build && nohup npm start > frontend.log 2>&1 &" C-m
+            tmux send-keys -t deploy_session:frontend "npm run build && nohup npm start > frontend.log 2>&1 & disown" C-m
