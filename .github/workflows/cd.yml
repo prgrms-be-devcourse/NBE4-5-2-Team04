@@ -22,7 +22,7 @@ jobs:
             # 새로운 tmux 세션 시작
             tmux new-session -d -s deploy_session
 
-            # 백엔드 배포
+            # 백엔드 배포 (기본 창 window 0)
             tmux send-keys -t deploy_session "cd ~/NBE4-5-2-Team04 && git pull origin main" C-m
             tmux send-keys -t deploy_session "cd backend" C-m
 
@@ -33,12 +33,11 @@ jobs:
             tmux send-keys -t deploy_session "./gradlew build -x test -Dorg.gradle.jvmargs='-Xmx256m'" C-m
             tmux send-keys -t deploy_session "nohup java -Xms64m -Xmx128m -jar build/libs/project2-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &" C-m
 
-            # 프론트엔드 배포
-            tmux send-keys -t deploy_session "cd ~/NBE4-5-2-Team04/frontend" C-m
+            # 프론트엔드 배포용 새 창 생성
+            tmux new-window -t deploy_session -n frontend
 
-            # 기존 프론트엔드 프로세스 종료
-            tmux send-keys -t deploy_session "pkill -f 'npm start' || true" C-m
-
-            # 빌드 후 실행
-            tmux send-keys -t deploy_session "npm run build" C-m
-            tmux send-keys -t deploy_session "nohup npm start > frontend.log 2>&1 &" C-m
+            # 프론트엔드 빌드 및 실행 (frontend 창에서)
+            tmux send-keys -t deploy_session:frontend "cd ~/NBE4-5-2-Team04/frontend" C-m
+            tmux send-keys -t deploy_session:frontend "pkill -f 'npm start' || true" C-m
+            tmux send-keys -t deploy_session:frontend "npm install" C-m
+            tmux send-keys -t deploy_session:frontend "npm run build && nohup npm start > frontend.log 2>&1 &" C-m
