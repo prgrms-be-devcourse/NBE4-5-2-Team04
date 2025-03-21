@@ -20,7 +20,10 @@ jobs:
             tmux kill-session -t deploy_session || true
 
             # 새로운 tmux 세션 시작
-            tmux new-session -d -s deploy_session
+            tmux new-session -d -s deploy_session || { echo "❌ tmux 세션 생성 실패"; exit 1; }
+
+            # tmux가 안정적으로 뜰 시간 확보
+            sleep 1
 
             # 백엔드 배포 (기본 창 window 0)
             tmux send-keys -t deploy_session "cd ~/NBE4-5-2-Team04 && git pull origin main" C-m
