@@ -16,29 +16,53 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # 기존 프로세스 정리
+            pkill -f 'java -jar build/libs/project2-0.0.1-SNAPSHOT.jar' || true
+            pkill -f 'npm start' || true
+            sleep 2
+
+            # 기존 tmux 세션 종료
             tmux kill-session -t deploy_session || true
             sleep 2
+
+            # 새 tmux 세션 시작
             tmux new-session -d -s deploy_session || { echo "❌ tmux 세션 생성 실패"; exit 1; }
             sleep 2  # tmux 세션 안정화 대기
 
+            # 작업 디렉토리 지정
+            REPO_DIR="${GITHUB_WORKSPACE}"
+
             # Backend 작업
-            tmux send-keys "cd NBE4-5-2-Team04" C-m
-            tmux send-keys "git pull origin main" C-m
-            tmux send-keys "cd backend" C-m
+            echo "🔄 Backend 빌드 및 실행 중..."
+            tmux send-keys "cd ${REPO_DIR}/backend" C-m
             tmux send-keys "./gradlew build -x test -Dorg.gradle.jvmargs=\"-Xmx256m\"" C-m
 
             # Spring 애플리케이션을 백그라운드에서 실행
+            tmux send-keys "cd ${REPO_DIR}/backend" C-m
             tmux send-keys "java -Xms64m -Xmx128m -jar build/libs/project2-0.0.1-SNAPSHOT.jar &" C-m
+            echo "⏳ Backend 시작 대기 중... (10초)"
+            sleep 10
 
-            # Spring 애플리케이션 실행 후 30초 대기
-            sleep 30  # 이 부분에서 30초 대기
+            # Frontend 작업을 위한 새 tmux 창
+            tmux new-window -t deploy_session:1 -n 'frontend'
+            echo "🔄 Frontend 빌드 및 실행 중..."
 
-            # 새로운 tmux 창에서 frontend 작업 시작
-            tmux new-window -t deploy_session:1 -n 'frontend'  # 새로운 창에서 frontend 작업 시작
-            tmux send-keys "cd NBE4-5-2-Team04" C-m
-            tmux send-keys "cd frontend" C-m
+            # Frontend 디렉토리에서 npm 명령어 실행
+            tmux send-keys "cd ${REPO_DIR}/frontend" C-m
             tmux send-keys "npm install" C-m
-            tmux send-keys "npm run build && npm start" C-m
 
-            # tmux 세션에 연결
-            tmux attach -t deploy_session
+            # 빌드 후 백그라운드로 npm start 실행
+            tmux send-keys "cd ${REPO_DIR}/frontend && npm run build && npm start &" C-m
+
+            # 서비스 상태 확인
+            echo "🔍 백엔드 서비스 상태 확인 중..."
+            if pgrep -f 'java -jar.*project2-0.0.1-SNAPSHOT.jar'; then
+              echo "✅ Backend 정상 실행 중"
+            else
+              echo "❌ Backend 실행 실패"
+              exit 1
+            fi
+
+            # 완료 메시지
+            echo "✅ 배포 완료 - tmux 세션 'deploy_session'에서 실행 중입니다"
+            echo "세션 접속 명령어: tmux attach -t deploy_session"
