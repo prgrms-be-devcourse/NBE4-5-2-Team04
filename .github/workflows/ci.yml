@@ -1,4 +1,4 @@
-name: local CI
+name: CI
 
 on:
   pull_request:
@@ -31,27 +31,6 @@ jobs:
 
       - name: Grant execute permission for Gradle
         run: chmod +x backend/gradlew
-
-      # MySQL 설정 (기본적으로 비활성화)
-      - name: Set up MySQL
-        if: env.USE_MYSQL == 'true' # USE_MYSQL이 true이면 MySQL 실행
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          host-port: 3306
-          container-port: 3306
-          character-set-server: "utf8mb4"
-          collation-server: "utf8mb4_general_ci"
-          mysql-version: "8.0"
-          mysql-database: "project2_team4"
-          mysql-root-password: 1234
-
-      - name: Wait for MySQL
-        if: env.USE_MYSQL == 'true' # USE_MYSQL이 true이면 실행
-        run: |
-          echo "Waiting for MySQL to be ready..."
-          until mysql -h127.0.0.1 -uroot -p1234 -e "SELECT 1"; do
-            sleep 1
-          done
 
       - name: Build and Test
         working-directory: ./backend
