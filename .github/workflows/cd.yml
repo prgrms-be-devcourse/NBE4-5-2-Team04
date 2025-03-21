@@ -6,11 +6,6 @@ on:
   workflow_dispatch: # 수동 패치 허용
 
 jobs:
-  build-test:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
   deploy:
     runs-on: ubuntu-latest
     needs: build-test # build-test가 성공하면 실행
