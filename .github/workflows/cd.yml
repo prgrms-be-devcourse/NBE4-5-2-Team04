@@ -6,41 +6,39 @@ on:
   workflow_dispatch: # 수동 실행 가능
 
 jobs:
-  deploy:
+  deploy_backend:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to EC2
+      - name: Deploy to EC2 - Backend
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 기존 tmux 세션 종료
             tmux kill-session -t deploy_session || true
-
-            # 새로운 tmux 세션 시작
+            sleep 2
             tmux new-session -d -s deploy_session || { echo "❌ tmux 세션 생성 실패"; exit 1; }
+            sleep 2  # tmux 세션 안정화 대기
 
-            # tmux가 안정적으로 뜰 시간 확보
-            sleep 1
+            # Backend 작업
+            tmux send-keys "cd NBE4-5-2-Team04" C-m
+            tmux send-keys "git pull origin main" C-m
+            tmux send-keys "cd backend" C-m
+            tmux send-keys "./gradlew build -x test -Dorg.gradle.jvmargs=\"-Xmx256m\"" C-m
 
-            # 백엔드 배포 (기본 창 window 0)
-            tmux send-keys -t deploy_session "cd ~/NBE4-5-2-Team04 && git pull origin main" C-m
-            tmux send-keys -t deploy_session "cd backend" C-m
+            # Spring 애플리케이션을 백그라운드에서 실행
+            tmux send-keys "java -Xms64m -Xmx128m -jar build/libs/project2-0.0.1-SNAPSHOT.jar &" C-m
 
-            # 기존 백엔드 프로세스 종료
-            tmux send-keys -t deploy_session "pkill -f 'project2-0.0.1-SNAPSHOT.jar' || true" C-m
+            # Spring 애플리케이션 실행 후 30초 대기
+            sleep 30  # 이 부분에서 30초 대기
 
-            # 새로 빌드 후 실행 + 완료 신호 보내기
-            tmux send-keys -t deploy_session "./gradlew build -x test -Dorg.gradle.jvmargs='-Xmx256m' && nohup java -Xms64m -Xmx128m -jar build/libs/project2-0.0.1-SNAPSHOT.jar > backend.log 2>&1 & disown && tmux wait-for -S backend_done" C-m
+            # 새로운 tmux 창에서 frontend 작업 시작
+            tmux new-window -t deploy_session:1 -n 'frontend'  # 새로운 창에서 frontend 작업 시작
+            tmux send-keys "cd NBE4-5-2-Team04" C-m
+            tmux send-keys "cd frontend" C-m
+            tmux send-keys "npm install" C-m
+            tmux send-keys "npm run build && npm start" C-m
 
-            # 프론트엔드 배포용 새 창 생성
-            tmux new-window -t deploy_session -n frontend
-
-            # 프론트는 백엔드 완료를 기다렸다가 실행
-            tmux send-keys -t deploy_session:frontend "tmux wait-for backend_done" C-m
-            tmux send-keys -t deploy_session:frontend "cd ~/NBE4-5-2-Team04/frontend" C-m
-            tmux send-keys -t deploy_session:frontend "pkill -f 'npm start' || true" C-m
-            tmux send-keys -t deploy_session:frontend "npm install" C-m
-            tmux send-keys -t deploy_session:frontend "npm run build && nohup npm start > frontend.log 2>&1 & disown" C-m
+            # tmux 세션에 연결
+            tmux attach -t deploy_session
