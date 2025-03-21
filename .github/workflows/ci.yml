@@ -37,5 +37,5 @@ jobs:
         run: |
           echo "🔥 Using profile: $SPRING_PROFILES_ACTIVE"
           ./gradlew build --no-daemon
-        env:
+        env: # 환경설정
           SPRING_PROFILES_ACTIVE: test
